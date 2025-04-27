@@ -1,0 +1,157 @@
+{
+  "mainScreen": "profileScreen",
+  "screens": [
+    {
+      "type": "screen",
+      "id": "profileScreen",
+      "navigationBar": {
+        "title": "Perfil",
+        "displayMode": "inline",
+        "backgroundColor": "#F5F5F5",
+        "foregroundColor": "#000000"
+      },
+      "body": [
+        {
+          "type": "vstack",
+          "alignment": "center",
+          "spacing": 4,
+          "modifiers": [
+            {
+              "background": "#FFFFFFF"
+            }
+          ],
+          "children": [
+            {
+              "type": "image",
+              "url": "https://i.pravatar.cc/150?u=bruno",
+              "modifiers": [
+                  {
+                      "placeholder": {
+                        "background": "gray"
+                      }
+                  },
+                {
+                  "resizable": true
+                },
+                {
+                  "scaledToFit": true
+                },
+                {
+                  "cornerRadius": 60
+                },
+                {
+                  "frame": {
+                    "width": 100,
+                    "height": 100
+                  }
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "value": "Bruno Martins",
+              "modifiers": [
+                {
+                  "font": {
+                    "style": "title",
+                    "weight": "bold"
+                  }
+                },
+                {
+                  "foregroundColor": "#222222"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "value": "Desenvolvedor de apps bilionário",
+              "modifiers": [
+                {
+                  "font": {
+                    "style": "subheadline"
+                  }
+                },
+                {
+                  "foregroundColor": "#666666"
+                }
+              ]
+            },
+            {
+              "type": "divider",
+              "modifiers": [
+                {
+                  "padding": {
+                    "top": 20,
+                    "bottom": 0
+                  }
+                }
+              ]
+            },
+            {
+              "type": "vstack",
+              "spacing": 0,
+              "modifiers": [
+                {
+                  "padding": {
+                    "top": 20,
+                    "leading": 30,
+                    "trailing": 30
+                  }
+                }
+              ],
+              "children": [
+                {
+                  "type": "button",
+                  "children": [
+                    {
+                      "type": "text",
+                      "value": "Editar Perfil",
+                      "modifiers": [
+                        {
+                          "foreground": "#FFFFFF"
+                        }
+                      ]
+                    }
+                  ],
+                  "modifiers": [
+                    {
+                      "frame": {
+                        "maxWidth": ".infinity"
+                      }
+                    },
+                    {
+                      "padding": 14
+                    },
+                    {
+                      "background": "blue"
+                    },
+                    {
+                      "cornerRadius": 10
+                    }
+                  ]
+                },
+                {
+                  "type": "button",
+                  "title": "Configurações",
+                  "onTap": {
+                    "print": "settings-tap"
+                  },
+                  "modifiers": [
+                    {
+                      "padding": 14
+                    },
+                    {
+                      "frame": {
+                        "maxWidth": ".infinity"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
