@@ -19,7 +19,7 @@ public struct TextFieldView {
             return AnyView(Text("TextField Error"))
         }
 
-        let textBinding: Binding<String> = BindingResolver.bind(varName, context: context)
+        let textBinding: Binding<String> = BindingResolver.bind(varName, context: context, defaultValue: "")
 
         print("--- DEBUG: TextFieldView render - varName: \(varName), current value: \(textBinding.wrappedValue)")
 

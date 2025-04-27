@@ -1,5 +1,12 @@
 {
   "mainScreen": "profileScreen",
+  "context": {
+    "darkModeEnabled": false,
+    "backgroundColorVar": "#FFFFFF",
+    "advancedOptionsOn": true,
+    "advancedOpacity": 1.0,
+    "isAdvancedDisabled": false
+  },
   "screens": [
     {
       "type": "screen",
@@ -17,7 +24,7 @@
           "spacing": 4,
           "modifiers": [
             {
-              "background": "#FFFFFFF"
+              "background": { "var": "backgroundColorVar" }
             }
           ],
           "children": [
@@ -27,7 +34,7 @@
               "modifiers": [
                   {
                       "placeholder": {
-                        "background": "gray"
+                        "background": "#F8F8F8"
                       }
                   },
                 {
@@ -82,10 +89,64 @@
                 {
                   "padding": {
                     "top": 20,
-                    "bottom": 0
+                    "bottom": 20
                   }
                 }
               ]
+            },
+            {
+              "type": "toggle",
+              "label": "Modo Escuro",
+              "isOn": { "var": "darkModeEnabled" },
+              "modifiers": [
+                {
+                   "padding": {
+                    "leading": 30,
+                    "trailing": 30
+                  }
+                }
+               ],
+              "onChange": {
+                "if": {
+                  "condition": { "var": "darkModeEnabled" },
+                  "then": {
+                    "setVariable": {
+                      "name": "backgroundColorVar",
+                      "value": "#000000"
+                    }
+                  },
+                  "else": {
+                    "setVariable": {
+                      "name": "backgroundColorVar",
+                      "value": "#FFFFFF"
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "type": "toggle",
+              "label": "Opções Avançadas",
+              "isOn": { "var": "advancedOptionsOn" },
+              "modifiers": [
+                { 
+                  "padding": {
+                    "top": 5,
+                    "leading": 30,
+                    "trailing": 30 
+                  }
+                },
+                { "opacity": { "var": "advancedOpacity" } },
+                { "disabled": { "var": "isAdvancedDisabled" } },
+                { "frame": { "maxWidth": ".infinity" } }
+              ],
+              "onChange": {
+                 "if": {
+                   "condition": {"Operator.eq": [{ "var": "advancedOpacity" }, 1.0]},
+                   "then": {"setVariable": {"name": "advancedOpacity", "value": 0.5}},
+                   "else": {"setVariable": {"name": "advancedOpacity", "value": 1.0}}
+                 }
+              }
             },
             {
               "type": "vstack",
@@ -126,7 +187,7 @@
                       "background": "blue"
                     },
                     {
-                      "cornerRadius": 10
+                      "cornerRadius": 20
                     }
                   ]
                 },

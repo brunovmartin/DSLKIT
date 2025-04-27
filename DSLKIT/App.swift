@@ -17,7 +17,7 @@ struct DSLApp: App {
                         Text("🚫 Nenhuma tela carregada")
                     }
                 } else {
-                    SplashView() 
+                    Color.clear.opacity(0)
                     .onAppear {
                         Task {
                             RegistrySetup.registerAll()
@@ -31,15 +31,3 @@ struct DSLApp: App {
     }
 }
 
-struct SplashView: View {
-    var body: some View {
-        VStack {
-            Image(systemName: "sparkles")
-                .resizable()
-                .frame(width: 100, height: 100)
-            Text("Bem-vindo!")
-                .font(.largeTitle)
-                .padding()
-        }
-    }
-}

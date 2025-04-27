@@ -7,11 +7,12 @@
 
 
 import SwiftUI
+
 struct BindingResolver {
-    static func bind(_ varName: String, context: DSLContext) -> Binding<String> {
-        Binding<String>(
+    static func bind<T>(_ varName: String, context: DSLContext, defaultValue: T) -> Binding<T> {
+        Binding<T>(
             get: {
-                context.storage[varName] as? String ?? ""
+                context.storage[varName] as? T ?? defaultValue
             },
             set: {
                 context.set(varName, to: $0)

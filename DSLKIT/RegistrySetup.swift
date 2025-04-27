@@ -15,6 +15,7 @@ public class RegistrySetup {
         NumberOperators.registerAll()
         ConditionalOperators.registerAll()
         
+        // Registra todos os componentes padrão definidos em DSLComponentRegistry
         DSLComponentRegistry.shared.registerDefaults()
 
     }

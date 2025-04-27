@@ -34,5 +34,6 @@ public class DSLComponentRegistry {
         ImageView.register()
         DividerView.register()
         ScrollViewComponent.register()
+        ToggleView.register()
     }
 }
