@@ -45,7 +45,7 @@
           "onTap": {
             "set": {
               "var": "profileScreen.title",
-              "value": "Título Alterado!"
+              "value": "Alterado!"
             }
           }
         }
@@ -378,11 +378,6 @@
               "value": "Esta é a Tela de Configurações",
               "modifiers": [
                 {
-                  "font": {
-                    "style": "title2"
-                  }
-                },
-                {
                   "foreground": {
                     "var": "style[currentTheme].textColor"
                   }
@@ -399,7 +394,7 @@
               "modifiers": [
                 {
                   "font": {
-                    "style": "title1",
+                    "style": "title2",
                     "weight": "bold"
                   }
                 },
