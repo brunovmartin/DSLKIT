@@ -110,13 +110,13 @@
                 "if": {
                   "condition": { "var": "darkModeEnabled" },
                   "then": {
-                    "setVariable": {
+                    "set": {
                       "name": "backgroundColorVar",
                       "value": "#000000"
                     }
                   },
                   "else": {
-                    "setVariable": {
+                    "set": {
                       "name": "backgroundColorVar",
                       "value": "#FFFFFF"
                     }
