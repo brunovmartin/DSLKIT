@@ -4,61 +4,65 @@ import Combine
 public class DSLInterpreter: ObservableObject {
     public static let shared = DSLInterpreter()
 
-    @Published public var currentView: AnyView?
-    // currentTitle is removed
+    @Published public var navigationPath: [String] = [] // Pilha de IDs de tela
 
     private var currentContext: DSLContext?
-    private var screenStack: [[String: Any]] = []
+    private var rootScreenId: String? // Para saber qual é a tela raiz
 
-    init() {
+    private init() {
          //print("--- DEBUG: DSLInterpreter INIT ---")
     }
 
-    // updateTitle is removed
-
     public func present(screen: [String: Any], context: DSLContext) {
-        //print("--- DEBUG: DSLInterpreter.present - Using received context ID: \(context.id)")
         self.currentContext = context
-        screenStack = [screen] // Reset stack
-        // Render the initial view. Title calculation happens inside render.
-        let newView = AnyView(DSLViewRenderer.render(screen: screen, context: context))
-        self.currentView = newView
-        //print("--- DEBUG: DSLInterpreter.present - self.currentView SET")
+        self.rootScreenId = screen["id"] as? String // Guarda o ID da raiz
+        self.navigationPath = [] // Limpa a pilha de navegação
+        // Não renderizamos mais a view aqui, App.swift fará isso
+        print("--- DEBUG: Interpreter.present - Root screen set to: \(rootScreenId ?? "nil"). Path cleared.")
+    }
+    
+    public func pushScreen(withId screenId: String) {
+         // Verifica se a tela existe antes de empilhar (opcional, mas bom)
+        guard DSLAppEngine.shared.getScreenDefinition(byId: screenId) != nil else {
+             print("⚠️ Interpreter.pushScreen - Tentativa de empilhar tela não existente: \(screenId)")
+             return
+        }
+        navigationPath.append(screenId)
+        print("--- DEBUG: Interpreter.pushScreen - Appended '\(screenId)' to path. New path: \(navigationPath)")
     }
 
-    public func push(screen: [String: Any]) {
-         guard let context = self.currentContext else { return }
-         screenStack.append(screen)
-         // Render the pushed view. Title calculation happens inside render.
-         let newView = AnyView(DSLViewRenderer.render(screen: screen, context: context))
-         self.currentView = newView
-         //print("--- DEBUG: DSLInterpreter.push - self.currentView SET")
-    }
-
-    public func pop() {
-        guard screenStack.count > 1, let context = self.currentContext else { return }
-        _ = screenStack.popLast()
-        if let previous = screenStack.last {
-             // Render the popped-to view. Title calculation happens inside render.
-             let newView = AnyView(DSLViewRenderer.render(screen: previous, context: context))
-             self.currentView = newView
-             //print("--- DEBUG: DSLInterpreter.pop - self.currentView SET")
+    public func popScreen() {
+        if !navigationPath.isEmpty {
+            let removed = navigationPath.removeLast()
+            print("--- DEBUG: Interpreter.popScreen - Removed '\(removed)' from path. New path: \(navigationPath)")
+        } else {
+             print("--- DEBUG: Interpreter.popScreen - Path is empty, cannot pop.")
         }
     }
+    
+    public func handleEvent(_ eventData: Any, context: DSLContext) {
+        print("--- DEBUG: Interpreter handleEvent - Received event data: \(String(describing: eventData))")
+        // Garantir que o contexto usado é o atual
+        guard self.currentContext === context else {
+             print("⚠️ Interpreter handleEvent - Context mismatch.")
+             // Considerar a melhor estratégia aqui: parar, continuar, atualizar contexto?
+             // Por segurança, vamos parar por enquanto.
+             return 
+        }
 
-    public func handleEvent(_ action: Any, context: DSLContext) {
-        if let command = action as? [String: Any] {
+        if let command = eventData as? [String: Any] {
             DSLCommandRegistry.shared.execute(command, context: context)
-        } else if let sequence = action as? [[String: Any]] {
+        } else if let sequence = eventData as? [[String: Any]] {
             for cmd in sequence {
                 DSLCommandRegistry.shared.execute(cmd, context: context)
             }
         }
-        if let screen = screenStack.last, let ctx = self.currentContext {
-             DispatchQueue.main.async {
-                 let updatedView = AnyView(DSLViewRenderer.render(screen: screen, context: ctx))
-                 self.currentView = updatedView
-             }
-        }
+        // NÃO precisamos mais forçar re-render aqui, @Published fará o trabalho
+        print("--- DEBUG: Interpreter handleEvent - Finished processing event.")
     }
+    
+    func getRootScreenDefinition() -> [String: Any]? {
+         guard let id = rootScreenId else { return nil }
+         return DSLAppEngine.shared.getScreenDefinition(byId: id)
+     }
 }

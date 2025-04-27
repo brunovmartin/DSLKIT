@@ -191,5 +191,31 @@ public struct HStackView {
             let labelText = DSLExpression.shared.evaluate(params["label"], context) as? String ?? ""
             return AnyView(view.accessibilityLabel(Text(labelText)))
         }
+        
+        modifierRegistry.register("ignoresSafeArea") { view, value, context in
+            let evaluatedValue = DSLExpression.shared.evaluate(value, context)
+            
+            if let ignore = evaluatedValue as? Bool, ignore {
+                 return AnyView(view.ignoresSafeArea())
+            } else if let edgesArray = evaluatedValue as? [String] {
+                var edgeSet: Edge.Set = []
+                for edgeStr in edgesArray {
+                    switch edgeStr.lowercased() {
+                    case "top": edgeSet.insert(.top)
+                    case "bottom": edgeSet.insert(.bottom)
+                    case "leading": edgeSet.insert(.leading)
+                    case "trailing": edgeSet.insert(.trailing)
+                    case "horizontal": edgeSet.insert(.horizontal)
+                    case "vertical": edgeSet.insert(.vertical)
+                    case "all": edgeSet.insert(.all)
+                    default: break
+                    }
+                }
+                if !edgeSet.isEmpty {
+                    return AnyView(view.ignoresSafeArea(.all, edges: edgeSet))
+                }
+            } 
+            return view
+        }
     }
 }

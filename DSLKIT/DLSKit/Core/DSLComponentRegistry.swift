@@ -35,5 +35,6 @@ public class DSLComponentRegistry {
         DividerView.register()
         ScrollViewComponent.register()
         ToggleView.register()
+        ZStackView.register()
     }
 }

@@ -1,21 +1,46 @@
 {
   "mainScreen": "profileScreen",
   "context": {
-    "darkModeEnabled": false,
+    "currentTheme": "light",
+    "profileScreenBarTitle": "Edite-me",
+    "profileTitle": "Perfil Inicial",
+    "style": {
+      "light": {
+        "backgroundColor": "#FFFFFF",
+        "primaryColor": "#007AFF",
+        "textColor": "#000000",
+        "secondaryTextColor": "#666666"
+      },
+      "dark": {
+        "backgroundColor": "#000000",
+        "primaryColor": "#0A84FF",
+        "textColor": "#FFFFFF",
+        "secondaryTextColor": "#CCCCCC"
+      }
+    },
     "backgroundColorVar": "#FFFFFF",
-    "advancedOptionsOn": true,
-    "advancedOpacity": 1.0,
-    "isAdvancedDisabled": false
+    "isDarkModeOn": false,
+    "environmentColorScheme": { "var": "currentTheme" }
   },
   "screens": [
     {
       "type": "screen",
       "id": "profileScreen",
       "navigationBar": {
-        "title": "Perfil",
-        "displayMode": "inline",
-        "backgroundColor": "#F5F5F5",
-        "foregroundColor": "#000000"
+        "title": { "var": "profileTitle" },
+        "displayMode": "large",
+        "backgroundColor": { "var": "style[currentTheme].backgroundColor" },
+        "foregroundColor": { "var": "style[currentTheme].textColor" },
+        "toolbarScheme": { "var": "currentTheme" },
+        "trailingButton": {
+          "label": "Mudar Título",
+          "onTap": {
+            "set": {
+              "var": "profileTitle",
+              "value": "Título Alterado!"
+            }
+          }
+        }
       },
       "body": [
         {
@@ -24,7 +49,16 @@
           "spacing": 4,
           "modifiers": [
             {
-              "background": { "var": "backgroundColorVar" }
+              "frame": {
+                "maxWidth": ".infinity",
+                "maxHeight": ".infinity"
+              }
+            },
+            {
+              "ignoresSafeArea": true
+            },
+            {
+              "background": { "var": "style[currentTheme].backgroundColor" }
             }
           ],
           "children": [
@@ -34,7 +68,7 @@
               "modifiers": [
                   {
                       "placeholder": {
-                        "background": "#F8F8F8"
+                        "background": { "var": "style[currentTheme].secondaryTextColor" }
                       }
                   },
                 {
@@ -65,7 +99,7 @@
                   }
                 },
                 {
-                  "foregroundColor": "#222222"
+                  "foreground": { "var": "style[currentTheme].textColor" }
                 }
               ]
             },
@@ -79,7 +113,7 @@
                   }
                 },
                 {
-                  "foregroundColor": "#666666"
+                  "foreground": { "var": "style[currentTheme].secondaryTextColor" }
                 }
               ]
             },
@@ -96,55 +130,50 @@
             },
             {
               "type": "toggle",
+              "var": "isDarkModeOn",
               "label": "Modo Escuro",
-              "isOn": { "var": "darkModeEnabled" },
               "modifiers": [
                 {
-                   "padding": {
-                    "leading": 30,
-                    "trailing": 30
-                  }
-                }
+                   "padding": { "leading": 30, "trailing": 30 }
+                },
+                {
+                  "foreground": { "var": "style[currentTheme].textColor" }
+                },
+                { "tint":  "green" }
                ],
               "onChange": {
                 "if": {
-                  "condition": { "var": "darkModeEnabled" },
-                  "then": {
-                    "set": {
-                      "name": "backgroundColorVar",
-                      "value": "#000000"
-                    }
-                  },
-                  "else": {
-                    "set": {
-                      "name": "backgroundColorVar",
-                      "value": "#FFFFFF"
-                    }
-                  }
-                }
+                   "condition": { "var": "isDarkModeOn" }, 
+                   "then": [ 
+                     { "set": { "var": "currentTheme", "value": "dark" } },
+                     { "set": { "var": "environmentColorScheme", "value": "dark" } }
+                   ],
+                   "else": [
+                     { "set": { "var": "currentTheme", "value": "light" } },
+                     { "set": { "var": "environmentColorScheme", "value": "light" } }
+                   ]
+                 }
               }
             },
             {
               "type": "toggle",
+              "var": "advancedOptionsOn",
               "label": "Opções Avançadas",
-              "isOn": { "var": "advancedOptionsOn" },
               "modifiers": [
-                { 
-                  "padding": {
-                    "top": 5,
-                    "leading": 30,
-                    "trailing": 30 
-                  }
-                },
-                { "opacity": { "var": "advancedOpacity" } },
-                { "disabled": { "var": "isAdvancedDisabled" } },
-                { "frame": { "maxWidth": ".infinity" } }
+                 { "padding": { "top": 5, "leading": 30, "trailing": 30 } },
+                 { "opacity": { "var": "advancedOpacity" } },
+                 { "disabled": { "var": "isAdvancedDisabled" } },
+                 { "frame": { "maxWidth": ".infinity" } },
+                 {
+                   "foreground": { "var": "style[currentTheme].textColor" }
+                 },
+                 { "tint":  "green" }
               ],
               "onChange": {
                  "if": {
                    "condition": {"Operator.eq": [{ "var": "advancedOpacity" }, 1.0]},
-                   "then": {"setVariable": {"name": "advancedOpacity", "value": 0.5}},
-                   "else": {"setVariable": {"name": "advancedOpacity", "value": 1.0}}
+                   "then": {"set": {"var": "advancedOpacity", "value": 0.5}},
+                   "else": {"set": {"var": "advancedOpacity", "value": 1.0}}
                  }
               }
             },
@@ -168,9 +197,7 @@
                       "type": "text",
                       "value": "Editar Perfil",
                       "modifiers": [
-                        {
-                          "foreground": "#FFFFFF"
-                        }
+                        { "foreground": { "var": "style[currentTheme].backgroundColor" } }
                       ]
                     }
                   ],
@@ -183,19 +210,15 @@
                     {
                       "padding": 14
                     },
-                    {
-                      "background": "blue"
-                    },
-                    {
-                      "cornerRadius": 20
-                    }
+                    { "background": { "var": "style[currentTheme].primaryColor" } },
+                    { "cornerRadius": 20 }
                   ]
                 },
                 {
                   "type": "button",
                   "title": "Configurações",
                   "onTap": {
-                    "print": "settings-tap"
+                    "navigate": "settingsScreen"
                   },
                   "modifiers": [
                     {
@@ -205,9 +228,50 @@
                       "frame": {
                         "maxWidth": ".infinity"
                       }
-                    }
+                    },
+                    { "foreground": { "var": "style[currentTheme].primaryColor" } }
                   ]
                 }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "screen",
+      "id": "settingsScreen",
+      "navigationBar": {
+        "title": "Configurações",
+         "displayMode": "large",
+         "backgroundColor": { "var": "style[currentTheme].backgroundColor" },
+         "foregroundColor": { "var": "style[currentTheme].textColor" }
+      },
+      "body": [
+        {
+          "type": "vstack",
+          "alignment": "center",
+          "modifiers": [
+            {
+              "frame": {
+                "maxWidth": ".infinity",
+                "maxHeight": ".infinity"
+              }
+            },
+            {
+              "ignoresSafeArea": true
+            },
+            {
+              "background": { "var": "style[currentTheme].backgroundColor" }
+            }
+          ],
+          "children": [
+            {
+              "type": "text",
+              "value": "Esta é a Tela de Configurações",
+              "modifiers": [
+                { "padding": 20 },
+                { "foreground": { "var": "style[currentTheme].textColor" } }
               ]
             }
           ]

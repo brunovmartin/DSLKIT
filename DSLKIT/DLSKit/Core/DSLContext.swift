@@ -32,14 +32,21 @@ public class DSLContext: ObservableObject {
     ///   - key: The name of the variable.
     ///   - value: The new value to assign.
     public func set(_ key: String, to value: Any) {
+        // Tenta comparar como AnyHashable para evitar notificações desnecessárias
         if let current = storage[key] as? AnyHashable,
            let newValue = value as? AnyHashable,
            current == newValue {
+            print("--- DEBUG: DSLContext SET - Value for \(key) unchanged. Skipping update.") 
             return // Não notifica se não mudou
         }
-
-        storage[key] = value
+        
+        print("--- DEBUG: DSLContext SET - Triggering objectWillChange for \(key)")
+        // Chama objectWillChange manualmente ANTES da mudança
         objectWillChange.send()
+        
+        print("--- DEBUG: DSLContext SET - Updating \(key) to: \(value)")
+        storage[key] = value 
+        // @Published cuida da notificação APÓS a mudança
     }
 
     /// Evaluate a raw expression in the context of this DSL.

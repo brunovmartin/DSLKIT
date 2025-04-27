@@ -77,77 +77,62 @@ public class VariableCommands {
     // --- Funções Auxiliares Estáticas ---
 
     public static func parsePathComponents(_ path: String, context: DSLContext) -> [Any] {
-        // --- START MODIFICATION ---
-        // Check cache first
-        // cacheLock.lock() // Uncomment if using lock
-        if let cachedComponents = pathComponentCache[path] {
-            //print("--- Path Cache HIT for: \(path)")
-            // cacheLock.unlock() // Uncomment if using lock
-            return cachedComponents
-        }
-        //print("--- Path Cache MISS for: \(path)")
-        // cacheLock.unlock() // Uncomment if using lock
-        // --- END MODIFICATION ---
+        if let cachedComponents = pathComponentCache[path] { return cachedComponents }
 
-
-        // --- Existing parsing logic ---
         var components: [Any] = []
-        var currentPath = path
         let scanner = Scanner(string: path)
-        scanner.charactersToBeSkipped = nil
+        scanner.charactersToBeSkipped = nil // Manter processamento de . e []
 
+        // Lê a variável base
         guard let baseVar = scanner.scanUpToCharacters(from: CharacterSet(charactersIn: ".[")) else {
-            if path.isEmpty { return [] }
-            return []
+             if path.isEmpty { return [] }
+             if !path.contains(".") && !path.contains("[") {
+                 components.append(path)
+                 pathComponentCache[path] = components
+                 return components
+             }
+             return []
         }
         components.append(baseVar)
-        currentPath = String(path.dropFirst(scanner.scanLocation))
+        
+        // Processa o resto do caminho usando APIs modernas
+        while !scanner.isAtEnd {
+            // Verifica o próximo caractere sem avançar
+            guard let nextChar = scanner.string[scanner.currentIndex...].first else { break } 
 
-        while !currentPath.isEmpty {
-             if currentPath.hasPrefix(".") {
-                currentPath.removeFirst()
-                let keyScanner = Scanner(string: currentPath)
-                keyScanner.charactersToBeSkipped = nil
-                if let key = keyScanner.scanUpToCharacters(from: CharacterSet(charactersIn: ".[")) {
-                    components.append(key)
-                    currentPath = String(currentPath.dropFirst(keyScanner.scanLocation))
+            if nextChar == "." { // Acesso a propriedade via ponto
+                scanner.currentIndex = scanner.string.index(after: scanner.currentIndex) // Avança o ponto
+                guard !scanner.isAtEnd else { return [] } // Ponto não pode ser o último caractere
+                
+                let startScanIndex = scanner.currentIndex
+                let key = scanner.scanUpToCharacters(from: CharacterSet(charactersIn: ".["))
+                 // Se scanUpToCharacters falhar mas ainda houver caracteres, pega o resto
+                let finalKey = key ?? String(scanner.string[startScanIndex...])
+                
+                if !finalKey.isEmpty { components.append(finalKey) }
+                 else { return [] } // Chave vazia após ponto é inválido
+
+            } else if nextChar == "[" { // Acesso a índice/chave via colchetes
+                scanner.currentIndex = scanner.string.index(after: scanner.currentIndex) // Avança o colchete [ 
+                guard !scanner.isAtEnd else { return [] } // Não pode terminar após [ 
+
+                guard let content = scanner.scanUpToString("]") else { // Lê até o ]
+                    return [] // Não encontrou ]
+                }
+                 scanner.currentIndex = scanner.string.index(after: scanner.currentIndex) // Avança o ]
+
+                if let indexInt = Int(content) {
+                    components.append(indexInt)
                 } else {
-                    if !currentPath.isEmpty { components.append(currentPath) }
-                    currentPath = ""
+                    components.append("VAR::" + content) // Chave dinâmica
                 }
-            } else if currentPath.hasPrefix("[") {
-                currentPath.removeFirst()
-                let indexScanner = Scanner(string: currentPath)
-                indexScanner.charactersToBeSkipped = nil
-                guard let indexStr = indexScanner.scanUpToCharacters(from: CharacterSet(charactersIn: "]")) else {
-                   return []
-                }
-                // --- Potential Micro-Optimization: Check if indexStr is already an Int before converting ---
-                // Swift's Int initializer is efficient, but this avoids creating the Scanner if not needed.
-                // However, the current approach handles integer literals correctly.
-                guard let indexInt = Int(indexStr) else {
-                   return []
-                }
-                components.append(indexInt)
-                currentPath = String(currentPath.dropFirst(indexScanner.scanLocation))
-                guard currentPath.hasPrefix("]") else {
-                   return []
-                }
-                currentPath.removeFirst()
             } else {
+                // Caractere inesperado
                 return []
             }
         }
-        // --- End Existing Parsing ---
 
-        // --- START MODIFICATION ---
-        // Store result in cache before returning
-        // cacheLock.lock() // Uncomment if using lock
         pathComponentCache[path] = components
-        // cacheLock.unlock() // Uncomment if using lock
-        //print("--- Parsed Path for \(path): \(components)")
-        // --- END MODIFICATION ---
-
         return components
     }
 

@@ -5,45 +5,34 @@ public struct ToggleView {
     static let modifierRegistry = DSLModifierRegistry<AnyView>()
 
     public static func render(_ node: [String: Any], context: DSLContext) -> AnyView {
-        // Extrai o label (espera uma string por enquanto)
         let labelText = DSLExpression.shared.evaluate(node["label"], context) as? String ?? ""
-
-        // Extrai o nome da variável booleana do parâmetro 'isOn'
-        guard let isOnExpr = node["isOn"],
-              let isOnDict = isOnExpr as? [String: Any],
-              let varName = isOnDict["var"] as? String else {
-            print("⚠️ ToggleView: Definição de 'isOn' inválida ou faltando. Precisa ser {\"var\": \"nomeVarBooleana\"}")
-            return AnyView(Text("Toggle Error"))
-        }
-
-        // Cria o Binding<Bool> usando o BindingResolver genérico
-        // Fornece 'false' como valor padrão se a variável não existir
-        let isOnBinding: Binding<Bool> = BindingResolver.bind(varName, context: context, defaultValue: false)
-
-        // Pega a ação onChange da DSL, se existir
         let onChangeAction = node["onChange"]
+        
+        // Busca a variável de estado na raiz do nó
+        guard let varName = node["var"] as? String else {
+            print("⚠️ ToggleView: Parâmetro 'var' (String) faltando na raiz do nó.")
+            return AnyView(Text("Toggle Error: var missing"))
+        }
+        
+        // Cria o Binding usando a variável da raiz e passando a ação
+        let isOnBinding: Binding<Bool> = BindingResolver.bind(
+            varName, 
+            context: context, 
+            defaultValue: false, // Assume false se não existir
+            onChangeAction: onChangeAction 
+        )
+        
+        print("--- DEBUG: ToggleView render - Root var: \(varName), current value: \(isOnBinding.wrappedValue)")
 
-        print("--- DEBUG: ToggleView render - varName: \(varName), current value: \(isOnBinding.wrappedValue)")
+        // Cria a view base (sem modificador .onChange)
+        let toggle = Toggle(labelText, isOn: isOnBinding)
 
-        // Cria a Toggle view
-        var toggle = Toggle(labelText, isOn: isOnBinding)
-            .onChange(of: isOnBinding.wrappedValue) {
-                let currentValue = isOnBinding.wrappedValue
-                print("--- DEBUG: Toggle \(varName) changed to \(currentValue)")
-                if let action = onChangeAction {
-                    print("--- DEBUG: Executing onChange action for \(varName)")
-                    DSLInterpreter.shared.handleEvent(action, context: context)
-                }
-            }
-
-        // Cria AnyView a partir do Toggle tipado
         var finalView = AnyView(toggle)
 
-        // 2. Aplica modificadores usando o registry específico
+        // Aplica modificadores
         if let modifiers = node["modifiers"] as? [[String: Any]] {
             finalView = modifierRegistry.apply(modifiers, to: finalView, context: context)
         }
-
         return finalView
     }
 
@@ -136,8 +125,181 @@ public struct ToggleView {
             return AnyView(view.disabled(isDisabled))
         }
         
-        // Adicionar outros modificadores comuns aqui, como:
-        // modifierRegistry.register("background") { ... }
-        // modifierRegistry.register("foreground") { ... }
+        // --- Adicionando mais modificadores --- 
+
+        modifierRegistry.register("background") { view, value, context in
+            // Lógica de ButtonView/TextView
+            let evaluatedValue = DSLExpression.shared.evaluate(value, context)
+            if let color = parseColor(evaluatedValue) {
+                return AnyView(view.background(color))
+            }
+            // TODO: Considerar background com ShapeStyle ou View?
+            return view
+        }
+
+        modifierRegistry.register("foreground") { view, value, context in
+            // Lógica de ButtonView/TextView
+            let evaluatedValue = DSLExpression.shared.evaluate(value, context)
+            if let color = parseColor(evaluatedValue) {
+                return AnyView(view.foregroundColor(color))
+            }
+            return view
+        }
+
+        modifierRegistry.register("tint") { view, value, context in
+            // Modificador tint para cor de acentuação
+            let evaluatedValue = DSLExpression.shared.evaluate(value, context)
+            if let color = parseColor(evaluatedValue) {
+                return AnyView(view.tint(color))
+            }
+            return view
+        }
+
+        modifierRegistry.register("scaleEffect") { view, value, context in
+            // Permite escalar a view
+            let evaluatedValue = DSLExpression.shared.evaluate(value, context)
+            if let scale = castToCGFloat(evaluatedValue) {
+                return AnyView(view.scaleEffect(scale))
+            } else if let dict = evaluatedValue as? [String: Any] {
+                let x = castToCGFloat(DSLExpression.shared.evaluate(dict["x"], context)) ?? 1.0
+                let y = castToCGFloat(DSLExpression.shared.evaluate(dict["y"], context)) ?? 1.0
+                // TODO: Anchor point?
+                return AnyView(view.scaleEffect(CGSize(width: x, height: y)))
+            }
+            return view
+        }
+
+        modifierRegistry.register("rotationEffect") { view, value, context in
+            // Permite rotacionar a view
+            let evaluatedValue = DSLExpression.shared.evaluate(value, context)
+            if let angleDegrees = evaluatedValue as? Double {
+                // TODO: Anchor point?
+                return AnyView(view.rotationEffect(.degrees(angleDegrees)))
+            } else if let dict = evaluatedValue as? [String: Any] {
+                 let angleDegrees = (DSLExpression.shared.evaluate(dict["degrees"], context) as? Double) ?? 0.0
+                 // TODO: Anchor point dict["anchor"]?
+                 return AnyView(view.rotationEffect(.degrees(angleDegrees)))
+            }
+            return view
+        }
+
+        modifierRegistry.register("offset") { view, value, context in
+            // Permite deslocar a view
+            let evaluatedValue = DSLExpression.shared.evaluate(value, context)
+            if let dict = evaluatedValue as? [String: Any] {
+                let x = castToCGFloat(DSLExpression.shared.evaluate(dict["x"], context)) ?? 0
+                let y = castToCGFloat(DSLExpression.shared.evaluate(dict["y"], context)) ?? 0
+                return AnyView(view.offset(x: x, y: y))
+            } else if let sizeArray = evaluatedValue as? [Double], sizeArray.count == 2 { // [x, y]
+                 return AnyView(view.offset(x: CGFloat(sizeArray[0]), y: CGFloat(sizeArray[1])))
+            }
+            return view
+        }
+        
+        // --- Implementando mais modificadores ---
+
+        modifierRegistry.register("cornerRadius") { view, value, context in
+            let evaluatedValue = DSLExpression.shared.evaluate(value, context)
+            guard let radius = castToCGFloat(evaluatedValue) else { return view }
+            // Note: cornerRadius geralmente é usado com clipShape ou background
+            // Aplicar diretamente pode não ter o efeito visual esperado sem um background.
+            // Uma abordagem comum é aplicar clipShape(RoundedRectangle(cornerRadius: radius))
+            // Por simplicidade, aplicamos clipShape aqui.
+            return AnyView(view.clipShape(RoundedRectangle(cornerRadius: radius)))
+        }
+
+        modifierRegistry.register("clipShape") { view, value, context in
+            let evaluatedValue = DSLExpression.shared.evaluate(value, context)
+            if let shapeName = evaluatedValue as? String {
+                 // Mapeia o nome da forma para a Shape real (requer função helper)
+                switch shapeName.lowercased() {
+                case "circle":
+                    return AnyView(view.clipShape(Circle()))
+                case "capsule":
+                    return AnyView(view.clipShape(Capsule()))
+                case "rectangle":
+                     return AnyView(view.clipShape(Rectangle()))
+                 // Outros casos podem ser adicionados (ex: Ellipse)
+                default:
+                     break // Forma não reconhecida
+                }
+            } else if let shapeDict = evaluatedValue as? [String: Any], 
+                      let type = shapeDict["type"] as? String, type.lowercased() == "roundedrectangle" {
+                 let cornerRadius = castToCGFloat(DSLExpression.shared.evaluate(shapeDict["cornerRadius"], context)) ?? 0
+                 // TODO: Suportar style (continuous/circular)?
+                 return AnyView(view.clipShape(RoundedRectangle(cornerRadius: cornerRadius)))
+            }
+            return view
+        }
+
+        // Nota: Overlay com View arbitrária é complexo. Implementando com Color/ShapeStyle por enquanto.
+        modifierRegistry.register("overlay") { view, value, context in
+            let evaluatedValue = DSLExpression.shared.evaluate(value, context)
+             if let color = parseColor(evaluatedValue) {
+                 // Overlay simples com cor
+                 return AnyView(view.overlay(color))
+             }
+            // TODO: Suportar overlay com Shape e stroke? Ex: {"shape": "circle", "stroke": "red", "lineWidth": 2}
+            return view
+        }
+
+        modifierRegistry.register("border") { view, value, context in
+            let evaluatedValue = DSLExpression.shared.evaluate(value, context)
+            if let color = parseColor(evaluatedValue) {
+                // Borda simples com cor e largura padrão
+                return AnyView(view.border(color))
+            } else if let dict = evaluatedValue as? [String: Any] {
+                let color = parseColor(DSLExpression.shared.evaluate(dict["color"], context)) ?? .black
+                let width = castToCGFloat(DSLExpression.shared.evaluate(dict["width"], context)) ?? 1
+                // Nota: view.border(color, width: width) pode precisar de clipShape antes.
+                // Uma alternativa é usar overlay(Rectangle().stroke(color, lineWidth: width))
+                return AnyView(view.overlay(Rectangle().stroke(color, lineWidth: width)))
+            }
+            return view
+        }
+        
+        modifierRegistry.register("shadow") { view, value, context in
+            let evaluatedValue = DSLExpression.shared.evaluate(value, context)
+             guard let dict = evaluatedValue as? [String: Any] else { return view }
+
+            let color = parseColor(DSLExpression.shared.evaluate(dict["color"], context)) ?? Color(.sRGBLinear, white: 0, opacity: 0.33)
+            let radius = castToCGFloat(DSLExpression.shared.evaluate(dict["radius"], context)) ?? 0
+            let x = castToCGFloat(DSLExpression.shared.evaluate(dict["x"], context)) ?? 0
+            let y = castToCGFloat(DSLExpression.shared.evaluate(dict["y"], context)) ?? 0
+            
+            return AnyView(view.shadow(color: color, radius: radius, x: x, y: y))
+        }
+
+        modifierRegistry.register("blur") { view, value, context in
+            let evaluatedValue = DSLExpression.shared.evaluate(value, context)
+            let radius = castToCGFloat(evaluatedValue) ?? 0
+            return AnyView(view.blur(radius: radius))
+        }
+
+        modifierRegistry.register("fixedSize") { view, value, context in
+            let evaluatedValue = DSLExpression.shared.evaluate(value, context)
+            if let dict = evaluatedValue as? [String: Any] {
+                let horizontal = DSLExpression.shared.evaluate(dict["horizontal"], context) as? Bool ?? true // Default to true if dict exists
+                let vertical = DSLExpression.shared.evaluate(dict["vertical"], context) as? Bool ?? true   // Default to true if dict exists
+                 return AnyView(view.fixedSize(horizontal: horizontal, vertical: vertical))
+            } else if let enabled = evaluatedValue as? Bool, enabled {
+                 // Se for apenas `true`, aplica em ambas as direções
+                 return AnyView(view.fixedSize())
+            } // Se for `false` ou outro tipo, não faz nada
+            return view
+        }
+        
+        modifierRegistry.register("allowsHitTesting") { view, value, context in
+            let enabled = DSLExpression.shared.evaluate(value, context) as? Bool ?? true // Default to true
+            return AnyView(view.allowsHitTesting(enabled))
+        }
+        
+        modifierRegistry.register("labelsHidden") { view, value, context in
+            let hidden = DSLExpression.shared.evaluate(value, context) as? Bool ?? true // Default to true if modifier exists
+            if hidden {
+                return AnyView(view.labelsHidden())
+            }
+            return view
+        }
     }
 } 

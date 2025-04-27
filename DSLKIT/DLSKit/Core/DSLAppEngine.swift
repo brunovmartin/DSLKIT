@@ -52,9 +52,28 @@ public class DSLAppEngine {
            let data = try? Data(contentsOf: url),
            let raw = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
            let initialData = raw["context"] as? [String: Any] {
+            
+            // --- Primeira Passagem: Definir valores brutos --- 
+            print("--- DEBUG AppEngine.start: First Pass - Setting raw initial values ---")
             for (key, value) in initialData {
-                // Define os valores iniciais no contexto da App
+                print("    Setting raw: \(key) = \(value)")
                 context.set(key, to: value)
+            }
+            
+            // --- Segunda Passagem: Avaliar e atualizar expressões --- 
+            print("--- DEBUG AppEngine.start: Second Pass - Evaluating expressions ---")
+            for (key, rawValue) in initialData { // Iterar sobre os dados originais
+                // Avaliar SOMENTE se o valor bruto parece ser uma expressão 
+                // (Ex: um dicionário, que é como representamos {"var":...} ou operadores)
+                if rawValue is [String: Any] { 
+                    print("    Evaluating expression for key: \(key), rawValue: \(rawValue)")
+                    let evaluatedValue = DSLExpression.shared.evaluate(rawValue, context) ?? NSNull()
+                    print("    Updating context: \(key) = \(evaluatedValue)")
+                    context.set(key, to: evaluatedValue) // Atualiza com o valor avaliado
+                } else {
+                    // Valores literais (String, Int, Bool, etc.) já foram definidos corretamente na primeira passagem
+                     print("    Skipping literal for key: \(key), value: \(rawValue)")
+                }
             }
         }
 
@@ -74,5 +93,10 @@ public class DSLAppEngine {
             return
         }
         DSLInterpreter.shared.present(screen: screen, context: context) // Usa o contexto atual
+    }
+
+    // Função para obter a definição da tela por ID
+    public func getScreenDefinition(byId screenId: String) -> [String: Any]? {
+        return screens[screenId]
     }
 }

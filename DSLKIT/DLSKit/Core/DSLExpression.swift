@@ -61,46 +61,50 @@ public class DSLExpression {
 
     // --- Função resolvePath para LEITURA ---
     private func resolvePath(_ path: String, context: DSLContext) -> Any? {
-        // Usa a função de parse (pode ser a mesma do VariableCommands)
         let components = VariableCommands.parsePathComponents(path, context: context)
         guard !components.isEmpty, let baseVar = components[0] as? String else {
-            ////print("⚠️ Path Read Error: Invalid path or base variable. Path: '\(path)'")
             return nil
         }
 
         var currentValue: Any? = context.get(baseVar)
-//        ////print("--- DEBUG: Path Reader - Base var '\(baseVar)', Initial value: \(String(describing: currentValue))")
 
         for component in components.dropFirst() {
             let currentNonNullValue = (currentValue is NSNull) ? nil : currentValue
             guard currentNonNullValue != nil else {
-//                ////print("⚠️ Path Read Error: Cannot resolve further, current value is nil/NSNull. Path component: \(component)")
                 return nil
             }
 
-            if let index = component as? Int { // Acesso a Array
-                guard let array = currentNonNullValue as? [Any] else {
-//                    //print("⚠️ Path Read Error: Trying to access index '\(index)' on non-array: \(currentNonNullValue!)")
-                    return nil
-                }
-                guard index >= 0 && index < array.count else {
-//                    //print("⚠️ Path Read Error: Index \(index) out of bounds for array count \(array.count).")
-                    return nil
-                }
+            if let index = component as? Int { // Acesso a Array por Índice Numérico
+                guard let array = currentNonNullValue as? [Any] else { return nil }
+                guard index >= 0 && index < array.count else { return nil }
                 currentValue = array[index]
-//                //print("--- DEBUG: Path Reader - Accessed index \(index), New value: \(String(describing: currentValue))")
-            }
-            else if let key = component as? String { // Acesso a Dicionário
-                 guard let dict = currentNonNullValue as? [String: Any] else {
-//                    //print("⚠️ Path Read Error: Trying to access key '\(key)' on non-dictionary: \(currentNonNullValue!)")
-                    return nil
+            } 
+            else if let key = component as? String {
+                // Verifica se é uma chave dinâmica
+                if key.hasPrefix("VAR::") {
+                    let variableName = String(key.dropFirst(5)) // Remove "VAR::"
+                    // Avalia a variável para obter a chave real (ex: "light" ou "dark")
+                    guard let resolvedKey = evaluate(["var": variableName], context) as? String else {
+                         print("⚠️ Path Resolution: Dynamic key variable '\(variableName)' not found or not a String.")
+                         return nil
+                    }
+                    // Usa a chave resolvida para acessar o dicionário
+                    guard let dict = currentNonNullValue as? [String: Any] else {
+                        print("⚠️ Path Resolution: Trying to access dynamic key '\(resolvedKey)' on non-dictionary: \(currentNonNullValue!)")
+                        return nil
+                    }
+                    print("--- DEBUG: Path Resolution - Using dynamic key: \(resolvedKey)")
+                    currentValue = dict[resolvedKey]
+                } else { 
+                    // Chave literal normal
+                    guard let dict = currentNonNullValue as? [String: Any] else { return nil }
+                    currentValue = dict[key]
                 }
-                currentValue = dict[key] // Pode ser nil ou NSNull
-//                //print("--- DEBUG: Path Reader - Accessed key '\(key)', New value: \(String(describing: currentValue))")
             }
-            else { /* Erro: componente inválido */ return nil }
+            else { 
+                return nil // Componente inválido
+            }
         }
-        // Retorna nil em vez de NSNull para simplificar o uso
         return (currentValue is NSNull) ? nil : currentValue
     }
 }

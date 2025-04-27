@@ -152,15 +152,18 @@ public struct TextView {
 
         // MARK: - Decoration
         
-        modifierRegistry.register("background") { view, value, _ in
-            if let color = parseColor(value) {
+        modifierRegistry.register("background") { view, value, context in
+            let evaluatedValue = DSLExpression.shared.evaluate(value, context)
+            if let color = parseColor(evaluatedValue) {
                 return AnyView(view.background(color))
             }
             return view
         }
         
-        modifierRegistry.register("foreground") { view, value, _ in
-            if let color = parseColor(value) {
+        modifierRegistry.register("foreground") { view, value, context in
+            // Lógica de TextView
+            let evaluatedValue = DSLExpression.shared.evaluate(value, context)
+            if let color = parseColor(evaluatedValue) {
                 return AnyView(view.foregroundColor(color))
             }
             return view

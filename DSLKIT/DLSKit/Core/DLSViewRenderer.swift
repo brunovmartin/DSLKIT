@@ -4,87 +4,79 @@ import SwiftUI
 
 public struct DSLViewRenderer {
 
-    // Render the main screen (remains the same)
-    public static func render(screen: [String: Any], context: DSLContext) -> some View {
-        // ... (keep existing code for navigation bar, body extraction, etc.) ...
-         let body = screen["body"] as? [[String: Any]] ?? []
-         let content = renderChildren(from: body, context: context) // O conteúdo da tela (ex: List)
-         let navBar = screen["navigationBar"] as? [String: Any]
+    // NOVA FUNÇÃO: Renderiza apenas o conteúdo de uma tela e aplica modificadores de navegação
+    @ViewBuilder
+    public static func renderScreenContent(screen: [String: Any], context: DSLContext) -> some View {
+        let body = screen["body"] as? [[String: Any]] ?? []
+        let content = renderChildren(from: body, context: context) // O conteúdo da tela (ex: VStack, List)
+        let navBar = screen["navigationBar"] as? [String: Any]
 
-         // --- Lógica do Título (existente) ---
-         let rawTitleExpr = navBar?["title"]
-         let evaluatedTitleValue = DSLExpression.shared.evaluate(rawTitleExpr, context)
-         let calculatedTitle: String
-         if let actualValue = evaluatedTitleValue {
-             calculatedTitle = "\(actualValue)"
-         } else {
-             calculatedTitle = ""
-         }
-         //print("--- DEBUG: DSLViewRenderer - Calculated NavigationBar Title: \(calculatedTitle)")
+        // --- Lógica do Título ---
+        let rawTitleExpr = navBar?["title"]
+        let evaluatedTitleValue = DSLExpression.shared.evaluate(rawTitleExpr, context)
+        let calculatedTitle: String = "\(evaluatedTitleValue ?? "")"
 
-         // --- Lógica do Display Mode e Background (existente) ---
-         let displayMode = mapNavDisplayMode(navBar?["displayMode"] as? String)
-         let backgroundColor = parseColor(navBar?["background"])
+        // --- Lógica do Display Mode e Cores ---
+        let displayMode = mapNavDisplayMode(navBar?["displayMode"] as? String)
+        let navBgColorExpr = navBar?["backgroundColor"]
+        let navFgColorExpr = navBar?["foregroundColor"]
+        let navColorSchemeExpr = navBar?["toolbarColorScheme"]
+        let evaluatedNavBgColor = DSLExpression.shared.evaluate(navBgColorExpr, context)
+        let evaluatedNavFgColor = DSLExpression.shared.evaluate(navFgColorExpr, context)
+        let evaluatedSchemeColor = DSLExpression.shared.evaluate(navColorSchemeExpr, context)
+        let navBackgroundColor = parseColor(evaluatedNavBgColor)
+        let navForegroundColor = parseColor(evaluatedNavFgColor)
+        let navSchemeColor = parseColor(evaluatedNavFgColor)
+        
 
-         // --- Lógica do Botão (existente) ---
-         let trailingButtonInfo = navBar?["trailingButton"] as? [String: Any]
-         let buttonLabelExpr = trailingButtonInfo?["label"] // Expressão para o texto do botão
-         let buttonAction = trailingButtonInfo?["onTap"]     // Ação a ser executada
-         let buttonLabel = DSLExpression.shared.evaluate(buttonLabelExpr, context) as? String ?? ""
 
-         // --- Modifica o retorno da NavigationView ---
-         return AnyView( // Keep AnyView wrapper here for the whole screen if needed
-             NavigationView {
-                 content // Aplica os modificadores ao conteúdo DENTRO da NavigationView
-                     .navigationTitle(calculatedTitle) // Título (existente)
-                     .navigationBarTitleDisplayMode(displayMode) // Modo de exibição (existente)
-                     // Modificador de fundo (existente)
-                     .ifLet(backgroundColor) { view, color in
-                         view
-                             .toolbarBackground(color, for: .navigationBar)
-                             .toolbarBackground(.visible, for: .navigationBar)
-                     }
-                     // --- Toolbar para o botão (existente) ---
-                     .toolbar {
-                         if !buttonLabel.isEmpty, let action = buttonAction {
-                             ToolbarItem(placement: .navigationBarTrailing) {
-                                 Button(buttonLabel) {
-                                     //print("--- DEBUG: Trailing navigation button tapped. Action: \(action)")
-                                     DSLInterpreter.shared.handleEvent(action, context: context)
-                                 }
-                             }
-                         }
-                     }
+        // --- Lógica do Botão Trailing ---
+        let trailingButtonInfo = navBar?["trailingButton"] as? [String: Any]
+        let buttonLabelExpr = trailingButtonInfo?["label"]
+        let buttonAction = trailingButtonInfo?["onTap"]
+        let buttonLabel = DSLExpression.shared.evaluate(buttonLabelExpr, context) as? String ?? ""
+
+        // Aplica modificadores ao conteúdo
+        content
+            .navigationTitle(calculatedTitle)
+            .navigationBarTitleDisplayMode(displayMode)
+             .ifLet(navForegroundColor) { view, color in
+                 view.tint(.blue) // Define a cor de destaque padrão
              }
-             // No need to add .environmentObject(context) here if it's already done in App.swift
-             // .environmentObject(context)
-         )
+            .toolbar {
+                if !buttonLabel.isEmpty, let action = buttonAction {
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        Button(buttonLabel) {
+                            DSLInterpreter.shared.handleEvent(action, context: context)
+                        }
+                        // O tint() acima deve afetar este botão, mas podemos deixar o explícito como fallback?
+                        // Ou remover este tint individual se o global funcionar.
+                         .ifLet(navForegroundColor) { btn, color in btn.tint(color) }
+                    }
+                }
+                // O botão Voltar será adicionado automaticamente pelo NavigationStack
+            }
+            // Adicionar outros modificadores de tela aqui se necessário (ex: background da tela)
+            // Ex: .background(parseColor(DSLExpression.shared.evaluate(screen["backgroundColor"], context)))
+
     }
 
+    // Função render original removida ou renomeada (REMOVIDA)
 
-    // --- CHANGE THIS FUNCTION ---
-    // Change return type from 'some View' to 'AnyView'
-    // Remove @ViewBuilder if it causes issues with AnyView return type
+    // --- renderComponent e renderChildren permanecem os mesmos ---
     public static func renderComponent(from node: [String: Any], context: DSLContext) -> AnyView {
          if let type = node["type"] as? String,
             let builder = DSLComponentRegistry.shared.resolve(type) {
-             // The builder already returns AnyView, so just return it directly
              return builder(node, context)
          } else {
-             // Wrap the fallback Text in AnyView
              return AnyView(Text("🚫 Componente desconhecido: \(node["type"] as? String ?? "?")"))
          }
     }
-    // --- END OF CHANGE ---
 
-
-    // This function uses renderComponent, which now returns AnyView.
-    // It needs to be adjusted or remain as is if @ViewBuilder handles AnyView correctly.
-    // Let's keep @ViewBuilder for now, as it *should* work with AnyView.
     @ViewBuilder
     public static func renderChildren(from nodes: [[String: Any]], context: DSLContext) -> some View {
          ForEach(0..<nodes.count, id: \.self) { i in
-             renderComponent(from: nodes[i], context: context) // This now returns AnyView
+             renderComponent(from: nodes[i], context: context)
          }
     }
 }

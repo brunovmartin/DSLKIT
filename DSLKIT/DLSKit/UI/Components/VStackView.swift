@@ -174,9 +174,11 @@ public struct VStackView {
              })
          }
          modifierRegistry.register("onAppear") { view, paramsAny, context in
-             let params = paramsAny as? [String: Any] ?? [:]
-             return AnyView(view.onAppear {
-                 DSLInterpreter.shared.handleEvent(params, context: context)
+             print("--- DEBUG: REGISTERED onAppear closure EXECUTED by apply(). Modifier value: \(String(describing: paramsAny))")
+             return AnyView(view.onAppear { 
+                 print("--- DEBUG: SwiftUI .onAppear action EXECUTED.")
+                 // Chama handleEvent diretamente, sem Task ou delay
+                 DSLInterpreter.shared.handleEvent(paramsAny, context: context)
              })
          }
          modifierRegistry.register("onDisappear") { view, paramsAny, context in
@@ -190,6 +192,32 @@ public struct VStackView {
             let params = paramsAny as? [String: Any] ?? [:]
             let labelText = DSLExpression.shared.evaluate(params["label"], context) as? String ?? ""
             return AnyView(view.accessibilityLabel(Text(labelText)))
+        }
+        
+        modifierRegistry.register("ignoresSafeArea") { view, value, context in
+            let evaluatedValue = DSLExpression.shared.evaluate(value, context)
+            
+            if let ignore = evaluatedValue as? Bool, ignore {
+                 return AnyView(view.ignoresSafeArea())
+            } else if let edgesArray = evaluatedValue as? [String] {
+                var edgeSet: Edge.Set = []
+                for edgeStr in edgesArray {
+                    switch edgeStr.lowercased() {
+                    case "top": edgeSet.insert(.top)
+                    case "bottom": edgeSet.insert(.bottom)
+                    case "leading": edgeSet.insert(.leading)
+                    case "trailing": edgeSet.insert(.trailing)
+                    case "horizontal": edgeSet.insert(.horizontal)
+                    case "vertical": edgeSet.insert(.vertical)
+                    case "all": edgeSet.insert(.all)
+                    default: break
+                    }
+                }
+                if !edgeSet.isEmpty {
+                    return AnyView(view.ignoresSafeArea(.all, edges: edgeSet))
+                }
+            } 
+            return view
         }
     }
 }

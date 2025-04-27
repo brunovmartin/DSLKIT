@@ -17,12 +17,18 @@ public class DSLModifierRegistry<ViewType> {
     }
 
     public func apply(_ list: [[String: Any]], to view: ViewType, context: DSLContext) -> ViewType {
-        list.reduce(view) { current, mod in
+        print("--- DEBUG: Modifier Apply - STARTING application for list: \(list)")
+        return list.reduce(view) { current, mod in
+            print("--- DEBUG: Modifier Apply - Processing mod dict: \(mod)")
             guard let key = mod.keys.first,
                   let value = mod[key],
                   let fn = modifiers[key] else {
+                // Log se o modificador for pulado
+                print("--- DEBUG: Modifier Apply - SKIPPING modifier (key not found or fn not registered): \(mod)") 
                 return current
             }
+            // Log se o modificador for aplicado
+            print("--- DEBUG: Modifier Apply - APPLYING modifier: \(key)") 
             return fn(current, value, context)
         }
     }

@@ -76,3 +76,20 @@ public func parseColor(_ value: Any?) -> Color? {
         default: return nil
     }
 }
+
+// Helper para verificar se uma cor é clara (simplificado, pode precisar de melhorias)
+extension Color {
+    func isLight() -> Bool {
+        // Implementação placeholder - uma lógica real analisaria os componentes RGB
+        // Esta é uma suposição muito básica!
+        // Uma abordagem mais robusta calcularia a luminância relativa:
+        // let uiColor = UIColor(self)
+        // var red: CGFloat = 0, green: CGFloat = 0, blue: CGFloat = 0, alpha: CGFloat = 0
+        // uiColor.getRed(&red, green: &green, blue: &blue, alpha: &alpha)
+        // let luminance = 0.2126 * red + 0.7152 * green + 0.0722 * blue
+        // return luminance > 0.5 // Limiar pode precisar de ajuste
+
+        // Manter a versão simples por enquanto:
+        return self == .white || self == .yellow || self == .clear || self == .gray || self == .mint || self == .orange || self == .pink || self == .cyan
+    }
+}

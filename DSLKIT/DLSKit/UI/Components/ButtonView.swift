@@ -34,23 +34,25 @@ public struct ButtonView {
     public static func register() {
         DSLComponentRegistry.shared.register("button", builder: render)
 
-        modifierRegistry.register("padding") { view, value, _ in
-            if let length = castToCGFloat(value) {
+        modifierRegistry.register("padding") { view, value, context in
+            let evaluatedValue = DSLExpression.shared.evaluate(value, context)
+            if let length = castToCGFloat(evaluatedValue) {
                 return AnyView(view.padding(length))
-            } else if let dict = value as? [String: Any] {
+            } else if let dict = evaluatedValue as? [String: Any] {
                 let edges = mapEdgeSet(from: dict["edges"] as? [String])
                 let length = castToCGFloat(dict["length"])
                 return AnyView(view.padding(edges, length ?? 0))
-            } else if value is NSNull || (value as? [String: Any])?.isEmpty == true {
+            } else if evaluatedValue is NSNull || (evaluatedValue as? [String: Any])?.isEmpty == true {
                 return AnyView(view.padding())
-            } else if let boolValue = value as? Bool, boolValue {
+            } else if let boolValue = evaluatedValue as? Bool, boolValue {
                 return AnyView(view.padding())
             }
             return view
         }
 
-        modifierRegistry.register("background") { view, value, _ in
-            if let color = parseColor(value) {
+        modifierRegistry.register("background") { view, value, context in
+            let evaluatedValue = DSLExpression.shared.evaluate(value, context)
+            if let color = parseColor(evaluatedValue) {
                 return AnyView(view.background(color))
             }
             return view
@@ -93,21 +95,28 @@ public struct ButtonView {
             ))
         }
         
-        modifierRegistry.register("foreground") { view, value, _ in
-            if let color = parseColor(value) {
+        modifierRegistry.register("foreground") { view, value, context in
+            let evaluatedValue = DSLExpression.shared.evaluate(value, context)
+            if let color = parseColor(evaluatedValue) {
                 return AnyView(view.foregroundColor(color))
             }
             return view
         }
 
-        modifierRegistry.register("cornerRadius") { view, value, _ in
-            guard let radius = castToCGFloat(value) else { return view }
-            return AnyView(view.cornerRadius(radius))
+        modifierRegistry.register("cornerRadius") { view, value, context in
+            let evaluatedValue = DSLExpression.shared.evaluate(value, context)
+            if let radius = castToCGFloat(evaluatedValue) {
+                return AnyView(view.cornerRadius(radius))
+            }
+            return view
         }
 
-        modifierRegistry.register("opacity") { view, value, _ in
-            guard let opacityValue = value as? Double else { return view }
-            return AnyView(view.opacity(max(0.0, min(1.0, opacityValue))))
+        modifierRegistry.register("opacity") { view, value, context in
+            let evaluatedValue = DSLExpression.shared.evaluate(value, context)
+            if let opacity = castToCGFloat(evaluatedValue) {
+                return AnyView(view.opacity(Double(opacity)))
+            }
+            return view
         }
     }
 }
