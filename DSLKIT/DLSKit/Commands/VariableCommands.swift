@@ -5,19 +5,69 @@ public class VariableCommands {
     private static var pathComponentCache: [String: [Any]] = [:]
     
     public static func registerAll() {
-        // Comando 'set'
+        // Comando 'set' (Modificado para usar lógica de path)
         DSLCommandRegistry.shared.register("set") { payload, context in
             guard
                 let setData = payload as? [String: Any],
-                let key = setData["var"] as? String,
+                let targetPath = setData["var"] as? String, // Renomear 'key' para 'targetPath'
                 let valueExpr = setData["value"]
             else {
-                //print("⚠️ Comando 'set' inválido: payload incompleto ou mal formatado. Payload: \(String(describing: payload))")
+                print("⚠️ Comando 'set' inválido: payload incompleto ou mal formatado. Payload: \(String(describing: payload))")
                 return
             }
             let resolvedValue = DSLExpression.shared.evaluate(valueExpr, context) ?? NSNull()
-            //print("--- DEBUG: VariableCommands 'set' - Key: \(key), Resolved Value: \(String(describing: resolvedValue))")
-            context.set(key, to: resolvedValue)
+            print("--- DEBUG: VariableCommands 'set' - Path: \(targetPath), Resolved Value: \(String(describing: resolvedValue))")
+            
+            // --- Lógica Adaptada de setAtPath --- 
+            let components = Self.parsePathComponents(targetPath, context: context)
+            
+            guard !components.isEmpty, let baseVar = components[0] as? String else {
+                print("⚠️ 'set' - Path inválido ou não inicia com variável. Path: \(targetPath)")
+                return
+            }
+            
+            // Obter o valor base atual ou inicializar se necessário
+            var currentMutableValue: Any
+            if let existingValue = context.get(baseVar), !(existingValue is NSNull) {
+                 currentMutableValue = existingValue
+            } else {
+                 // Inicializa se não existir e o path for mais profundo
+                 if components.count > 1 {
+                     if components[1] is String {
+                         currentMutableValue = [String: Any]()
+                         print("--- DEBUG: 'set' - Initialized base dictionary '\(baseVar)'.")
+                     } else if components[1] is Int {
+                         currentMutableValue = [Any]() // Embora set em array por string não faça sentido aqui
+                         print("--- DEBUG: 'set' - Initialized base array '\(baseVar)'.")
+                     } else {
+                         print("⚠️ 'set' - Base '\(baseVar)' not found, cannot initialize for path component: \(components[1]).")
+                         return
+                     }
+                 } else if components.count == 1 { // Apenas a variável base
+                      print("--- DEBUG: 'set' - Setting base variable '\(baseVar)' directly.")
+                      // Notificar ANTES da mudança para @Published funcionar
+                      context.objectWillChange.send()
+                      context.set(baseVar, to: resolvedValue) 
+                      return
+                 } else { // Path vazio, já tratado acima
+                      return
+                 }
+             }
+             
+             // Chamar a função auxiliar para modificar o valor no caminho restante
+             print("--- DEBUG: 'set' - Attempting to modify path for base '\(baseVar)'. Components: \(Array(components.dropFirst()))")
+             // Notificar ANTES da mudança para @Published funcionar
+             context.objectWillChange.send()
+             if Self.modifyValueAtPath(&currentMutableValue, pathComponents: Array(components.dropFirst()), newValue: resolvedValue) {
+                 // Atualizar o valor base no contexto com a estrutura modificada
+                 context.set(baseVar, to: currentMutableValue)
+                 print("--- DEBUG: 'set' - Path write successful for: \(targetPath)")
+             } else {
+                 print("⚠️ 'set' - Path write failed for: \(targetPath)")
+                 // Opcional: Desfazer a notificação se a escrita falhar? Depende da granularidade desejada.
+             }
+            // Remover chamada antiga
+            // context.set(key, to: resolvedValue)
         }
 
         // Comando 'setAtPath'

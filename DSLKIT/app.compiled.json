@@ -2,8 +2,6 @@
   "mainScreen": "profileScreen",
   "context": {
     "currentTheme": "light",
-    "profileScreenBarTitle": "Edite-me",
-    "profileTitle": "Perfil Inicial",
     "style": {
       "light": {
         "backgroundColor": "#FFFFFF",
@@ -18,25 +16,35 @@
         "secondaryTextColor": "#CCCCCC"
       }
     },
+    "profileScreen": {
+      "title": "Perfil Inicials"
+    },
+    "SettingsScreen": {
+      "counter": 0
+    },
     "backgroundColorVar": "#FFFFFF",
     "isDarkModeOn": false,
-    "environmentColorScheme": { "var": "currentTheme" }
+    "environmentColorScheme": {
+      "var": "currentTheme"
+    }
   },
   "screens": [
     {
       "type": "screen",
       "id": "profileScreen",
       "navigationBar": {
-        "title": { "var": "profileTitle" },
+        "title": {
+          "var": "profileScreen.title"
+        },
         "displayMode": "large",
-        "backgroundColor": { "var": "style[currentTheme].backgroundColor" },
-        "foregroundColor": { "var": "style[currentTheme].textColor" },
-        "toolbarScheme": { "var": "currentTheme" },
+        "toolbarScheme": {
+          "var": "currentTheme"
+        },
         "trailingButton": {
-          "label": "Mudar Título",
+          "label": "Mudar",
           "onTap": {
             "set": {
-              "var": "profileTitle",
+              "var": "profileScreen.title",
               "value": "Título Alterado!"
             }
           }
@@ -58,7 +66,9 @@
               "ignoresSafeArea": true
             },
             {
-              "background": { "var": "style[currentTheme].backgroundColor" }
+              "background": {
+                "var": "style[currentTheme].backgroundColor"
+              }
             }
           ],
           "children": [
@@ -66,11 +76,13 @@
               "type": "image",
               "url": "https://i.pravatar.cc/150?u=bruno",
               "modifiers": [
-                  {
-                      "placeholder": {
-                        "background": { "var": "style[currentTheme].secondaryTextColor" }
-                      }
-                  },
+                {
+                  "placeholder": {
+                    "background": {
+                      "var": "style[currentTheme].secondaryTextColor"
+                    }
+                  }
+                },
                 {
                   "resizable": true
                 },
@@ -99,7 +111,9 @@
                   }
                 },
                 {
-                  "foreground": { "var": "style[currentTheme].textColor" }
+                  "foreground": {
+                    "var": "style[currentTheme].textColor"
+                  }
                 }
               ]
             },
@@ -113,7 +127,9 @@
                   }
                 },
                 {
-                  "foreground": { "var": "style[currentTheme].secondaryTextColor" }
+                  "foreground": {
+                    "var": "style[currentTheme].secondaryTextColor"
+                  }
                 }
               ]
             },
@@ -134,25 +150,54 @@
               "label": "Modo Escuro",
               "modifiers": [
                 {
-                   "padding": { "leading": 30, "trailing": 30 }
+                  "padding": {
+                    "leading": 30,
+                    "trailing": 30
+                  }
                 },
                 {
-                  "foreground": { "var": "style[currentTheme].textColor" }
+                  "foreground": {
+                    "var": "style[currentTheme].textColor"
+                  }
                 },
-                { "tint":  "green" }
-               ],
+                {
+                  "tint": "green"
+                }
+              ],
               "onChange": {
                 "if": {
-                   "condition": { "var": "isDarkModeOn" }, 
-                   "then": [ 
-                     { "set": { "var": "currentTheme", "value": "dark" } },
-                     { "set": { "var": "environmentColorScheme", "value": "dark" } }
-                   ],
-                   "else": [
-                     { "set": { "var": "currentTheme", "value": "light" } },
-                     { "set": { "var": "environmentColorScheme", "value": "light" } }
-                   ]
-                 }
+                  "condition": {
+                    "var": "isDarkModeOn"
+                  },
+                  "then": [
+                    {
+                      "set": {
+                        "var": "currentTheme",
+                        "value": "dark"
+                      }
+                    },
+                    {
+                      "set": {
+                        "var": "environmentColorScheme",
+                        "value": "dark"
+                      }
+                    }
+                  ],
+                  "else": [
+                    {
+                      "set": {
+                        "var": "currentTheme",
+                        "value": "light"
+                      }
+                    },
+                    {
+                      "set": {
+                        "var": "environmentColorScheme",
+                        "value": "light"
+                      }
+                    }
+                  ]
+                }
               }
             },
             {
@@ -160,21 +205,60 @@
               "var": "advancedOptionsOn",
               "label": "Opções Avançadas",
               "modifiers": [
-                 { "padding": { "top": 5, "leading": 30, "trailing": 30 } },
-                 { "opacity": { "var": "advancedOpacity" } },
-                 { "disabled": { "var": "isAdvancedDisabled" } },
-                 { "frame": { "maxWidth": ".infinity" } },
-                 {
-                   "foreground": { "var": "style[currentTheme].textColor" }
-                 },
-                 { "tint":  "green" }
+                {
+                  "padding": {
+                    "top": 5,
+                    "leading": 30,
+                    "trailing": 30
+                  }
+                },
+                {
+                  "opacity": {
+                    "var": "advancedOpacity"
+                  }
+                },
+                {
+                  "disabled": {
+                    "var": "isAdvancedDisabled"
+                  }
+                },
+                {
+                  "frame": {
+                    "maxWidth": ".infinity"
+                  }
+                },
+                {
+                  "foreground": {
+                    "var": "style[currentTheme].textColor"
+                  }
+                },
+                {
+                  "tint": "green"
+                }
               ],
               "onChange": {
-                 "if": {
-                   "condition": {"Operator.eq": [{ "var": "advancedOpacity" }, 1.0]},
-                   "then": {"set": {"var": "advancedOpacity", "value": 0.5}},
-                   "else": {"set": {"var": "advancedOpacity", "value": 1.0}}
-                 }
+                "if": {
+                  "condition": {
+                    "Operator.eq": [
+                      {
+                        "var": "advancedOpacity"
+                      },
+                      1
+                    ]
+                  },
+                  "then": {
+                    "set": {
+                      "var": "advancedOpacity",
+                      "value": 0.5
+                    }
+                  },
+                  "else": {
+                    "set": {
+                      "var": "advancedOpacity",
+                      "value": 1
+                    }
+                  }
+                }
               }
             },
             {
@@ -197,7 +281,11 @@
                       "type": "text",
                       "value": "Editar Perfil",
                       "modifiers": [
-                        { "foreground": { "var": "style[currentTheme].backgroundColor" } }
+                        {
+                          "foreground": {
+                            "var": "style[currentTheme].backgroundColor"
+                          }
+                        }
                       ]
                     }
                   ],
@@ -210,8 +298,14 @@
                     {
                       "padding": 14
                     },
-                    { "background": { "var": "style[currentTheme].primaryColor" } },
-                    { "cornerRadius": 20 }
+                    {
+                      "background": {
+                        "var": "style[currentTheme].primaryColor"
+                      }
+                    },
+                    {
+                      "cornerRadius": 20
+                    }
                   ]
                 },
                 {
@@ -229,7 +323,11 @@
                         "maxWidth": ".infinity"
                       }
                     },
-                    { "foreground": { "var": "style[currentTheme].primaryColor" } }
+                    {
+                      "foreground": {
+                        "var": "style[currentTheme].primaryColor"
+                      }
+                    }
                   ]
                 }
               ]
@@ -243,9 +341,13 @@
       "id": "settingsScreen",
       "navigationBar": {
         "title": "Configurações",
-         "displayMode": "large",
-         "backgroundColor": { "var": "style[currentTheme].backgroundColor" },
-         "foregroundColor": { "var": "style[currentTheme].textColor" }
+        "displayMode": "large",
+        "backgroundColor": {
+          "var": "style[currentTheme].backgroundColor"
+        },
+        "foregroundColor": {
+          "var": "style[currentTheme].textColor"
+        }
       },
       "body": [
         {
@@ -262,7 +364,12 @@
               "ignoresSafeArea": true
             },
             {
-              "background": { "var": "style[currentTheme].backgroundColor" }
+              "background": {
+                "var": "style[currentTheme].backgroundColor"
+              }
+            },
+            {
+              "padding": 30
             }
           ],
           "children": [
@@ -270,8 +377,92 @@
               "type": "text",
               "value": "Esta é a Tela de Configurações",
               "modifiers": [
-                { "padding": 20 },
-                { "foreground": { "var": "style[currentTheme].textColor" } }
+                {
+                  "font": {
+                    "style": "title2"
+                  }
+                },
+                {
+                  "foreground": {
+                    "var": "style[currentTheme].textColor"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "value": {
+                "Number.toIntString": {
+                  "var": "SettingsScreen.counter"
+                }
+              },
+              "modifiers": [
+                {
+                  "font": {
+                    "style": "title1",
+                    "weight": "bold"
+                  }
+                },
+                {
+                  "foreground": {
+                    "var": "style[currentTheme].textColor"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "button",
+              "children": [
+                {
+                  "type": "text",
+                  "value": "Mudar título e somar",
+                  "modifiers": [
+                    {
+                      "foreground": {
+                        "var": "style[currentTheme].backgroundColor"
+                      }
+                    }
+                  ]
+                }
+              ],
+              "onTap": {
+                "sequence": [
+                  {
+                    "set": {
+                      "var": "SettingsScreen.counter",
+                      "value": {
+                        "Math.add": [
+                          { "var": "SettingsScreen.counter" },
+                          1
+                        ]
+                      }
+                    }
+                  },
+                  {
+                    "set": {
+                      "var": "profileScreen.title",
+                      "value": "Batatinha"
+                    }
+                  }
+                ]
+              },
+              "modifiers": [
+                {
+                  "frame": {
+                    "maxWidth": ".infinity"
+                  }
+                },
+                {
+                  "padding": 14
+                },
+                {
+                  "background": {
+                    "var": "style[currentTheme].primaryColor"
+                  }
+                },
+                {
+                  "cornerRadius": 20
+                }
               ]
             }
           ]
