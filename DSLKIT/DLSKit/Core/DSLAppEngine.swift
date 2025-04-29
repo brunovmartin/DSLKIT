@@ -182,7 +182,11 @@ public class DSLAppEngine {
             // --- Após a conclusão da avaliação síncrona --- 
             // Usa Task/MainActor para atualizar o estado @Published e apresentar a UI
             Task {
+                
+                //try? await Task.sleep(for: .seconds(10)) 
                 await MainActor.run { // Garante execução na Main Thread
+                    
+                    
                     print("--- DEBUG AppEngine.start: Evaluation Complete - Setting isInitialLoadComplete = true ---")
                     context.isInitialLoadComplete = true
                     
@@ -191,9 +195,12 @@ public class DSLAppEngine {
                         print("🚫 Tela inicial não encontrada após carregamento.")
                         return
                     }
-                    print("--- DEBUG AppEngine.start: Presenting initial screen: \(id) ---")
-                    print(context.storage)
-                    DSLInterpreter.shared.present(screen: screen, context: context)
+                    context.waitForUpdates {
+                        print("--- DEBUG AppEngine.start: All context updates complete - Presenting initial screen: \(id) ---")
+                        print("--- Final Context Storage ---")
+                        print(context.storage)
+                        DSLInterpreter.shared.present(screen: screen, context: context)
+                    }
                 }
             } // Fim da Task
         } // Fim do if let initialData
