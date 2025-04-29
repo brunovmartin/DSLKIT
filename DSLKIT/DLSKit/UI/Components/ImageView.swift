@@ -7,9 +7,12 @@ public struct ImageView {
     public static func render(_ node: [String: Any], context: DSLContext) -> AnyView {
         if let urlExpr = node["url"],
            let urlString = DSLExpression.shared.evaluate(urlExpr, context) as? String,
-           let _ = URL(string: urlString) {
+           let url = URL(string: urlString) {
             
             let modifiers = node["modifiers"] as? [[String: Any]] ?? []
+            
+            // Verifica se o cache está habilitado para esta imagem
+            let shouldCache = DSLExpression.shared.evaluate(node["cache"], context) as? Bool ?? true
             
             let frameModifier = modifiers.first(where: { $0["frame"] != nil })
             let params = frameModifier?["frame"] as? [String: Any] ?? [:]
@@ -40,11 +43,38 @@ public struct ImageView {
             let backgroundValueRaw = placeholderDict?["background"]
             let hasBackground = DSLExpression.shared.evaluate(backgroundValueRaw, context)
             
-            var finalView = AnyView(EmptyView()) // Inicializa com EmptyView
-            if let url = URL(string: urlString) {
+            var finalView = AnyView(EmptyView())
+            
+            // Se o cache estiver habilitado, tenta pegar a imagem do cache LOCAL
+            if shouldCache, let cachedImage = ImageFileCache.shared.load(for: url) {
+                finalView = AnyView(Image(uiImage: cachedImage)
+                    .conditionalResizableScaled(
+                        modifiers,
+                        minWidth: minWidth,
+                        idealWidth: idealWidth,
+                        maxWidth: maxWidth,
+                        minHeight: minHeight,
+                        idealHeight: idealHeight,
+                        maxHeight: maxHeight,
+                        alignment: alignment
+                    )
+                    .cornerRadius(cornerRadius))
+            } else {
+                // Se não estiver no cache local ou o cache estiver desabilitado, usa AsyncImage
                 finalView = AnyView(AsyncImage(url: url) { phase in
-                    if let image = phase.image {
-                        image
+                    switch phase {
+                    case .empty:
+                        if hasBackground != nil {
+                            Rectangle()
+                                .fill(parseColor(hasBackground) ?? Color.gray.opacity(0.3))
+                                .frame(width: idealWidth ?? 50, height: idealHeight ?? 50)
+                                .cornerRadius(cornerRadius)
+                        } else {
+                            ProgressView()
+                                .frame(width: idealWidth ?? 50, height: idealHeight ?? 50)
+                        }
+                    case .success(let image):
+                        image // Retorna a imagem para exibição
                             .conditionalResizableScaled(
                                 modifiers,
                                 minWidth: minWidth,
@@ -56,31 +86,28 @@ public struct ImageView {
                                 alignment: alignment
                             )
                             .cornerRadius(cornerRadius)
-                    } else if phase.error != nil {
-                        // Handle error state - maybe show a placeholder?
-                        Text("Error loading image") 
-                    } else {
-                        // Placeholder while loading
-                        if hasBackground != nil {
-                            Rectangle()
-                                .fill(parseColor(hasBackground) ?? Color.gray.opacity(0.3))
-                                .frame(width: idealWidth ?? 50, height: idealHeight ?? 50) // Use ideal or default size
-                                .cornerRadius(cornerRadius)
-                        } else {
-                            ProgressView()
-                                .frame(width: idealWidth ?? 50, height: idealHeight ?? 50)
-                        }
+                            .task {
+                                if shouldCache {
+                                    // Converte e armazena no cache LOCAL em background
+                                    await MainActor.run { // Garante execução no main actor
+                                        let renderer = ImageRenderer(content: image)
+                                        if let uiImage = renderer.uiImage {
+                                            ImageFileCache.shared.save(uiImage, for: url) // Salva no cache local
+                                        }
+                                    }
+                                }
+                            }
+                    case .failure:
+                        Text("Error loading image")
+                    @unknown default:
+                        Text("Error loading image")
                     }
                 })
-            } else {
-                // Fallback if URL is invalid
-                finalView = AnyView(Text("Invalid URL"))
             }
 
             // Aplicar outros modificadores genéricos APÓS o AsyncImage ser configurado
             if !modifiers.isEmpty {
-                 // Filtra modificadores já usados (frame, cornerRadius, placeholder)
-                 let remainingModifiers = modifiers.filter { !$0.keys.contains("frame") && !$0.keys.contains("cornerRadius") && !$0.keys.contains("placeholder") && !$0.keys.contains("resizable") && !$0.keys.contains("scaledToFit")}
+                let remainingModifiers = modifiers.filter { !$0.keys.contains("frame") && !$0.keys.contains("cornerRadius") && !$0.keys.contains("placeholder") && !$0.keys.contains("resizable") && !$0.keys.contains("scaledToFit")}
                 if !remainingModifiers.isEmpty {
                     finalView = modifierRegistry.apply(remainingModifiers, to: finalView, context: context)
                 }
@@ -90,14 +117,9 @@ public struct ImageView {
             finalView = applyActionModifiers(node: node, context: context, to: finalView)
             
             return finalView
-
         }
         return AnyView(EmptyView())
     }
-
-
-
-
 
     public static func register() {
         DSLComponentRegistry.shared.register("image", builder: render)
