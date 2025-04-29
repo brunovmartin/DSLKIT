@@ -1,1 +1,543 @@
-{"mainScreen":"profileScreen","context":{"currentTheme":"light","style":{"light":{"backgroundColor":"#FFFFFF","primaryColor":"#007AFF","textColor":"#000000","secondaryTextColor":"#666666"},"dark":{"backgroundColor":"#000000","primaryColor":"#0A84FF","textColor":"#FFFFFF","secondaryTextColor":"#CCCCCC"}},"profileScreen":{"title":"Perfil Inicials","imageurl":"https://i.pravatar.cc/150?u=bruno","username":"Bruno Martins"},"SettingsScreen":{"counter":0,"title":"Configurações"},"backgroundColorVar":"#FFFFFF","isDarkModeOn":false,"environmentColorScheme":{"var":"currentTheme"}},"screens":[{"type":"screen","id":"profileScreen","navigationBar":{"title":{"var":"profileScreen.title"},"displayMode":"large","toolbarScheme":{"var":"currentTheme"},"trailingButton":{"label":"Mudar","onTap":{"set":{"var":"profileScreen.title","value":"Alterado!"}}}},"body":[{"type":"vstack","alignment":"center","spacing":4,"onAppear":{"print":"VStack principal da ProfileScreen apareceu!"},"modifiers":[{"frame":{"maxWidth":".infinity","maxHeight":".infinity"}},{"ignoresSafeArea":true},{"background":{"var":"style[currentTheme].backgroundColor"}}],"children":[{"type":"image","url":{"var":"profileScreen.imageurl"},"modifiers":[{"placeholder":{"background":{"var":"style[currentTheme].secondaryTextColor"}}},{"resizable":true},{"scaledToFit":true},{"cornerRadius":60},{"frame":{"width":100,"height":100}}]},{"type":"text","value":{"var":"profileScreen.username"},"onTapGesture":{"set":{"var":"profileScreen.title","value":"Clicou no Nome!"}},"modifiers":[{"font":{"style":"title","weight":"bold"}},{"foreground":{"var":"style[currentTheme].textColor"}}]},{"type":"text","value":"Desenvolvedor de apps bilionário","modifiers":[{"font":{"style":"subheadline"}},{"foreground":{"var":"style[currentTheme].secondaryTextColor"}}]},{"type":"divider","modifiers":[{"padding":{"top":20,"bottom":20}}]},{"type":"toggle","var":"isDarkModeOn","label":"Modo Escuro","modifiers":[{"padding":{"leading":30,"trailing":30}},{"foreground":{"var":"style[currentTheme].textColor"}},{"tint":"green"}],"onChange":{"if":{"condition":{"var":"isDarkModeOn"},"then":{"sequence":[{"set":{"var":"currentTheme","value":"dark"}},{"set":{"var":"environmentColorScheme","value":"dark"}}]},"else":{"sequence":[{"set":{"var":"currentTheme","value":"light"}},{"set":{"var":"environmentColorScheme","value":"light"}}]}}}},{"type":"toggle","var":"advancedOptionsOn","label":"Opções Avançadas","modifiers":[{"padding":{"top":5,"leading":30,"trailing":30}},{"opacity":{"var":"advancedOpacity"}},{"disabled":{"var":"isAdvancedDisabled"}},{"frame":{"maxWidth":".infinity"}},{"foreground":{"var":"style[currentTheme].textColor"}},{"tint":"green"}],"onChange":{"if":{"condition":{"Operator.eq":[{"var":"advancedOpacity"},1]},"then":{"set":{"var":"advancedOpacity","value":0.5}},"else":{"set":{"var":"advancedOpacity","value":1}}}}},{"type":"vstack","spacing":0,"modifiers":[{"padding":{"top":20,"leading":30,"trailing":30}}],"children":[{"type":"button","children":[{"type":"text","value":"Editar Perfil","modifiers":[{"foreground":{"var":"style[currentTheme].backgroundColor"}},{"frame":{"maxWidth":".infinity"}}]}],"onTap":{"sequence":[{"set":{"var":"profileScreen.imageurl","value":"https://i.pravatar.cc/150?u=andre"}},{"set":{"var":"profileScreen.username","value":"Simone Silva"}},{"set":{"var":"settingsScreen.title","value":"Configuração"}}]},"modifiers":[{"frame":{"maxWidth":".infinity"}},{"padding":14},{"background":{"var":"style[currentTheme].primaryColor"}},{"cornerRadius":20}]},{"type":"button","title":"Configurações","onTap":{"navigate":"settingsScreen"},"modifiers":[{"padding":14},{"frame":{"maxWidth":".infinity"}},{"foreground":{"var":"style[currentTheme].primaryColor"}}]}]}]}]},{"type":"screen","id":"settingsScreen","navigationBar":{"title":{"var":"settingsScreen.title"},"displayMode":"large","backgroundColor":{"var":"style[currentTheme].backgroundColor"},"foregroundColor":{"var":"style[currentTheme].textColor"}},"body":[{"type":"vstack","alignment":"center","modifiers":[{"frame":{"maxWidth":".infinity","maxHeight":".infinity"}},{"ignoresSafeArea":true},{"background":{"var":"style[currentTheme].backgroundColor"}},{"padding":30}],"children":[{"type":"text","value":"Esta é a Tela de Configurações","modifiers":[{"foreground":{"var":"style[currentTheme].textColor"}}]},{"type":"text","value":{"Number.toIntString":{"var":"SettingsScreen.counter"}},"modifiers":[{"font":{"style":"title2","weight":"bold"}},{"foreground":{"var":"style[currentTheme].textColor"}}]},{"type":"button","children":[{"type":"text","value":"Mudar título e somar","modifiers":[{"frame":{"maxWidth":".infinity"}},{"foreground":{"var":"style[currentTheme].backgroundColor"}}]}],"onTap":{"sequence":[{"set":{"var":"SettingsScreen.counter","value":{"Math.add":[{"var":"SettingsScreen.counter"},1]}}},{"set":{"var":"profileScreen.title","value":"Batatinha"}}]},"modifiers":[{"frame":{"maxWidth":".infinity"}},{"padding":14},{"background":{"var":"style[currentTheme].primaryColor"}},{"cornerRadius":20}]}]}]}]}
+{
+  "mainScreen": "profileScreen",
+  "context": {
+  "currentTheme": { "Storage.get": { "key": "userPreferredTheme" } },
+  "isDarkModeOn": {
+    "Logic.eq": [
+      { "Storage.get": { "key": "userPreferredTheme" } },
+      "dark"
+    ]
+  },
+    "lastUsername": { "Storage.get": { "key": "lastUser" } },
+    "style": {
+      "light": {
+        "backgroundColor": "#FFFFFF",
+        "primaryColor": "#007AFF",
+        "textColor": "#000000",
+        "secondaryTextColor": "#666666"
+      },
+      "dark": {
+        "backgroundColor": "#000000",
+        "primaryColor": "#0A84FF",
+        "textColor": "#FFFFFF",
+        "secondaryTextColor": "#CCCCCC"
+      }
+    },
+    "profileScreen": {
+      "title": "Perfil Inicials",
+      "imageurl": "https://i.pravatar.cc/150?u=bruno",
+      "username": "Bruno Martins"
+    },
+    "SettingsScreen": {
+      "counter": 0,
+      "title": "Configurações"
+    },
+    "backgroundColorVar": "#FFFFFF",
+    "isDarkModeOn": false,
+    "environmentColorScheme": {
+      "var": "currentTheme"
+    }
+  },
+  "screens": [
+    {
+      "type": "screen",
+      "id": "profileScreen",
+      "navigationBar": {
+        "title": {
+          "var": "profileScreen.title"
+        },
+        "displayMode": "large",
+        "toolbarScheme": {
+          "var": "currentTheme"
+        },
+        "trailingButton": {
+          "label": "Mudar",
+          "onTap": {
+            "set": {
+              "var": "profileScreen.title",
+              "value": "Alterado!"
+            }
+          }
+        }
+      },
+      "body": [
+        {
+          "type": "vstack",
+          "alignment": "center",
+          "spacing": 4,
+          "onAppear": {
+            "print": "VStack principal da ProfileScreen apareceu!"
+          },
+          "modifiers": [
+            {
+              "frame": {
+                "maxWidth": ".infinity",
+                "maxHeight": ".infinity"
+              }
+            },
+            {
+              "ignoresSafeArea": true
+            },
+            {
+              "background": {
+                "var": "style[currentTheme].backgroundColor"
+              }
+            }
+          ],
+          "children": [
+            {
+              "type": "image",
+              "url": {
+                "var": "profileScreen.imageurl"
+              },
+              "modifiers": [
+                {
+                  "placeholder": {
+                    "background": {
+                      "var": "style[currentTheme].secondaryTextColor"
+                    }
+                  }
+                },
+                {
+                  "resizable": true
+                },
+                {
+                  "scaledToFit": true
+                },
+                {
+                  "cornerRadius": 60
+                },
+                {
+                  "frame": {
+                    "width": 100,
+                    "height": 100
+                  }
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "value": {
+                "var": "profileScreen.username"
+              },
+              "onTapGesture": {
+                "set": {
+                  "var": "profileScreen.title",
+                  "value": "Clicou no Nome!"
+                }
+              },
+              "modifiers": [
+                {
+                  "font": {
+                    "style": "title",
+                    "weight": "bold"
+                  }
+                },
+                {
+                  "foreground": {
+                    "var": "style[currentTheme].textColor"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "value": "Desenvolvedor de apps bilionário",
+              "modifiers": [
+                {
+                  "font": {
+                    "style": "subheadline"
+                  }
+                },
+                {
+                  "foreground": {
+                    "var": "style[currentTheme].secondaryTextColor"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "divider",
+              "modifiers": [
+                {
+                  "padding": {
+                    "top": 20,
+                    "bottom": 20
+                  }
+                }
+              ]
+            },
+            {
+              "type": "toggle",
+              "var": "isDarkModeOn",
+              "label": "Modo Escuro",
+              "modifiers": [
+                {
+                  "padding": {
+                    "leading": 30,
+                    "trailing": 30
+                  }
+                },
+                {
+                  "foreground": {
+                    "var": "style[currentTheme].textColor"
+                  }
+                },
+                {
+                  "tint": "green"
+                }
+              ],
+              "onChange": {
+                "if": {
+                  "condition": {
+                    "var": "isDarkModeOn"
+                  },
+                  "then": {
+                    "sequence": [
+                      {
+                        "set": {
+                          "var": "currentTheme",
+                          "value": "dark"
+                        }
+                      },
+                      {
+                        "set": {
+                          "var": "environmentColorScheme",
+                          "value": "dark"
+                        }
+                      },
+                      {
+                        "Storage.set": {
+                          "key": "userPreferredTheme",
+                          "value": "dark"
+                        }
+                      }
+                    ]
+                  },
+                  "else": {
+                    "sequence": [
+                      {
+                        "set": {
+                          "var": "currentTheme",
+                          "value": "light"
+                        }
+                      },
+                      {
+                        "set": {
+                          "var": "environmentColorScheme",
+                          "value": "light"
+                        }
+                      },
+                      {
+                        "Storage.set": {
+                          "key": "userPreferredTheme",
+                          "value": "light"
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            },
+            {
+              "type": "toggle",
+              "var": "advancedOptionsOn",
+              "label": "Opções Avançadas",
+              "modifiers": [
+                {
+                  "padding": {
+                    "top": 5,
+                    "leading": 30,
+                    "trailing": 30
+                  }
+                },
+                {
+                  "opacity": {
+                    "var": "advancedOpacity"
+                  }
+                },
+                {
+                  "disabled": {
+                    "var": "isAdvancedDisabled"
+                  }
+                },
+                {
+                  "frame": {
+                    "maxWidth": ".infinity"
+                  }
+                },
+                {
+                  "foreground": {
+                    "var": "style[currentTheme].textColor"
+                  }
+                },
+                {
+                  "tint": "green"
+                }
+              ],
+              "onChange": {
+                "if": {
+                  "condition": {
+                    "Operator.eq": [
+                      {
+                        "var": "advancedOpacity"
+                      },
+                      1
+                    ]
+                  },
+                  "then": {
+                    "set": {
+                      "var": "advancedOpacity",
+                      "value": 0.5
+                    }
+                  },
+                  "else": {
+                    "set": {
+                      "var": "advancedOpacity",
+                      "value": 1
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "type": "vstack",
+              "spacing": 0,
+              "modifiers": [
+                {
+                  "padding": {
+                    "top": 20,
+                    "leading": 30,
+                    "trailing": 30
+                  }
+                }
+              ],
+              "children": [
+                {
+                  "type": "button",
+                  "children": [
+                    {
+                      "type": "text",
+                      "value": "Editar Perfil",
+                      "modifiers": [
+                        {
+                          "foreground": {
+                            "var": "style[currentTheme].backgroundColor"
+                          }
+                        },
+                        {
+                          "frame": {
+                            "maxWidth": ".infinity"
+                          }
+                        }
+                      ]
+                    }
+                  ],
+                  "onTap": {
+                    "sequence": [
+                      {
+                        "set": {
+                          "var": "profileScreen.imageurl",
+                          "value": "https://i.pravatar.cc/150?u=andre"
+                        }
+                      },
+                      {
+                        "set": {
+                          "var": "profileScreen.username",
+                          "value": "Simone Silva"
+                        }
+                      },
+                      {
+                        "set": {
+                          "var": "settingsScreen.title",
+                          "value": "Configuração"
+                        }
+                      }
+                    ]
+                  },
+                  "modifiers": [
+                    {
+                      "frame": {
+                        "maxWidth": ".infinity"
+                      }
+                    },
+                    {
+                      "padding": 14
+                    },
+                    {
+                      "background": {
+                        "var": "style[currentTheme].primaryColor"
+                      }
+                    },
+                    {
+                      "cornerRadius": 20
+                    }
+                  ]
+                },
+                {
+                  "type": "button",
+                  "title": "Configurações",
+                  "onTap": {
+                    "navigate": "settingsScreen"
+                  },
+                  "modifiers": [
+                    {
+                      "padding": 14
+                    },
+                    {
+                      "frame": {
+                        "maxWidth": ".infinity"
+                      }
+                    },
+                    {
+                      "foreground": {
+                        "var": "style[currentTheme].primaryColor"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "screen",
+      "id": "settingsScreen",
+      "navigationBar": {
+        "title": {
+          "var": "settingsScreen.title"
+        },
+        "displayMode": "large",
+        "backgroundColor": {
+          "var": "style[currentTheme].backgroundColor"
+        },
+        "foregroundColor": {
+          "var": "style[currentTheme].textColor"
+        }
+      },
+      "body": [
+        {
+          "type": "vstack",
+          "alignment": "center",
+          "modifiers": [
+            {
+              "frame": {
+                "maxWidth": ".infinity",
+                "maxHeight": ".infinity"
+              }
+            },
+            {
+              "ignoresSafeArea": true
+            },
+            {
+              "background": {
+                "var": "style[currentTheme].backgroundColor"
+              }
+            },
+            {
+              "padding": 30
+            }
+          ],
+          "children": [
+            {
+              "type": "text",
+              "value": "Esta é a Tela de Configurações",
+              "modifiers": [
+                {
+                  "foreground": {
+                    "var": "style[currentTheme].textColor"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "value": {
+                "Number.toIntString": {
+                  "var": "SettingsScreen.counter"
+                }
+              },
+              "modifiers": [
+                {
+                  "font": {
+                    "style": "title2",
+                    "weight": "bold"
+                  }
+                },
+                {
+                  "foreground": {
+                    "var": "style[currentTheme].textColor"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "button",
+              "children": [
+                {
+                  "type": "text",
+                  "value": "Mudar título e somar",
+                  "modifiers": [
+                    {
+                      "frame": {
+                        "maxWidth": ".infinity"
+                      }
+                    },
+                    {
+                      "foreground": {
+                        "var": "style[currentTheme].backgroundColor"
+                      }
+                    }
+                  ]
+                }
+              ],
+              "onTap": {
+                "sequence": [
+                  {
+                    "set": {
+                      "var": "SettingsScreen.counter",
+                      "value": {
+                        "Math.add": [
+                          {
+                            "var": "SettingsScreen.counter"
+                          },
+                          1
+                        ]
+                      }
+                    }
+                  },
+                  {
+                    "set": {
+                      "var": "profileScreen.title",
+                      "value": "Batatinha"
+                    }
+                  }
+                ]
+              },
+              "modifiers": [
+                {
+                  "frame": {
+                    "maxWidth": ".infinity"
+                  }
+                },
+                {
+                  "padding": 14
+                },
+                {
+                  "background": {
+                    "var": "style[currentTheme].primaryColor"
+                  }
+                },
+                {
+                  "cornerRadius": 20
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

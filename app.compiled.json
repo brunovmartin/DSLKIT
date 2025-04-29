@@ -1,7 +1,13 @@
 {
   "initialScreen": "main",
   "context": {
-    "currentTheme": "light",
+    "currentTheme": { "Storage.get": { "key": "userPreferredTheme" } },
+    "isDarkModeOn": {
+      "Logic.eq": [
+        { "Storage.get": { "key": "userPreferredTheme" } },
+        "dark"
+      ]
+    },
     "style": {
       "light": {
         "primaryColor": "blue",

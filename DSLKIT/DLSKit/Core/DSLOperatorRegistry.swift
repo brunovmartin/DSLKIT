@@ -32,4 +32,15 @@ public class DSLOperatorRegistry {
     public func isRegistered(_ name: String) -> Bool {
         return registry[name] != nil
     }
+
+    // MARK: - Storage Operators
+    public func registerDefaults() {
+        StringOperators.registerAll()
+        ArrayOperators.registerAll()
+        LogicOperators.registerAll()
+        MathOperators.registerAll()
+        NumberOperators.registerAll()
+        ConditionalOperators.registerAll()
+        StorageOperators.registerAll()
+    }
 }

@@ -8,7 +8,7 @@ public class DSLCommandRegistry {
     private var registry: [String: (Any?, DSLContext) -> Void] = [:] // <<-- MUDANÇA AQUI
 
     private init() {
-        registerDefaults()
+        // registerDefaults() // REMOVIDO DAQUI
     }
 
     // MUDE A ASSINATURA AQUI também
@@ -27,7 +27,7 @@ public class DSLCommandRegistry {
         fn(params, context)
     }
 
-    private func registerDefaults() {
+    public func registerDefaults() {
         // Comando 'set' para modificar variáveis no contexto
         register("set") { params, context in
             guard let setParams = params as? [String: Any],
@@ -116,5 +116,12 @@ public class DSLCommandRegistry {
         //     DSLInterpreter.shared.handleEvent(sequenceArray, context: context) // Reencaminha para handleEvent
         // }
 
+        // Chamar funções de registro modulares
+       
+        
+        VariableCommands.registerAll()
+        ArrayCommands.registerAll()
+        FlowCommands.registerAll()
+        StorageCommands.registerAll()
     } // Fim de registerDefaults
 }
