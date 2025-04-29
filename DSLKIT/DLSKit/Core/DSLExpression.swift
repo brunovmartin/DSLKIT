@@ -5,6 +5,7 @@ public class DSLExpression {
     public static let shared = DSLExpression()
 
     // Função principal de avaliação (sem localOverrides)
+    // Reverte a função para síncrona
     public func evaluate(_ expr: Any?, _ context: DSLContext) -> Any? {
         guard let expr = expr else { return nil }
 
@@ -13,6 +14,7 @@ public class DSLExpression {
            dict.keys.count == 1,
            let pathString = dict["var"] as? String {
             //print("--- DEBUG: DSLExpression - Evaluating path: \(pathString)")
+            // resolvePath é síncrono
             return resolvePath(pathString, context: context) // Chama helper de leitura
         }
 
@@ -24,6 +26,7 @@ public class DSLExpression {
              //print("--- DEBUG: DSLExpression - Evaluating REGISTERED operator: \(opName)")
              var evaluatedInput: Any?
             if let inputArray = input as? [Any] {
+                // Avalia itens do array de forma síncrona
                 evaluatedInput = inputArray.map { item in
                     evaluate(item, context) // Avaliação recursiva SEM overrides
                 }
@@ -31,13 +34,14 @@ public class DSLExpression {
                 evaluatedInput = evaluate(input, context) // Avaliação recursiva SEM overrides
             }
              //print("--- DEBUG: DSLExpression - Operator evaluated input: \(String(describing: evaluatedInput))")
-             // Retorna nil se o operador falhar
+             // Chamada síncrona para o operador
              return DSLOperatorRegistry.shared.evaluate(opName, input: evaluatedInput, context: context)
         }
 
         // Caso 2: Dicionário Literal
         if let dict = expr as? [String: Any] {
              ////print("--- DEBUG: DSLExpression - Evaluating Dictionary Literal Values: \(dict)")
+             // Avalia valores do dicionário de forma síncrona
              var evaluatedDict: [String: Any] = [:]
              for (key, value) in dict {
                  evaluatedDict[key] = evaluate(value, context) // Avaliação recursiva SEM overrides
@@ -49,6 +53,7 @@ public class DSLExpression {
         // Caso 3: Array Literal
         if let array = expr as? [Any] {
              ////print("--- DEBUG: DSLExpression - Evaluating Array Literal items...")
+             // Avalia itens do array de forma síncrona
              let evaluatedArray = array.map { evaluate($0, context) } // Avaliação recursiva SEM overrides
              ////print("--- DEBUG: DSLExpression - Evaluated Array Literal: \(evaluatedArray)")
              return evaluatedArray

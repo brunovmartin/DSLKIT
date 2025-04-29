@@ -1,14 +1,26 @@
 {
   "mainScreen": "profileScreen",
   "context": {
-  "currentTheme": { "Storage.get": { "key": "userPreferredTheme" } },
-  "isDarkModeOn": {
-    "Logic.eq": [
-      { "Storage.get": { "key": "userPreferredTheme" } },
-      "dark"
-    ]
-  },
-    "lastUsername": { "Storage.get": { "key": "lastUser" } },
+    "currentTheme": {
+      "Storage.get": {
+        "key": "userPreferredTheme"
+      }
+    },
+    "isDarkModeOn": {
+      "Logic.eq": [
+        {
+          "Storage.get": {
+            "key": "userPreferredTheme"
+          }
+        },
+        "dark"
+      ]
+    },
+    "lastUsername": {
+      "Storage.get": {
+        "key": "lastUser"
+      }
+    },
     "style": {
       "light": {
         "backgroundColor": "#FFFFFF",
@@ -33,7 +45,6 @@
       "title": "Configurações"
     },
     "backgroundColorVar": "#FFFFFF",
-    "isDarkModeOn": false,
     "environmentColorScheme": {
       "var": "currentTheme"
     }
@@ -47,9 +58,6 @@
           "var": "profileScreen.title"
         },
         "displayMode": "large",
-        "toolbarScheme": {
-          "var": "currentTheme"
-        },
         "trailingButton": {
           "label": "Mudar",
           "onTap": {
@@ -407,15 +415,9 @@
       "id": "settingsScreen",
       "navigationBar": {
         "title": {
-          "var": "settingsScreen.title"
+          "var": "SettingsScreen.title"
         },
-        "displayMode": "large",
-        "backgroundColor": {
-          "var": "style[currentTheme].backgroundColor"
-        },
-        "foregroundColor": {
-          "var": "style[currentTheme].textColor"
-        }
+        "displayMode": "large"
       },
       "body": [
         {

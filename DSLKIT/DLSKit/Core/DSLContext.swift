@@ -13,6 +13,7 @@ public class DSLContext: ObservableObject {
     let id = UUID()
     /// Storage for variables used in the DSL.
     @Published public private(set) var storage: [String: Any]
+    @Published var isInitialLoadComplete = false
 
     /// Create a context with optional initial variables.
     public init(initial: [String: Any] = [:]) {

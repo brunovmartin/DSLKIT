@@ -165,29 +165,38 @@ public class DSLAppEngine {
             }
             
             // --- Segunda Passagem: Avaliar e atualizar expressões --- 
+            // Mantém a avaliação síncrona por enquanto
             print("--- DEBUG AppEngine.start: Second Pass - Evaluating expressions ---")
             for (key, rawValue) in initialData { // Iterar sobre os dados originais
-                // Avaliar SOMENTE se o valor bruto parece ser uma expressão 
-                // (Ex: um dicionário, que é como representamos {"var":...} ou operadores)
                 if rawValue is [String: Any] { 
                     print("    Evaluating expression for key: \(key), rawValue: \(rawValue)")
-                    let evaluatedValue = DSLExpression.shared.evaluate(rawValue, context) ?? NSNull()
+                    // Chamada síncrona
+                    let evaluatedValue = DSLExpression.shared.evaluate(rawValue, context) ?? NSNull() 
                     print("    Updating context: \(key) = \(evaluatedValue)")
-                    context.set(key, to: evaluatedValue) // Atualiza com o valor avaliado
+                    context.set(key, to: evaluatedValue)
                 } else {
-                    // Valores literais (String, Int, Bool, etc.) já foram definidos corretamente na primeira passagem
-                     print("    Skipping literal for key: \(key), value: \(rawValue)")
+                    print("    Skipping literal for key: \(key), value: \(rawValue)")
                 }
             }
-        }
-
-        guard let id = initialScreenId, let screen = screens[id] else {
-            //("🚫 Tela inicial não encontrada.")
-            return
-        }
-
-        // Apresenta usando o contexto recebido
-        DSLInterpreter.shared.present(screen: screen, context: context)
+            
+            // --- Após a conclusão da avaliação síncrona --- 
+            // Usa Task/MainActor para atualizar o estado @Published e apresentar a UI
+            Task {
+                await MainActor.run { // Garante execução na Main Thread
+                    print("--- DEBUG AppEngine.start: Evaluation Complete - Setting isInitialLoadComplete = true ---")
+                    context.isInitialLoadComplete = true
+                    
+                    // Apresenta a tela inicial somente APÓS o contexto estar pronto
+                    guard let id = self.initialScreenId, let screen = self.screens[id] else {
+                        print("🚫 Tela inicial não encontrada após carregamento.")
+                        return
+                    }
+                    print("--- DEBUG AppEngine.start: Presenting initial screen: \(id) ---")
+                    print(context.storage)
+                    DSLInterpreter.shared.present(screen: screen, context: context)
+                }
+            } // Fim da Task
+        } // Fim do if let initialData
     }
 
     // Adapte navigate se necessário para usar self.currentContext
