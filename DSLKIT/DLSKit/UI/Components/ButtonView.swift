@@ -23,6 +23,8 @@ public struct ButtonView {
                 }
             }
         )
+        
+        view.contentShape(_:Rectangle(), eoFill: true)
 
         if let modifiers = node["modifiers"] as? [[String: Any]] {
             view = modifierRegistry.apply(modifiers, to: view, context: context)
@@ -79,31 +81,5 @@ public struct ButtonView {
                 return view
             }
         }
-        
-        // role (Removido por enquanto devido a complexidade de aplicação como modificador pós-renderização)
-        /*
-        modifierRegistry.register("role") { view, value, context in
-             if #available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *) {
-                 let roleName = DSLExpression.shared.evaluate(value, context) as? String
-                 let role: ButtonRole? = {
-                     switch roleName?.lowercased() {
-                     case "destructive": return .destructive
-                     case "cancel": return .cancel
-                     default: return nil
-                     }
-                 }()
-                 // Aplicar role diretamente é complexo aqui devido ao AnyView
-                 // Idealmente, seria aplicado no render()
-                 print("⚠️ Role modifier application skipped (apply in render if needed).")
-                 return view
-                 // Tentativa anterior:
-                 // if let buttonView = view as? Button<Text> { ... } // Muito específico
-             } else {
-                  return view // Role não disponível
-             }
-         }
-         */
-
-        // Nota: onTap é tratado no render() do ButtonView.
     }
 }

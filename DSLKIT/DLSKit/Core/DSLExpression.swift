@@ -23,7 +23,7 @@ public class DSLExpression {
            DSLOperatorRegistry.shared.isRegistered(opName) {
              //print("--- DEBUG: DSLExpression - Evaluating REGISTERED operator: \(opName)")
              var evaluatedInput: Any?
-            if var inputArray = input as? [Any] {
+            if let inputArray = input as? [Any] {
                 evaluatedInput = inputArray.map { item in
                     evaluate(item, context) // Avaliação recursiva SEM overrides
                 }

@@ -11,7 +11,7 @@ public struct TextView {
         // If we have an index AND the value expression is a variable path referencing the placeholder...
         if let index = currentIndex,
            let valueDict = rawValue as? [String: Any],
-           var path = valueDict["var"] as? String, // Get the path string
+           let path = valueDict["var"] as? String, // Get the path string
            path.contains("[currentItemIndex]")      // Check if it uses the placeholder
         {
             // ...substitute the actual index into the path string BEFORE evaluation.

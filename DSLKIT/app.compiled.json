@@ -289,6 +289,11 @@
                           "foreground": {
                             "var": "style[currentTheme].backgroundColor"
                           }
+                        },
+                        {
+                          "frame": {
+                            "maxWidth": ".infinity"
+                          }
                         }
                       ]
                     }
@@ -416,6 +421,11 @@
                   "type": "text",
                   "value": "Mudar título e somar",
                   "modifiers": [
+                  {
+                    "frame": {
+                      "maxWidth": ".infinity"
+                    }
+                  },
                     {
                       "foreground": {
                         "var": "style[currentTheme].backgroundColor"

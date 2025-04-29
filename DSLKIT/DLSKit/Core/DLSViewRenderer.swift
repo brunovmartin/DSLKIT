@@ -20,13 +20,13 @@ public struct DSLViewRenderer {
         let displayMode = mapNavDisplayMode(navBar?["displayMode"] as? String)
         let navBgColorExpr = navBar?["backgroundColor"]
         let navFgColorExpr = navBar?["foregroundColor"]
-        let navColorSchemeExpr = navBar?["toolbarColorScheme"]
-        let evaluatedNavBgColor = DSLExpression.shared.evaluate(navBgColorExpr, context)
+//        let navColorSchemeExpr = navBar?["toolbarColorScheme"]
+//        let evaluatedNavBgColor = DSLExpression.shared.evaluate(navBgColorExpr, context)
         let evaluatedNavFgColor = DSLExpression.shared.evaluate(navFgColorExpr, context)
-        let evaluatedSchemeColor = DSLExpression.shared.evaluate(navColorSchemeExpr, context)
-        let navBackgroundColor = parseColor(evaluatedNavBgColor)
+//        let evaluatedSchemeColor = DSLExpression.shared.evaluate(navColorSchemeExpr, context)
+//        let navBackgroundColor = parseColor(evaluatedNavBgColor)
         let navForegroundColor = parseColor(evaluatedNavFgColor)
-        let navSchemeColor = parseColor(evaluatedNavFgColor)
+//        let navSchemeColor = parseColor(evaluatedNavFgColor)
         
 
 
