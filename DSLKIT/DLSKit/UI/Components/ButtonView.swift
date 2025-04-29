@@ -34,89 +34,76 @@ public struct ButtonView {
     public static func register() {
         DSLComponentRegistry.shared.register("button", builder: render)
 
-        modifierRegistry.register("padding") { view, value, context in
-            let evaluatedValue = DSLExpression.shared.evaluate(value, context)
-            if let length = castToCGFloat(evaluatedValue) {
-                return AnyView(view.padding(length))
-            } else if let dict = evaluatedValue as? [String: Any] {
-                let edges = mapEdgeSet(from: dict["edges"] as? [String])
-                let length = castToCGFloat(dict["length"])
-                return AnyView(view.padding(edges, length ?? 0))
-            } else if evaluatedValue is NSNull || (evaluatedValue as? [String: Any])?.isEmpty == true {
-                return AnyView(view.padding())
-            } else if let boolValue = evaluatedValue as? Bool, boolValue {
-                return AnyView(view.padding())
-            }
-            return view
-        }
+        // Registra modificadores de base comuns (padding, frame, background, opacity, cornerRadius)
+        registerBaseViewModifiers(on: modifierRegistry)
 
-        modifierRegistry.register("background") { view, value, context in
+        // --- Modificadores Específicos de Button ---
+
+        // disabled é importante para botões
+        modifierRegistry.register("disabled") { view, value, context in
+            let isDisabled = DSLExpression.shared.evaluate(value, context) as? Bool ?? false
+            return AnyView(view.disabled(isDisabled))
+        }
+        
+        // tint pode afetar a aparência do botão dependendo do estilo
+        modifierRegistry.register("tint") { view, value, context in
             let evaluatedValue = DSLExpression.shared.evaluate(value, context)
             if let color = parseColor(evaluatedValue) {
-                return AnyView(view.background(color))
+                return AnyView(view.tint(color))
             }
             return view
         }
         
-        modifierRegistry.register("frame") { view, paramsAny, context in
-            let params = paramsAny as? [String: Any] ?? [:]
-
-            func parseDimension(_ key: String) -> CGFloat? {
-                guard let value = params[key] else { return nil }
-                let evaluatedValue = DSLExpression.shared.evaluate(value, context)
-                if let stringValue = evaluatedValue as? String, stringValue.lowercased() == ".infinity" {
-                    return .infinity
-                } else if let number = evaluatedValue as? NSNumber {
-                    return CGFloat(number.doubleValue)
-                } else if let cgFloat = evaluatedValue as? CGFloat {
-                     return cgFloat
-                }
-                return nil
+        // buttonStyle (Exemplo - implementação real pode variar)
+        modifierRegistry.register("buttonStyle") { view, value, context in
+            let styleName = DSLExpression.shared.evaluate(value, context) as? String
+            switch styleName?.lowercased() {
+            case "bordered":
+                 if #available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *) {
+                    return AnyView(view.buttonStyle(.bordered))
+                 } else {
+                     return view // Fallback para OS mais antigo
+                 }
+            case "borderedProminent":
+                 if #available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *) {
+                     return AnyView(view.buttonStyle(.borderedProminent))
+                 } else {
+                     return view // Fallback
+                 }
+            case "borderless":
+                 return AnyView(view.buttonStyle(.borderless))
+            case "plain":
+                 return AnyView(view.buttonStyle(.plain))
+            // Adicione outros estilos conforme necessário
+            default:
+                return view
             }
-
-            let minWidth = parseDimension("minWidth")
-            let idealWidth = parseDimension("width")
-            let maxWidth = parseDimension("maxWidth")
-            let minHeight = parseDimension("minHeight")
-            let idealHeight = parseDimension("height")
-            let maxHeight = parseDimension("maxHeight")
-
-            let alignmentString = DSLExpression.shared.evaluate(params["alignment"], context) as? String
-            let alignment: Alignment = mapAlignment(from: alignmentString)
-
-            return AnyView(view.frame(
-                minWidth: minWidth,
-                idealWidth: idealWidth,
-                maxWidth: maxWidth,
-                minHeight: minHeight,
-                idealHeight: idealHeight,
-                maxHeight: maxHeight,
-                alignment: alignment
-            ))
         }
         
-        modifierRegistry.register("foreground") { view, value, context in
-            let evaluatedValue = DSLExpression.shared.evaluate(value, context)
-            if let color = parseColor(evaluatedValue) {
-                return AnyView(view.foregroundColor(color))
-            }
-            return view
-        }
+        // role (Removido por enquanto devido a complexidade de aplicação como modificador pós-renderização)
+        /*
+        modifierRegistry.register("role") { view, value, context in
+             if #available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *) {
+                 let roleName = DSLExpression.shared.evaluate(value, context) as? String
+                 let role: ButtonRole? = {
+                     switch roleName?.lowercased() {
+                     case "destructive": return .destructive
+                     case "cancel": return .cancel
+                     default: return nil
+                     }
+                 }()
+                 // Aplicar role diretamente é complexo aqui devido ao AnyView
+                 // Idealmente, seria aplicado no render()
+                 print("⚠️ Role modifier application skipped (apply in render if needed).")
+                 return view
+                 // Tentativa anterior:
+                 // if let buttonView = view as? Button<Text> { ... } // Muito específico
+             } else {
+                  return view // Role não disponível
+             }
+         }
+         */
 
-        modifierRegistry.register("cornerRadius") { view, value, context in
-            let evaluatedValue = DSLExpression.shared.evaluate(value, context)
-            if let radius = castToCGFloat(evaluatedValue) {
-                return AnyView(view.cornerRadius(radius))
-            }
-            return view
-        }
-
-        modifierRegistry.register("opacity") { view, value, context in
-            let evaluatedValue = DSLExpression.shared.evaluate(value, context)
-            if let opacity = castToCGFloat(evaluatedValue) {
-                return AnyView(view.opacity(Double(opacity)))
-            }
-            return view
-        }
+        // Nota: onTap é tratado no render() do ButtonView.
     }
 }

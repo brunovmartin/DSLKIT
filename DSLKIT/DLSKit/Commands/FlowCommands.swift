@@ -17,24 +17,32 @@ public class FlowCommands {
             print("--- DEBUG: IF Command - Condition evaluated to: \(result)")
             let branchKey = result ? "then" : "else"
             guard let branch = ifData[branchKey] else {
-                //print("--- DEBUG: FlowCommands 'if' - Branch '\(branchKey)' not found or empty.")
+                // Branch não encontrada, não faz nada.
+                print("--- DEBUG: IF Command - Branch '\(branchKey)' not found.")
                 return
             }
-            print("--- DEBUG: IF Command - Selected branch '\(branchKey)'. Content: \(branch)")
+            print("--- DEBUG: IF Command - Found branch '\(branchKey)'. Content: \(branch)")
 
+            // MODIFICAÇÃO AQUI: Só aceita um *único* objeto de comando.
+            // Se for um array, ou qualquer outra coisa, será ignorado.
             if let singleCommand = branch as? [String: Any] {
-                //print("--- DEBUG: FlowCommands 'if' - Executing single command in '\(branchKey)' branch.")
-                print("--- DEBUG: IF Command - Executing single command in '\(branchKey)' branch...")
+                print("--- DEBUG: IF Command - Executing single command in '\(branchKey)' branch: \(singleCommand)")
+                // Executa o comando único. Se este comando for um "sequence",
+                // o manipulador de "sequence" será chamado e processará a lista interna.
                 DSLCommandRegistry.shared.execute(singleCommand, context: context)
-            } else if let commands = branch as? [[String: Any]] {
-                //print("--- DEBUG: FlowCommands 'if' - Executing command list in '\(branchKey)' branch.")
-                print("--- DEBUG: IF Command - Executing command list in '\(branchKey)' branch...")
-                for cmd in commands {
-                    DSLCommandRegistry.shared.execute(cmd, context: context)
-                }
-            } else {
-                //print("⚠️ Comando 'if' - Branch '\(branchKey)' não é um comando ou lista de comandos válidos.")
-                print("⚠️ Comando 'if' - Branch '\(branchKey)' não é um comando ou lista válidos.")
+            }
+            // REMOVIDO: Bloco que tratava 'branch' como [[String: Any]] (array)
+            /*
+            else if let commands = branch as? [[String: Any]] {
+                 print("⚠️ Deprecated: 'if' command branch '\(branchKey)' should contain a single command object (e.g., 'sequence'), not an array. Executing sequence anyway.")
+                 for cmd in commands {
+                     DSLCommandRegistry.shared.execute(cmd, context: context)
+                 }
+            }
+            */
+             else {
+                // Se não for um objeto de comando válido, avisa.
+                print("⚠️ Comando 'if' - Branch '\(branchKey)' não contém um objeto de comando válido. Conteúdo: \(branch)")
             }
         }
 

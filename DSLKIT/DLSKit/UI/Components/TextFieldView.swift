@@ -9,6 +9,7 @@
 import SwiftUI
 
 public struct TextFieldView {
+    static let modifierRegistry = DSLModifierRegistry<AnyView>()
 
     public static func render(_ node: [String: Any], context: DSLContext) -> AnyView {
         let placeholder = DSLExpression.shared.evaluate(node["placeholder"], context) as? String ?? ""
@@ -33,5 +34,17 @@ public struct TextFieldView {
 
     public static func register() {
         DSLComponentRegistry.shared.register("textfield", builder: render)
+        
+        // Registra modificadores de base comuns (padding, frame, background, etc.)
+        registerBaseViewModifiers(on: modifierRegistry)
+        
+        // Adicionar modificadores específicos de TextField aqui, se necessário
+        // Ex: keyboardType, autocapitalization, disableAutocorrection, submitLabel, etc.
+        // Exemplo:
+        // modifierRegistry.register("keyboardType") { view, value, context in
+        //     let typeName = DSLExpression.shared.evaluate(value, context) as? String
+        //     let type = mapKeyboardType(typeName) // Precisa criar mapKeyboardType
+        //     return AnyView(view.keyboardType(type))
+        // }
     }
 }

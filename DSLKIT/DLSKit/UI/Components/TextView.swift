@@ -48,137 +48,73 @@ public struct TextView {
     public static func register() {
         DSLComponentRegistry.shared.register("text", builder: render)
         
+        // Registra modificadores de base comuns (padding, background, etc.)
+        registerBaseViewModifiers(on: modifierRegistry)
+        
+        // --- Modificadores Específicos de Texto ---
         
         modifierRegistry.register("font") { view, paramsAny, context in
             let evaluatedParams = DSLExpression.shared.evaluate(paramsAny, context)
-
             // Caso 1: String (nome do estilo)
             if let styleName = evaluatedParams as? String {
                 if let textStyle = mapTextStyle(from: styleName) {
-                    //print("--- DEBUG: Applying font text style: \(styleName)")
-                    return AnyView(view.font(.system(textStyle))) // Usar .system(textStyle) é mais flexível
+                    return AnyView(view.font(.system(textStyle)))
                 } else {
-                    //print("--- DEBUG: Applying default font (unknown style: \(styleName))")
-                    return AnyView(view.font(.body)) // Fallback para estilo desconhecido
+                    return AnyView(view.font(.body)) // Fallback
                 }
             }
             // Caso 2: Dicionário (para size/weight/design)
             else if let paramsDict = evaluatedParams as? [String: Any] {
-                // Tenta pegar estilo primeiro
                 if let styleName = paramsDict["style"] as? String, let textStyle = mapTextStyle(from: styleName) {
-                     //print("--- DEBUG: Applying font text style from dict: \(styleName)")
-                     // TODO: Adicionar lógica para aplicar weight/design sobre o textStyle se necessário e possível
                      return AnyView(view.font(.system(textStyle)))
-
                 }
-                // Senão, tenta usar .system com size/weight/design
                 else if paramsDict["size"] != nil || paramsDict["weight"] != nil || paramsDict["design"] != nil {
                     let sizeVal = DSLExpression.shared.evaluate(paramsDict["size"], context)
                     let weightStr = DSLExpression.shared.evaluate(paramsDict["weight"], context) as? String
                     let designStr = DSLExpression.shared.evaluate(paramsDict["design"], context) as? String
-
-                    // Usa tamanho do body como fallback se não especificado
                     let size = castToCGFloat(sizeVal) ?? Font.TextStyle.body.size
-                    let weight = mapFontWeight(weightStr) ?? .regular // Requer ModifierHelpers.swift
-                    let design: Font.Design = { // Requer ModifierHelpers.swift e @available
+                    let weight = mapFontWeight(weightStr) ?? .regular
+                    let design: Font.Design = {
                         if #available(iOS 16.1, macOS 13.0, tvOS 16.1, watchOS 9.1, *) {
                             return mapFontDesign(designStr) ?? .default
                         } else {
                             return .default
                         }
                     }()
-
-                    //print("--- DEBUG: Applying system font: Size=\(size), Weight=\(String(describing: weightStr)), Design=\(String(describing: designStr))")
                     return AnyView(view.font(.system(size: size, weight: weight, design: design)))
                 }
-                // Dicionário inválido ou vazio
                 else {
-                     //print("--- DEBUG: Applying default font (invalid font dictionary)")
-                    return AnyView(view.font(.body))
+                    return AnyView(view.font(.body)) // Fallback
                 }
             }
-             // Caso 3: Fallback geral
             else {
-                //print("--- DEBUG: Applying default font (invalid font parameter type)")
-                return AnyView(view.font(.body))
+                return AnyView(view.font(.body)) // Fallback
             }
         }
         
-        modifierRegistry.register("padding") { view, paramsAny, context in
-            // Avalia o valor do JSON primeiro
-            let evaluatedParams = DSLExpression.shared.evaluate(paramsAny, context)
-
-            // Caso 1: Padding padrão (ex: "padding": true ou "padding": {})
-            if evaluatedParams is NSNull || (evaluatedParams as? [String: Any])?.isEmpty == true || (evaluatedParams as? Bool) == true {
-                //print("--- DEBUG: Applying default padding")
-                return AnyView(view.padding())
-            }
-            // Caso 2: Padding uniforme (ex: "padding": 10)
-            else if let length = castToCGFloat(evaluatedParams) { // Usa sua função helper existente
-                //print("--- DEBUG: Applying uniform padding: \(length)")
-                return AnyView(view.padding(length))
-            }
-            // Caso 3: Dicionário especificando edges/length ou top/leading etc.
-            else if let paramsDict = evaluatedParams as? [String: Any] {
-                // Subcaso 3a: Edges + Length (ex: {"edges": ["horizontal"], "length": 10})
-                if let edgesList = paramsDict["edges"] as? [String], let lengthValue = paramsDict["length"] {
-                    let edges = mapEdgeSet(from: edgesList) // Usa sua função helper existente
-                    let length = castToCGFloat(lengthValue) ?? 0 // Usa sua função helper existente
-                    //print("--- DEBUG: Applying padding to edges: \(edgesList) with length: \(length)")
-                    return AnyView(view.padding(edges, length))
-                }
-                // Subcaso 3b: Edge individuais (ex: {"top": 5, "leading": 10})
-                else if paramsDict.keys.contains(where: { ["top", "leading", "bottom", "trailing"].contains($0) }) {
-                    let top = castToCGFloat(paramsDict["top"])
-                    let leading = castToCGFloat(paramsDict["leading"])
-                    let bottom = castToCGFloat(paramsDict["bottom"])
-                    let trailing = castToCGFloat(paramsDict["trailing"])
-                    let insets = EdgeInsets(top: top ?? 0, leading: leading ?? 0, bottom: bottom ?? 0, trailing: trailing ?? 0)
-                    //print("--- DEBUG: Applying specific edge insets: T:\(top ?? 0) L:\(leading ?? 0) B:\(bottom ?? 0) T:\(trailing ?? 0)")
-                    return AnyView(view.padding(insets))
-                }
-                // Se for um dicionário, mas não corresponder aos padrões acima, aplica padding padrão
-                else {
-                    //print("--- DEBUG: Applying default padding (unrecognized dictionary)")
-                    return AnyView(view.padding())
-                }
-            }
-
-            // Se não for nenhum dos casos acima, não aplica padding ou aplica padrão
-            //print("--- DEBUG: Padding - No valid format recognized, applying default padding.")
-            return AnyView(view.padding())
-        }
-
-
-        // MARK: - Decoration
-        
-        modifierRegistry.register("background") { view, value, context in
-            let evaluatedValue = DSLExpression.shared.evaluate(value, context)
-            if let color = parseColor(evaluatedValue) {
-                return AnyView(view.background(color))
-            }
-            return view
-        }
-        
+        // foreground movido para registerBaseViewModifiers
+        /*
         modifierRegistry.register("foreground") { view, value, context in
-            // Lógica de TextView
             let evaluatedValue = DSLExpression.shared.evaluate(value, context)
             if let color = parseColor(evaluatedValue) {
-                return AnyView(view.foregroundColor(color))
+                 if #available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *) {
+                     return AnyView(view.foregroundStyle(color))
+                 } else {
+                     return AnyView(view.foregroundColor(color))
+                 }
             }
             return view
         }
+        */
         
         modifierRegistry.register("strikethrough") { view, paramsAny, context in
             let raw = DSLExpression.shared.evaluate(paramsAny, context)
             var active = false
             var color: Color? = nil
-            if let bool = raw as? Bool {
-                active = bool
-            } else if let dict = raw as? [String: Any] {
+            if let bool = raw as? Bool { active = bool }
+            else if let dict = raw as? [String: Any] {
                 active = DSLExpression.shared.evaluate(dict["active"], context) as? Bool ?? true
-                let rawColor = DSLExpression.shared.evaluate(dict["color"], context)
-                color = parseColor(rawColor)
+                color = parseColor(DSLExpression.shared.evaluate(dict["color"], context))
             }
             return AnyView(view.strikethrough(active, color: color))
         }
@@ -187,33 +123,36 @@ public struct TextView {
             let raw = DSLExpression.shared.evaluate(paramsAny, context)
             var active = false
             var color: Color? = nil
-            if let bool = raw as? Bool {
-                active = bool
-            } else if let dict = raw as? [String: Any] {
+            if let bool = raw as? Bool { active = bool }
+            else if let dict = raw as? [String: Any] {
                 active = DSLExpression.shared.evaluate(dict["active"], context) as? Bool ?? true
-                let rawColor = DSLExpression.shared.evaluate(dict["color"], context)
-                color = parseColor(rawColor)
+                color = parseColor(DSLExpression.shared.evaluate(dict["color"], context))
             }
-            return AnyView(view.underline(active, color: color))
+             return AnyView(view.underline(active, color: color))
         }
 
-        // MARK: - Layout & Metrics
         modifierRegistry.register("lineLimit") { view, paramsAny, context in
             let raw = DSLExpression.shared.evaluate(paramsAny, context)
-            if raw is NSNull {
-                return AnyView(view.lineLimit(nil))
-            } else if let dict = raw as? [String: Any] {
-                let limit = DSLExpression.shared.evaluate(dict["limit"], context) as? Int
-                return AnyView(view.lineLimit(limit))
+            if raw is NSNull { // Permitir nil para remover limite
+                 if #available(iOS 16.0, macOS 13.0, tvOS 16.0, watchOS 9.0, *) {
+                     return AnyView(view.lineLimit(nil))
+                 } else {
+                     return AnyView(view.lineLimit(Int.max)) // Fallback
+                 }
             } else if let limit = raw as? Int {
-                return AnyView(view.lineLimit(limit))
+                return AnyView(view.lineLimit(max(0, limit))) // Evitar limite negativo
+            // Permitir dict { "limit": Int? }?
+            //} else if let dict = raw as? [String: Any], let limit = DSLExpression.shared.evaluate(dict["limit"], context) as? Int {
+            //     return AnyView(view.lineLimit(max(0, limit)))
+            } else {
+                 print("⚠️ LineLimit: Valor inválido \(String(describing: raw)). Esperado Int ou null.")
             }
             return view
         }
 
         modifierRegistry.register("lineSpacing") { view, paramsAny, context in
             let raw = DSLExpression.shared.evaluate(paramsAny, context)
-            let spacing = castToCGFloat(raw) ?? 0
+            let spacing = castToCGFloat(raw) ?? 0 // Usa helper, default 0
             return AnyView(view.lineSpacing(spacing))
         }
 
@@ -225,8 +164,8 @@ public struct TextView {
 
         modifierRegistry.register("minimumScaleFactor") { view, paramsAny, context in
             let raw = DSLExpression.shared.evaluate(paramsAny, context)
-            let factor = castToCGFloat(raw) ?? 1
-            return AnyView(view.minimumScaleFactor(min(max(0, factor), 1)))
+            let factor = castToCGFloat(raw) ?? 1.0 // Default 1.0 (sem escala)
+            return AnyView(view.minimumScaleFactor(min(max(0, factor), 1))) // Garante 0...1
         }
 
         modifierRegistry.register("truncationMode") { view, paramsAny, context in
@@ -235,10 +174,18 @@ public struct TextView {
                 switch raw.lowercased() {
                 case "head": return .head
                 case "middle": return .middle
-                default: return .tail
+                default: return .tail // Inclui "tail" e desconhecidos
                 }
             }()
             return AnyView(view.truncationMode(mode))
         }
+        
+        // Outros modificadores comuns de texto que podem ser adicionados:
+        // - bold()
+        // - italic()
+        // - kerning() / tracking()
+        // - baselineOffset()
+        // - multilineTextAlignment()
+        // - textCase()
     }
 }

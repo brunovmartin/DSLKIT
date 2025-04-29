@@ -30,7 +30,6 @@ public class DSLComponentRegistry {
         ButtonView.register()
         TextFieldView.register()
         ListView.register()
-        ConditionalView.register()
         ImageView.register()
         DividerView.register()
         ScrollViewComponent.register()

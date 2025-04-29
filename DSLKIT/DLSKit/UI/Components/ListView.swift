@@ -70,7 +70,11 @@ public struct ListView {
     public static func register() {
         DSLComponentRegistry.shared.register("list", builder: render)
         
-        // Inside ListView.register()
+        // Registra modificadores de base comuns (frame, padding, background, etc.)
+        // Alguns podem ter efeitos limitados dependendo do listStyle.
+        registerBaseViewModifiers(on: modifierRegistry)
+        
+        // --- Modificadores Específicos de List ---
 
         modifierRegistry.register("listStyle") { view, paramsAny, context in
             let evaluatedStyle = DSLExpression.shared.evaluate(paramsAny, context) as? String
@@ -81,27 +85,46 @@ public struct ListView {
             case "grouped":
                 return AnyView(view.listStyle(.grouped))
             case "inset":
-                return AnyView(view.listStyle(.inset))
+                 if #available(iOS 14.0, macOS 11.0, *) {
+                     return AnyView(view.listStyle(.inset)) // Disponível em iOS 14+
+                 } else {
+                     return AnyView(view.listStyle(.grouped)) // Fallback para iOS 13
+                 }
             case "insetgrouped":
-                return AnyView(view.listStyle(.insetGrouped))
-            // Add other styles like .sidebar if needed
+                 if #available(iOS 14.0, macOS 11.0, *) {
+                     return AnyView(view.listStyle(.insetGrouped))
+                 } else {
+                     return AnyView(view.listStyle(.grouped)) // Fallback para iOS 13
+                 }
+             case "sidebar":
+                  if #available(iOS 14.0, macOS 11.0, *) {
+                      return AnyView(view.listStyle(.sidebar))
+                  } else {
+                      print("⚠️ ListStyle 'sidebar' not available on this OS version.")
+                      return view // Ou um fallback como .plain
+                  }
             default:
-//                print("⚠️ ListStyle modifier: Unknown or invalid style '\(evaluatedStyle ?? "nil")'. Applying default.")
-                // Applying .automatic or .insetGrouped is often a safe default
-                 return AnyView(view.listStyle(.insetGrouped))
+                print("⚠️ ListStyle modifier: Unknown or invalid style '\(evaluatedStyle ?? "nil")'. Applying default.")
+                // Default pode ser .automatic ou um estilo seguro como .insetGrouped
+                if #available(iOS 14.0, macOS 11.0, *) {
+                    return AnyView(view.listStyle(.insetGrouped))
+                } else {
+                    return AnyView(view.listStyle(.grouped))
+                }
             }
         }
 
         modifierRegistry.register("safeAreaInset") { view, paramsAny, context in
             guard let params = paramsAny as? [String: Any],
-                  let edgeStr = params["edge"] as? String,
+                  let edgeStr = DSLExpression.shared.evaluate(params["edge"], context) as? String,
                   let contentNode = params["content"] as? [String: Any] else {
-                //print("⚠️ safeAreaInset modifier: Invalid parameters. Need 'edge' (string) and 'content' (dictionary).")
+                print("⚠️ safeAreaInset modifier: Invalid parameters. Need 'edge' (string) and 'content' (dictionary).")
                 return view // Retorna a view original se os params estiverem errados
             }
 
-            // Opcional: Pega o spacing, se definido
-            let spacing = castToCGFloat(params["spacing"]) // Usa helper existente
+            // Avalia parâmetros opcionais
+            let spacing = castToCGFloat(DSLExpression.shared.evaluate(params["spacing"], context))
+            let alignmentStr = DSLExpression.shared.evaluate(params["alignment"], context) as? String
 
             // Renderiza o conteúdo do inset ANTES de aplicar o modificador
             let insetContent = DSLViewRenderer.renderComponent(from: contentNode, context: context)
@@ -111,30 +134,28 @@ public struct ListView {
             // Chama a assinatura correta baseada na string da borda
             switch edgeStr.lowercased() {
             case "top":
-                // Para bordas verticais, o alinhamento é horizontal (default .center)
-                return AnyView(view.safeAreaInset(edge: .top, alignment: .center, spacing: spacing) {
-                    insetContent
-                })
+                let align: HorizontalAlignment = mapHorizontalAlignment(from: alignmentStr) ?? .center
+                return AnyView(view.safeAreaInset(edge: .top, alignment: align, spacing: spacing) { insetContent })
             case "bottom":
-                // Para bordas verticais, o alinhamento é horizontal (default .center)
-                return AnyView(view.safeAreaInset(edge: .bottom, alignment: .center, spacing: spacing) {
-                    insetContent
-                })
+                 let align: HorizontalAlignment = mapHorizontalAlignment(from: alignmentStr) ?? .center
+                return AnyView(view.safeAreaInset(edge: .bottom, alignment: align, spacing: spacing) { insetContent })
             case "leading":
-                // Para bordas horizontais, o alinhamento é vertical (default .center)
-                return AnyView(view.safeAreaInset(edge: .leading, alignment: .center, spacing: spacing) {
-                    insetContent
-                })
+                 let align: VerticalAlignment = mapVerticalAlignment(from: alignmentStr) ?? .center
+                return AnyView(view.safeAreaInset(edge: .leading, alignment: align, spacing: spacing) { insetContent })
             case "trailing":
-                // Para bordas horizontais, o alinhamento é vertical (default .center)
-                return AnyView(view.safeAreaInset(edge: .trailing, alignment: .center, spacing: spacing) {
-                    insetContent
-                })
+                 let align: VerticalAlignment = mapVerticalAlignment(from: alignmentStr) ?? .center
+                return AnyView(view.safeAreaInset(edge: .trailing, alignment: align, spacing: spacing) { insetContent })
             default:
-                //print("⚠️ safeAreaInset modifier: Invalid edge '\(edgeStr)'. Modifier not applied.")
+                print("⚠️ safeAreaInset modifier: Invalid edge '\(edgeStr)'. Modifier not applied.")
                 return view // Retorna a view original se a borda for inválida
             }
-        }
-        // Register other ListView-specific modifiers here (if any)
-    }
+        } // Fim da closure safeAreaInset
+        
+        // Outros modificadores de Lista:
+        // - environment(\.defaultMinListRowHeight, ...)
+        // - listRowSeparator, listSectionSeparator
+        // - listRowInsets
+        // - refreshable (iOS 15+)
+        // - swipeActions (iOS 15+)
+    } // Fim de register()
 }
