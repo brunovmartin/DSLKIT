@@ -17,10 +17,13 @@
       }
     },
     "profileScreen": {
-      "title": "Perfil Inicials"
+      "title": "Perfil Inicials",
+      "imageurl": "https://i.pravatar.cc/150?u=bruno",
+      "username": "Bruno Martins"
     },
     "SettingsScreen": {
-      "counter": 0
+      "counter": 0,
+      "title": "Configurações",
     },
     "backgroundColorVar": "#FFFFFF",
     "isDarkModeOn": false,
@@ -77,7 +80,7 @@
           "children": [
             {
               "type": "image",
-              "url": "https://i.pravatar.cc/150?u=bruno",
+              "url": {"var": "profileScreen.imageurl"},
               "modifiers": [
                 {
                   "placeholder": {
@@ -105,7 +108,7 @@
             },
             {
               "type": "text",
-              "value": "Bruno Martins",
+              "value": {"var": "profileScreen.username"},
               "onTapGesture": {
                 "set": {
                   "var": "profileScreen.title",
@@ -307,6 +310,28 @@
                       ]
                     }
                   ],
+                  "onTap": {
+                    "sequence": [
+                      {
+                        "set": {
+                          "var": "profileScreen.imageurl",
+                          "value": "https://i.pravatar.cc/150?u=andre"
+                         }
+                      },
+                      {
+                        "set": {
+                          "var": "profileScreen.username",
+                          "value": "Simone Silva"
+                         }
+                      },
+                      {
+                        "set": {
+                          "var": "settingsScreen.title",
+                          "value": "Configuração"
+                        }
+                      }
+                    ]
+                  },
                   "modifiers": [
                     {
                       "frame": {
@@ -358,7 +383,9 @@
       "type": "screen",
       "id": "settingsScreen",
       "navigationBar": {
-        "title": "Configurações",
+        "title": {
+          "var": "settingsScreen.title"
+        },
         "displayMode": "large",
         "backgroundColor": {
           "var": "style[currentTheme].backgroundColor"
