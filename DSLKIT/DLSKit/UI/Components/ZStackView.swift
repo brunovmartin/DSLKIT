@@ -21,6 +21,10 @@ public struct ZStackView {
         if let modifiers = node["modifiers"] as? [[String: Any]] {
             view = modifierRegistry.apply(modifiers, to: view, context: context)
         }
+        
+        // Aplicar modificadores de ação diretamente do node
+        view = applyActionModifiers(node: node, context: context, to: view)
+        
         return view
     }
 

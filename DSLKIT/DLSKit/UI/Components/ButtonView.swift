@@ -23,12 +23,14 @@ public struct ButtonView {
                 }
             }
         )
-        
-        view.contentShape(_:Rectangle(), eoFill: true)
 
         if let modifiers = node["modifiers"] as? [[String: Any]] {
             view = modifierRegistry.apply(modifiers, to: view, context: context)
         }
+        
+        // Aplicar modificadores de ação genéricos (onTapGesture, onAppear, etc.) diretamente do node
+        // Nota: O "onTap" principal do botão já é tratado na inicialização.
+        view = applyActionModifiers(node: node, context: context, to: view)
 
         return view
     }

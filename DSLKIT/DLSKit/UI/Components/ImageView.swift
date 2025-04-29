@@ -7,7 +7,7 @@ public struct ImageView {
     public static func render(_ node: [String: Any], context: DSLContext) -> AnyView {
         if let urlExpr = node["url"],
            let urlString = DSLExpression.shared.evaluate(urlExpr, context) as? String,
-           let url = URL(string: urlString) {
+           let _ = URL(string: urlString) {
             
             let modifiers = node["modifiers"] as? [[String: Any]] ?? []
             
@@ -40,16 +40,10 @@ public struct ImageView {
             let backgroundValueRaw = placeholderDict?["background"]
             let hasBackground = DSLExpression.shared.evaluate(backgroundValueRaw, context)
             
-            if let color = parseColor(hasBackground) {
-                let view = AsyncImage(url: url) { phase in
-                    switch phase {
-                    case .empty:
-                        Rectangle()
-                            .fill(color)
-                            .frame(width: idealWidth,height: idealHeight)
-                            .cornerRadius(cornerRadius)
-                        
-                    case .success(let image):
+            var finalView = AnyView(EmptyView()) // Inicializa com EmptyView
+            if let url = URL(string: urlString) {
+                finalView = AnyView(AsyncImage(url: url) { phase in
+                    if let image = phase.image {
                         image
                             .conditionalResizableScaled(
                                 modifiers,
@@ -62,42 +56,41 @@ public struct ImageView {
                                 alignment: alignment
                             )
                             .cornerRadius(cornerRadius)
-                        
-                    case .failure(_):
-                        Rectangle()
-                            .fill(Color.red.opacity(0.3))
-                            .frame(width: idealWidth,height: idealHeight)
-                            .cornerRadius(cornerRadius)
-                        
-                    @unknown default:
-                        EmptyView()
+                    } else if phase.error != nil {
+                        // Handle error state - maybe show a placeholder?
+                        Text("Error loading image") 
+                    } else {
+                        // Placeholder while loading
+                        if hasBackground != nil {
+                            Rectangle()
+                                .fill(parseColor(hasBackground) ?? Color.gray.opacity(0.3))
+                                .frame(width: idealWidth ?? 50, height: idealHeight ?? 50) // Use ideal or default size
+                                .cornerRadius(cornerRadius)
+                        } else {
+                            ProgressView()
+                                .frame(width: idealWidth ?? 50, height: idealHeight ?? 50)
+                        }
                     }
-                }
-                
-                return AnyView(view)
-                
+                })
             } else {
-                let view = AsyncImage(url: url) { data in
-                    data.image?
-                        .conditionalResizableScaled(
-                            modifiers,
-                            minWidth: minWidth,
-                            idealWidth: idealWidth,
-                            maxWidth: maxWidth,
-                            minHeight: minHeight,
-                            idealHeight: idealHeight,
-                            maxHeight: maxHeight,
-                            alignment: alignment
-                        )
-                        .cornerRadius(cornerRadius)
-                }
-                return AnyView(view)
+                // Fallback if URL is invalid
+                finalView = AnyView(Text("Invalid URL"))
             }
 
+            // Aplicar outros modificadores genéricos APÓS o AsyncImage ser configurado
+            if !modifiers.isEmpty {
+                 // Filtra modificadores já usados (frame, cornerRadius, placeholder)
+                 let remainingModifiers = modifiers.filter { !$0.keys.contains("frame") && !$0.keys.contains("cornerRadius") && !$0.keys.contains("placeholder") && !$0.keys.contains("resizable") && !$0.keys.contains("scaledToFit")}
+                if !remainingModifiers.isEmpty {
+                    finalView = modifierRegistry.apply(remainingModifiers, to: finalView, context: context)
+                }
+            }
+            
+            // Aplicar modificadores de ação diretamente do node
+            finalView = applyActionModifiers(node: node, context: context, to: finalView)
+            
+            return finalView
 
-            
-            
-            
         }
         return AnyView(EmptyView())
     }
@@ -200,10 +193,7 @@ public struct ImageView {
 
          // --- Modificadores de Eventos (Podem ser úteis em Imagens) ---
          modifierRegistry.register("onTapGesture") { view, paramsAny, context in
-              // Ação/evento
-              return AnyView(view.onTapGesture {
-                  DSLInterpreter.shared.handleEvent(paramsAny, context: context)
-              })
+              return view
           }
          
          // Nota: Outros modificadores base como frame, padding, background, opacity, etc.

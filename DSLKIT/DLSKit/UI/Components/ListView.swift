@@ -60,6 +60,9 @@ public struct ListView {
             //print("--- DEBUG: ListView - Applying modifiers")
             contentView = modifierRegistry.apply(modifiers, to: contentView, context: context)
         }
+        
+        // Aplicar modificadores de ação diretamente do node
+        contentView = applyActionModifiers(node: node, context: context, to: contentView)
 
         return contentView
     }

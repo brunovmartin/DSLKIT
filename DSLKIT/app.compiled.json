@@ -55,6 +55,9 @@
           "type": "vstack",
           "alignment": "center",
           "spacing": 4,
+          "onAppear": {
+            "print": "VStack principal da ProfileScreen apareceu!"
+          },
           "modifiers": [
             {
               "frame": {
@@ -103,6 +106,12 @@
             {
               "type": "text",
               "value": "Bruno Martins",
+              "onTapGesture": {
+                "set": {
+                  "var": "profileScreen.title",
+                  "value": "Clicou no Nome!"
+                }
+              },
               "modifiers": [
                 {
                   "font": {

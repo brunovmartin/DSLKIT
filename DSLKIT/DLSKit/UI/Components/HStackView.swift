@@ -29,6 +29,10 @@ public struct HStackView {
         if let modifiers = node["modifiers"] as? [[String: Any]] {
             view = modifierRegistry.apply(modifiers, to: view, context: context)
         }
+        
+        // Aplicar modificadores de ação diretamente do node
+        view = applyActionModifiers(node: node, context: context, to: view)
+        
         return view
     }
 
@@ -41,26 +45,6 @@ public struct HStackView {
 
         // Modificadores específicos de HStack
         // 'alignment' e 'spacing' são tratados no render() para HStack
-
-        // Modificadores de Eventos (mantidos aqui por enquanto)
-        modifierRegistry.register("onTapGesture") { view, paramsAny, context in
-             let params = paramsAny // Ação/evento
-             return AnyView(view.onTapGesture {
-                 DSLInterpreter.shared.handleEvent(params, context: context)
-             })
-         }
-         modifierRegistry.register("onAppear") { view, paramsAny, context in
-             // Ação/evento
-             return AnyView(view.onAppear {
-                 DSLInterpreter.shared.handleEvent(paramsAny, context: context)
-             })
-         }
-         modifierRegistry.register("onDisappear") { view, paramsAny, context in
-             // Ação/evento
-             return AnyView(view.onDisappear {
-                 DSLInterpreter.shared.handleEvent(paramsAny, context: context)
-             })
-         }
 
         // Modificador de Acessibilidade (mantido aqui)
         modifierRegistry.register("accessibilityLabel") { view, paramsAny, context in

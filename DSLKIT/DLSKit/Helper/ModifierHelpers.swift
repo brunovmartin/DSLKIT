@@ -417,6 +417,44 @@ public func registerBaseViewModifiers(on registry: DSLModifierRegistry<AnyView>)
 
 // --- Fim das Funções Auxiliares ---
 
+// MARK: - Action Modifier Application Helper
+
+/// Aplica modificadores de ação comuns (onTapGesture, onAppear, onDisappear) lendo diretamente do nó JSON.
+public func applyActionModifiers(node: [String: Any], context: DSLContext, to view: AnyView) -> AnyView {
+    var modifiedView = view
+
+    // onTapGesture
+    if let tapAction = node["onTapGesture"] {
+        // print("--- DEBUG: Applying onTapGesture from node")
+        modifiedView = AnyView(modifiedView.onTapGesture {
+            // print("--- DEBUG: Executing onTapGesture action")
+            DSLInterpreter.shared.handleEvent(tapAction, context: context)
+        })
+    }
+    
+    // onAppear
+    if let appearAction = node["onAppear"] {
+         // print("--- DEBUG: Applying onAppear from node")
+        modifiedView = AnyView(modifiedView.onAppear {
+             // print("--- DEBUG: Executing onAppear action")
+            DSLInterpreter.shared.handleEvent(appearAction, context: context)
+        })
+    }
+    
+    // onDisappear
+    if let disappearAction = node["onDisappear"] {
+         // print("--- DEBUG: Applying onDisappear from node")
+        modifiedView = AnyView(modifiedView.onDisappear {
+             // print("--- DEBUG: Executing onDisappear action")
+            DSLInterpreter.shared.handleEvent(disappearAction, context: context)
+        })
+    }
+    
+    // Adicione outros modificadores de ação aqui se necessário (ex: onChange para componentes genéricos?)
+
+    return modifiedView
+}
+
 // Funções adicionadas para mapear alinhamentos específicos
 public func mapHorizontalAlignment(from string: String?) -> HorizontalAlignment? {
     guard let string = string?.lowercased() else { return nil }

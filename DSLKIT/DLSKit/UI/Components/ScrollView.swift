@@ -47,6 +47,9 @@ public struct ScrollViewComponent {
         if let modifiers = node["modifiers"] as? [[String: Any]] {
             finalView = modifierRegistry.apply(modifiers, to: finalView, context: context)
         }
+        
+        // Aplicar modificadores de ação diretamente do node
+        finalView = applyActionModifiers(node: node, context: context, to: finalView)
 
         return finalView
     }

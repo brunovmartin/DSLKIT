@@ -18,7 +18,7 @@ public struct DSLViewRenderer {
 
         // --- Lógica do Display Mode e Cores ---
         let displayMode = mapNavDisplayMode(navBar?["displayMode"] as? String)
-        let navBgColorExpr = navBar?["backgroundColor"]
+//        let navBgColorExpr = navBar?["backgroundColor"]
         let navFgColorExpr = navBar?["foregroundColor"]
 //        let navColorSchemeExpr = navBar?["toolbarColorScheme"]
 //        let evaluatedNavBgColor = DSLExpression.shared.evaluate(navBgColorExpr, context)

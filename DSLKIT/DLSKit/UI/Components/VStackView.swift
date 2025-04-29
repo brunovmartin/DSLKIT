@@ -26,6 +26,10 @@ public struct VStackView {
         if let modifiers = node["modifiers"] as? [[String: Any]] {
             view = modifierRegistry.apply(modifiers, to: view, context: context)
         }
+        
+        // Aplicar modificadores de ação diretamente do node
+        view = applyActionModifiers(node: node, context: context, to: view)
+        
         return view
     }
 
@@ -38,27 +42,6 @@ public struct VStackView {
 
         // Modificadores específicos de VStack
         // 'alignment' e 'spacing' são tratados no render() para VStack
-
-        // Modificadores de Eventos (mantidos aqui por enquanto)
-        modifierRegistry.register("onTapGesture") { view, paramsAny, context in
-             let params = paramsAny // A ação/evento já deve ter sido avaliada se necessário
-             return AnyView(view.onTapGesture {
-                 DSLInterpreter.shared.handleEvent(params, context: context)
-             })
-         }
-         modifierRegistry.register("onAppear") { view, paramsAny, context in
-             // print("--- DEBUG: REGISTERED onAppear closure EXECUTED by apply(). Modifier value: \(String(describing: paramsAny))")
-             return AnyView(view.onAppear { 
-                 // print("--- DEBUG: SwiftUI .onAppear action EXECUTED.")
-                 DSLInterpreter.shared.handleEvent(paramsAny, context: context)
-             })
-         }
-         modifierRegistry.register("onDisappear") { view, paramsAny, context in
-             // let params = paramsAny as? [String: Any] ?? [:] // Ação/evento
-             return AnyView(view.onDisappear {
-                 DSLInterpreter.shared.handleEvent(paramsAny, context: context)
-             })
-         }
 
         // Modificador de Acessibilidade (mantido aqui)
         modifierRegistry.register("accessibilityLabel") { view, paramsAny, context in

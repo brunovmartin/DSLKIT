@@ -41,6 +41,10 @@ public struct TextView {
             // If they did, you'd need to pass the index into modifierRegistry.apply or handle it within evaluate.
             view = modifierRegistry.apply(modifiers, to: view, context: context)
         }
+        
+        // Aplicar modificadores de ação diretamente do node
+        view = applyActionModifiers(node: node, context: context, to: view)
+        
         return view
     }
 
