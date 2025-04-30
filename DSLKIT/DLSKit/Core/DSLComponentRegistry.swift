@@ -36,5 +36,6 @@ public class DSLComponentRegistry {
         ToggleView.register()
         ZStackView.register()
         LabelView.register()
+        MenuView.register()
     }
 }

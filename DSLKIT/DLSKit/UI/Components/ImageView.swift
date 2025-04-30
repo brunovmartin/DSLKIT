@@ -218,18 +218,6 @@ public struct ImageView {
              return view
          }
 
-         modifierRegistry.register("foregroundColor") { view, paramsAny, context in
-              let colorValue = DSLExpression.shared.evaluate(paramsAny, context)
-              if let color = parseColor(colorValue) {
-                   if #available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *) {
-                       return AnyView(view.foregroundStyle(color))
-                   } else {
-                       return AnyView(view.foregroundColor(color))
-                   }
-              }
-              return view
-          }
-
          // --- Modificadores de Eventos (Podem ser úteis em Imagens) ---
          modifierRegistry.register("onTapGesture") { view, paramsAny, context in
               return view

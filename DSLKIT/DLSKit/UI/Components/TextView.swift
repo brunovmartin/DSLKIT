@@ -97,19 +97,6 @@ public struct TextView {
         }
         
         // foreground movido para registerBaseViewModifiers
-        /*
-        modifierRegistry.register("foreground") { view, value, context in
-            let evaluatedValue = DSLExpression.shared.evaluate(value, context)
-            if let color = parseColor(evaluatedValue) {
-                 if #available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *) {
-                     return AnyView(view.foregroundStyle(color))
-                 } else {
-                     return AnyView(view.foregroundColor(color))
-                 }
-            }
-            return view
-        }
-        */
         
         modifierRegistry.register("strikethrough") { view, paramsAny, context in
             let raw = DSLExpression.shared.evaluate(paramsAny, context)

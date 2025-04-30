@@ -60,29 +60,44 @@
         "displayMode": "large",
         "trailingItems": [
           {
-            "type": "button",
-            "onTap": {
-              "print": "Botão de Ajuda Clicado!"
-            },
+            "type": "menu",
+            "title": "Ações",
             "children": [
-                {
-                  "type": "label",
-                  "title": "Teste",
-                  "systemImage": "questionmark.circle",
-                  "modifiers": [
-                    { "labelStyle": "titleandicon" }
-                  ]
-                }
-            ],
-            "modifiers": [
               {
-                "frame": {
-                  "width": 300,
-                  "height": 150
-                }
+                "type": "button",
+                "title": "Duplicar",
+                "onTap": { "print": "Duplicar" }
               },
               {
-                "background": "#FF0000"
+                "type": "button",
+                "title": "Renomear",
+                "onTap": { "print": "Renomear" }
+              },
+              {
+                "type": "button",
+                "title": "Deletar…",
+                "onTap": { "print": "Deletar" }
+              },
+              {
+                "type": "menu",
+                "title": "Copiar",
+                "children": [
+                  {
+                    "type": "button",
+                    "title": "Copiar",
+                    "onTap": { "print": "Copiar" }
+                  },
+                  {
+                    "type": "button",
+                    "title": "Copiar Formatado",
+                    "onTap": { "print": "Copiar Formatado" }
+                  },
+                  {
+                    "type": "button",
+                    "title": "Copiar Caminho",
+                    "onTap": { "print": "Copiar Caminho" }
+                  }
+                ]
               }
             ]
           }
