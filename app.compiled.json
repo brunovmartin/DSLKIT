@@ -134,6 +134,29 @@
         "properties": {
             "spacing": 0
         },
+        "navigationBar": {
+            "title": "Configurações",
+            "displayMode": "inline",
+            "foregroundColor": { "var": "style[currentTheme].primaryColor" },
+            "trailingItems": [
+              {
+                "type": "button",
+                "onTap": {
+                  "print": "Botão de Ajuda Clicado!"
+                },
+                "children": [
+                  {
+                    "type": "Label",
+                    "title": "Ajuda",
+                    "systemImage": "questionmark.circle",
+                    "modifiers": [
+                      { "labelStyle": "titleAndIcon" }
+                    ]
+                  }
+                ]
+              }
+            ]
+        },
         "children": [
              {
                 "type": "hstack",

@@ -5,49 +5,58 @@ public struct ImageView {
     static let modifierRegistry = DSLModifierRegistry<AnyView>()
 
     public static func render(_ node: [String: Any], context: DSLContext) -> AnyView {
-        if let urlExpr = node["url"],
-           let urlString = DSLExpression.shared.evaluate(urlExpr, context) as? String,
-           let url = URL(string: urlString) {
+        // --- Modificadores e Parâmetros Comuns ---
+        let modifiers = node["modifiers"] as? [[String: Any]] ?? []
+        let frameModifier = modifiers.first(where: { $0["frame"] != nil })
+        let params = frameModifier?["frame"] as? [String: Any] ?? [:]
+
+        let minWidth = parseDimension("minWidth", frameParams: params, evaluated: DSLExpression.shared.evaluate(params["minWidth"], context) as Any)
+        let idealWidth = parseDimension("width", frameParams: params, evaluated: DSLExpression.shared.evaluate(params["width"], context) as Any)
+        let maxWidth = parseDimension("maxWidth", frameParams: params, evaluated: DSLExpression.shared.evaluate(params["maxWidth"], context) as Any)
+        let minHeight = parseDimension("minHeight", frameParams: params, evaluated: DSLExpression.shared.evaluate(params["minHeight"], context) as Any)
+        let idealHeight = parseDimension("height", frameParams: params, evaluated: DSLExpression.shared.evaluate(params["height"], context) as Any)
+        let maxHeight = parseDimension("maxHeight", frameParams: params, evaluated: DSLExpression.shared.evaluate(params["maxHeight"], context) as Any)
+        let alignmentString = DSLExpression.shared.evaluate(params["alignment"], context) as? String
+        let alignment: Alignment = mapAlignment(from: alignmentString)
+
+        // --- Placeholder Info (apenas para URL) ---
+        let placeholderModifier = modifiers.first(where: { $0["placeholder"] != nil })
+        let placeholderDict = placeholderModifier?["placeholder"] as? [String: Any]
+        let backgroundValueRaw = placeholderDict?["background"]
+        let hasBackground = DSLExpression.shared.evaluate(backgroundValueRaw, context)
+
+        // --- Imagem Base (System ou URL) ---
+        var baseView: AnyView?
+
+        // 1. Tenta carregar System Image
+        if let systemNameExpr = node["systemName"],
+           let systemName = DSLExpression.shared.evaluate(systemNameExpr, context) as? String,
+           !systemName.isEmpty {
             
-            let modifiers = node["modifiers"] as? [[String: Any]] ?? []
+            // Cria a Image diretamente com systemName
+            let systemImage = Image(systemName: systemName)
+                .conditionalResizableScaled( // Aplica resizable/scaling se necessário
+                    modifiers,
+                    minWidth: minWidth,
+                    idealWidth: idealWidth,
+                    maxWidth: maxWidth,
+                    minHeight: minHeight,
+                    idealHeight: idealHeight,
+                    maxHeight: maxHeight,
+                    alignment: alignment
+                )
+            baseView = AnyView(systemImage)
+
+        // 2. Se não for system image, tenta carregar URL
+        } else if let urlExpr = node["url"],
+                  let urlString = DSLExpression.shared.evaluate(urlExpr, context) as? String,
+                  let url = URL(string: urlString) {
             
-            // Verifica se o cache está habilitado para esta imagem
             let shouldCache = DSLExpression.shared.evaluate(node["cache"], context) as? Bool ?? true
-            
-            let frameModifier = modifiers.first(where: { $0["frame"] != nil })
-            let params = frameModifier?["frame"] as? [String: Any] ?? [:]
-            
-            let minWidth = parseDimension("minWidth", frameParams: params,
-                                          evaluated: DSLExpression.shared.evaluate(params["minWidth"], context) as Any)
-            let idealWidth = parseDimension("width", frameParams: params,
-                                            evaluated: DSLExpression.shared.evaluate(params["width"], context) as Any)
-            let maxWidth = parseDimension("maxWidth", frameParams: params,
-                                          evaluated: DSLExpression.shared.evaluate(params["maxWidth"], context) as Any)
-            let minHeight = parseDimension("minHeight", frameParams: params,
-                                           evaluated: DSLExpression.shared.evaluate(params["minHeight"], context) as Any)
-            let idealHeight = parseDimension("height", frameParams: params,
-                                             evaluated: DSLExpression.shared.evaluate(params["height"], context) as Any)
-            let maxHeight = parseDimension("maxHeight", frameParams: params,
-                                           evaluated: DSLExpression.shared.evaluate(params["maxHeight"], context) as Any)
-            
-            let alignmentString = DSLExpression.shared.evaluate(params["alignment"], context) as? String
-            let alignment: Alignment = mapAlignment(from: alignmentString)
-            
-            // Captura o cornerRadius do modificador
-            let cornerModifier = modifiers.first(where: { $0["cornerRadius"] != nil })
-            let cornerValueRaw = cornerModifier?["cornerRadius"]
-            let cornerRadius = DSLExpression.shared.evaluate(cornerValueRaw, context) as? CGFloat ?? 0
-            
-            let placeholderModifier = modifiers.first(where: { $0["placeholder"] != nil })
-            let placeholderDict = placeholderModifier?["placeholder"] as? [String: Any]
-            let backgroundValueRaw = placeholderDict?["background"]
-            let hasBackground = DSLExpression.shared.evaluate(backgroundValueRaw, context)
-            
-            var finalView = AnyView(EmptyView())
-            
-            // Se o cache estiver habilitado, tenta pegar a imagem do cache LOCAL
+
+            // Tenta carregar do cache local primeiro
             if shouldCache, let cachedImage = ImageFileCache.shared.load(for: url) {
-                finalView = AnyView(Image(uiImage: cachedImage)
+                let cachedImageView = Image(uiImage: cachedImage)
                     .conditionalResizableScaled(
                         modifiers,
                         minWidth: minWidth,
@@ -58,23 +67,23 @@ public struct ImageView {
                         maxHeight: maxHeight,
                         alignment: alignment
                     )
-                    .cornerRadius(cornerRadius))
+                baseView = AnyView(cachedImageView) // REMOVIDO .cornerRadius() daqui
             } else {
-                // Se não estiver no cache local ou o cache estiver desabilitado, usa AsyncImage
-                finalView = AnyView(AsyncImage(url: url) { phase in
+                // Usa AsyncImage se não estiver no cache ou cache desabilitado
+                baseView = AnyView(AsyncImage(url: url) { phase in
                     switch phase {
                     case .empty:
                         if hasBackground != nil {
                             Rectangle()
                                 .fill(parseColor(hasBackground) ?? Color.gray.opacity(0.3))
                                 .frame(width: idealWidth ?? 50, height: idealHeight ?? 50)
-                                .cornerRadius(cornerRadius)
+                                // .cornerRadius removido daqui também, será aplicado por modificador
                         } else {
                             ProgressView()
                                 .frame(width: idealWidth ?? 50, height: idealHeight ?? 50)
                         }
                     case .success(let image):
-                        image // Retorna a imagem para exibição
+                        image // A imagem carregada
                             .conditionalResizableScaled(
                                 modifiers,
                                 minWidth: minWidth,
@@ -85,48 +94,49 @@ public struct ImageView {
                                 maxHeight: maxHeight,
                                 alignment: alignment
                             )
-                            .cornerRadius(cornerRadius)
+                            // .cornerRadius removido daqui
                             .task {
                                 if shouldCache {
-                                    // Converte e armazena no cache LOCAL em background
-                                    await MainActor.run { // Garante execução no main actor
+                                    await MainActor.run {
                                         let renderer = ImageRenderer(content: image)
                                         if let uiImage = renderer.uiImage {
-                                            ImageFileCache.shared.save(uiImage, for: url) // Salva no cache local
+                                            ImageFileCache.shared.save(uiImage, for: url)
                                         }
                                     }
                                 }
                             }
                     case .failure:
-                        Text("Error loading image")
+                        Text("Error loading image") // TODO: Melhorar visual de erro
                     @unknown default:
-                        Text("Error loading image")
+                        EmptyView()
                     }
                 })
             }
-
-            // Aplicar outros modificadores genéricos APÓS o AsyncImage ser configurado
-            if !modifiers.isEmpty {
-                let remainingModifiers = modifiers.filter { !$0.keys.contains("frame") && !$0.keys.contains("cornerRadius") && !$0.keys.contains("placeholder") && !$0.keys.contains("resizable") && !$0.keys.contains("scaledToFit")}
-                if !remainingModifiers.isEmpty {
-                    finalView = modifierRegistry.apply(remainingModifiers, to: finalView, context: context)
-                }
-            }
-            
-            // Aplicar modificadores de ação diretamente do node
-            finalView = applyActionModifiers(node: node, context: context, to: finalView)
-            
-            return finalView
         }
-        return AnyView(EmptyView())
+
+        // --- Aplicação Final dos Modificadores ---
+        guard var finalView = baseView else {
+            // Retorna EmptyView se nem systemName nem url válidos foram fornecidos
+            return AnyView(EmptyView())
+        }
+
+        // Aplicar outros modificadores genéricos (incluindo cornerRadius agora)
+        if let modifiers = node["modifiers"] as? [[String: Any]] {
+            finalView = modifierRegistry.apply(modifiers, to: finalView, context: context)
+        }
+
+        // Aplicar modificadores de ação diretamente do node
+        finalView = applyActionModifiers(node: node, context: context, to: finalView)
+
+        return finalView
     }
 
     public static func register() {
         DSLComponentRegistry.shared.register("image", builder: render)
-        
-        // Registra modificadores de base comuns
+
+        // Registra modificadores de base comuns (incluindo cornerRadius)
         registerBaseViewModifiers(on: modifierRegistry)
-        
+
         // --- Modificadores Específicos de Image ---
 
         modifierRegistry.register("aspectRatio") { view, paramsAny, context in
@@ -160,12 +170,19 @@ public struct ImageView {
         }
 
          modifierRegistry.register("scaledToFill") { view, _, _ in
-             return AnyView(view.scaledToFill()) // SwiftUI convenience
-         }
-         
-         modifierRegistry.register("scaledToFit") { view, _, _ in
-              return AnyView(view.scaledToFit()) // SwiftUI convenience
+              // Este modificador agora é tratado por conditionalResizableScaled
+              // Pode ser removido ou deixado como redundante (seguro)
+              // return AnyView(view.scaledToFill())
+             print("INFO: scaledToFill modifier applied via conditionalResizableScaled based on presence.")
+             return view // Retorna a view inalterada pois já foi tratado
           }
+
+          modifierRegistry.register("scaledToFit") { view, _, _ in
+               // Este modificador agora é tratado por conditionalResizableScaled
+               // return AnyView(view.scaledToFit())
+               print("INFO: scaledToFit modifier applied via conditionalResizableScaled based on presence.")
+              return view // Retorna a view inalterada pois já foi tratado
+           }
 
         modifierRegistry.register("renderingMode") { view, paramsAny, context in
              let modeString = DSLExpression.shared.evaluate(paramsAny, context) as? String

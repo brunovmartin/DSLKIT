@@ -176,27 +176,7 @@ public func registerBaseViewModifiers(on registry: DSLModifierRegistry<AnyView>)
     }
 
     // MARK: Frame
-    registry.register("frame") { view, paramsAny, context in
-        let params = paramsAny as? [String: Any] ?? [:]
-        // Função interna para avaliar dimensões, incluindo .infinity
-        func parseDimension(_ key: String) -> CGFloat? {
-             guard let value = params[key] else { return nil }
-             let evaluatedValue = DSLExpression.shared.evaluate(value, context)
-             if let stringValue = evaluatedValue as? String, stringValue.lowercased() == ".infinity" { return .infinity }
-             if let number = evaluatedValue as? NSNumber { return CGFloat(number.doubleValue) }
-             if let cgFloat = evaluatedValue as? CGFloat { return cgFloat }
-             return nil
-         }
-         let minWidth = parseDimension("minWidth")
-         let idealWidth = parseDimension("width") // "width" mapeia para idealWidth
-         let maxWidth = parseDimension("maxWidth")
-         let minHeight = parseDimension("minHeight")
-         let idealHeight = parseDimension("height") // "height" mapeia para idealHeight
-         let maxHeight = parseDimension("maxHeight")
-         // O alinhamento pode ser parte do frame
-         let alignment: Alignment = mapAlignment(from: DSLExpression.shared.evaluate(params["alignment"], context) as? String) // Necessita de mapAlignment
-         return AnyView(view.frame(minWidth: minWidth, idealWidth: idealWidth, maxWidth: maxWidth, minHeight: minHeight, idealHeight: idealHeight, maxHeight: maxHeight, alignment: alignment))
-    }
+    registerFrameViewModifiers(on: registry)
 
     // MARK: Background
     registry.register("background") { view, value, context in

@@ -30,30 +30,53 @@ public struct DSLViewRenderer {
         
 
 
-        // --- Lógica do Botão Trailing ---
-        let trailingButtonInfo = navBar?["trailingButton"] as? [String: Any]
-        let buttonLabelExpr = trailingButtonInfo?["label"]
-        let buttonAction = trailingButtonInfo?["onTap"]
-        let buttonLabel = DSLExpression.shared.evaluate(buttonLabelExpr, context) as? String ?? ""
+        // --- Lógica do Botão Trailing --- REMOVIDA ---
+        // let trailingButtonInfo = navBar?["trailingButton"] as? [String: Any]
+        // let buttonLabelExpr = trailingButtonInfo?["label"]
+        // let buttonAction = trailingButtonInfo?["onTap"]
+        // let buttonLabel = DSLExpression.shared.evaluate(buttonLabelExpr, context) as? String ?? ""
+
+        // +++ NOVA Lógica para Itens Dinâmicos na Toolbar +++
+        let trailingItemsJson = navBar?["trailingItems"] as? [[String: Any]] ?? []
+        let leadingItemsJson = navBar?["leadingItems"] as? [[String: Any]] ?? []
+
 
         // Aplica modificadores ao conteúdo
         content
             .navigationTitle(calculatedTitle)
             .navigationBarTitleDisplayMode(displayMode)
              .ifLet(navForegroundColor) { view, color in
-                 view.tint(.blue) // Define a cor de destaque padrão
+                 // Aplica a cor de destaque global à barra, se definida
+                 // Componentes individuais podem sobrescrever via modifiers no JSON
+                 view.tint(color)
              }
             .toolbar {
-                if !buttonLabel.isEmpty, let action = buttonAction {
-                    ToolbarItem(placement: .navigationBarTrailing) {
-                        Button(buttonLabel) {
-                            DSLInterpreter.shared.handleEvent(action, context: context)
-                        }
-                        // O tint() acima deve afetar este botão, mas podemos deixar o explícito como fallback?
-                        // Ou remover este tint individual se o global funcionar.
-                         .ifLet(navForegroundColor) { btn, color in btn.tint(color) }
+                // --- Renderiza os itens dinâmicos LEADING ---
+                ToolbarItemGroup(placement: .navigationBarLeading) {
+                    ForEach(0..<leadingItemsJson.count, id: \.self) { index in
+                        renderComponent(from: leadingItemsJson[index], context: context)
                     }
                 }
+
+                // --- Renderiza os itens dinâmicos TRAILING ---
+                ToolbarItemGroup(placement: .navigationBarTrailing) {
+                    ForEach(0..<trailingItemsJson.count, id: \.self) { index in
+                        renderComponent(from: trailingItemsJson[index], context: context)
+                    }
+                }
+
+                // --- Lógica do botão fixo REMOVIDA ---
+                // if !buttonLabel.isEmpty, let action = buttonAction {
+                //     ToolbarItem(placement: .navigationBarTrailing) {
+                //         Button(buttonLabel) {
+                //             DSLInterpreter.shared.handleEvent(action, context: context)
+                //         }
+                //         // O tint() acima deve afetar este botão, mas podemos deixar o explícito como fallback?
+                //         // Ou remover este tint individual se o global funcionar.
+                //          .ifLet(navForegroundColor) { btn, color in btn.tint(color) }
+                //     }
+                // }
+
                 // O botão Voltar será adicionado automaticamente pelo NavigationStack
             }
             // Adicionar outros modificadores de tela aqui se necessário (ex: background da tela)
