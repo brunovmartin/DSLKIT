@@ -11,7 +11,7 @@ struct DSLApp: App {
         WindowGroup {
             if appContext.isInitialLoadComplete {
                 Group {
-                    if engine.usesTabs(), let tabDefs = engine.tabDefinitions {
+                    if let tabDefs = engine.tabDefinitions {
                         TabView {
                             ForEach(0..<tabDefs.count, id: \.self) { index in
                                 let tabDef = tabDefs[index]

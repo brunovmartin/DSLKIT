@@ -3,6 +3,14 @@
    version = "1.0">
    <ContextStates>
       <ContextState
+         contextName = "closure #2 in static StringOperators.registerAll():StringOperators.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "str.uppercased()">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
          contextName = "static ToggleView.render(_:context:):ToggleView.swift">
          <PersistentStrings>
             <PersistentString
