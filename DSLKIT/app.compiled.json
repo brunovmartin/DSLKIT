@@ -47,6 +47,10 @@
     "backgroundColorVar": "#FFFFFF",
     "environmentColorScheme": {
       "var": "currentTheme"
+    },
+    "alerta":{
+        "titulo": "Alterar Perfil?",
+        "mensagem": "Tem certeza que deseja alterar o o perfil?"
     }
   },
   "screens": [
@@ -378,21 +382,40 @@
                   "onTap": {
                     "sequence": [
                       {
-                        "set": {
-                          "var": "profileScreen.imageurl",
-                          "value": "https://i.pravatar.cc/150?u=andre"
-                        }
-                      },
-                      {
-                        "set": {
-                          "var": "profileScreen.username",
-                          "value": "Simone Silva"
-                        }
-                      },
-                      {
-                        "set": {
-                          "var": "settingsScreen.title",
-                          "value": "Configuração"
+                        "alert.show": {
+                          "title": { "var": "alerta.titulo" },
+                          "message": { "var": "alerta.mensagem" },
+                          "buttons": [
+                            {
+                              "label": "OK",
+                              "action":{
+                                  "sequence":[
+                                      {
+                                        "set": {
+                                          "var": "profileScreen.imageurl",
+                                          "value": "https://i.pravatar.cc/150?u=andre"
+                                        }
+                                      },
+                                      {
+                                        "set": {
+                                          "var": "profileScreen.username",
+                                          "value": "Simone Silva"
+                                        }
+                                      },
+                                      {
+                                        "set": {
+                                          "var": "settingsScreen.title",
+                                          "value": "Configuração"
+                                        }
+                                      }
+                                  ]
+                              }
+                            },
+                            {
+                              "label": "Cancelar",
+                              "role": "destructive"
+                            }
+                          ]
                         }
                       }
                     ]
