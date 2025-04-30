@@ -86,6 +86,7 @@ public class DSLAppEngine {
     // public let context: DSLContext
     public var initialScreenId: String?
     public var screens: [String: [String: Any]] = [:]
+    public var tabDefinitions: [[String: Any]]? = nil 
 
     // Contexto será recebido externamente
     private var currentContext: DSLContext?
@@ -147,8 +148,8 @@ public class DSLAppEngine {
         }
     }
 
-    // Modifica start para receber o contexto
-    public func start(context: DSLContext) {
+    // Modifica start para receber o contexto e o interpreter
+    public func start(context: DSLContext, interpreter: DSLInterpreter) {
         self.currentContext = context // Armazena o contexto recebido
 
         // Carrega os dados iniciais do JSON NO CONTEXTO RECEBIDO
@@ -157,21 +158,21 @@ public class DSLAppEngine {
            let raw = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
            let initialData = raw["context"] as? [String: Any] {
             
-            // --- Primeira Passagem: Definir valores brutos --- 
+            // --- Primeira Passagem: Definir valores brutos ---
             print("--- DEBUG AppEngine.start: First Pass - Setting raw initial values ---")
             for (key, value) in initialData {
                 print("    Setting raw: \(key) = \(value)")
                 context.set(key, to: value)
             }
             
-            // --- Segunda Passagem: Avaliar e atualizar expressões --- 
+            // --- Segunda Passagem: Avaliar e atualizar expressões ---
             // Mantém a avaliação síncrona por enquanto
             print("--- DEBUG AppEngine.start: Second Pass - Evaluating expressions ---")
             for (key, rawValue) in initialData { // Iterar sobre os dados originais
-                if rawValue is [String: Any] { 
+                if rawValue is [String: Any] {
                     print("    Evaluating expression for key: \(key), rawValue: \(rawValue)")
                     // Chamada síncrona
-                    let evaluatedValue = DSLExpression.shared.evaluate(rawValue, context) ?? NSNull() 
+                    let evaluatedValue = DSLExpression.shared.evaluate(rawValue, context) ?? NSNull()
                     print("    Updating context: \(key) = \(evaluatedValue)")
                     context.set(key, to: evaluatedValue)
                 } else {
@@ -179,31 +180,54 @@ public class DSLAppEngine {
                 }
             }
             
-            // --- Após a conclusão da avaliação síncrona --- 
+            // --- Após a conclusão da avaliação síncrona ---
             // Usa Task/MainActor para atualizar o estado @Published e apresentar a UI
             Task {
                 
-                //try? await Task.sleep(for: .seconds(10)) 
+                //try? await Task.sleep(for: .seconds(10))
                 await MainActor.run { // Garante execução na Main Thread
-                    
-                    
-                    print("--- DEBUG AppEngine.start: Evaluation Complete - Setting isInitialLoadComplete = true ---")
-                    context.isInitialLoadComplete = true
                     
                     // Apresenta a tela inicial somente APÓS o contexto estar pronto
                     guard let id = self.initialScreenId, let screen = self.screens[id] else {
                         print("🚫 Tela inicial não encontrada após carregamento.")
                         return
                     }
+
+                    // Marca o carregamento como completo APÓS apresentar ao interpreter
+                    // Isso garante que o interpreter.currentContext está definido antes da UI principal tentar renderizar
                     context.waitForUpdates {
-                        print("--- DEBUG AppEngine.start: All context updates complete - Presenting initial screen: \(id) ---")
-                        print("--- Final Context Storage ---")
-                        print(context.storage)
-                        DSLInterpreter.shared.present(screen: screen, context: context)
-                    }
+                         print("--- DEBUG AppEngine.start: Evaluation Complete & Interpreter Presented - Setting isInitialLoadComplete = true ---")
+                         context.isInitialLoadComplete = true
+                         print("--- Final Context Storage after updates ---")
+                         print(context.storage)
+                        
+                        // --- VERIFICA SE HÁ TABS (APENAS PARA usesTabs()) ---
+                        if let tabs = raw["tabs"] as? [[String: Any]] {
+                            self.tabDefinitions = tabs
+                            print("ℹ️ Engine Init: Definição 'tabs' encontrada.")
+                            // Se usa tabs, o App.swift vai cuidar de apresentar a view inicial de cada tab.
+                            // O interpreter ainda precisa saber o contexto, mas não necessariamente apresentar uma tela específica aqui.
+                            // Talvez uma chamada diferente para o interpreter ou apenas definir o contexto?
+                            // Por enquanto, vamos deixar o present aqui, assumindo que o ID inicial ainda é relevante
+                            // mesmo com tabs, talvez para estado inicial ou fallback.
+                            interpreter.present(screen: screen, context: context) // Informa o interpreter sobre o contexto e tela "raiz"
+
+                        } else {
+                            self.tabDefinitions = nil
+                            print("ℹ️ Engine Init: Definição 'tabs' NÃO encontrada.")
+                            // Se não usa tabs, o interpreter apresenta a tela inicial única.
+                            interpreter.present(screen: screen, context: context) // Informa o interpreter sobre o contexto e tela inicial
+                        }
+                        
+                     }
                 }
             } // Fim da Task
         } // Fim do if let initialData
+    }
+    
+    // Helper para verificar se a configuração JSON continha tabs
+    public func usesTabs() -> Bool {
+        return self.tabDefinitions != nil
     }
 
     // Adapte navigate se necessário para usar self.currentContext

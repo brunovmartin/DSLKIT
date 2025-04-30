@@ -1,5 +1,17 @@
 {
   "mainScreen": "profileScreen",
+  "tabs": [
+    {
+      "screenId": "profileScreen",
+      "label": "Perfil",
+      "icon": "person.crop.circle"
+    },
+    {
+      "screenId": "settingsScreen",
+      "label": "Ajustes",
+      "icon": "gearshape.fill"
+    }
+  ],
   "context": {
     "currentTheme": {
       "Storage.get": {

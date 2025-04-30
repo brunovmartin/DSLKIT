@@ -10,19 +10,58 @@ struct DSLApp: App {
     var body: some Scene {
         WindowGroup {
             if appContext.isInitialLoadComplete {
-                NavigationStack(path: $interpreter.navigationPath) {
-                    Group {
-                        if let rootScreen = interpreter.getRootScreenDefinition() {
-                            DSLViewRenderer.renderScreenContent(screen: rootScreen, context: appContext)
-                        } else {
-                            Text("Erro: Tela raiz não definida após carregamento.")
+                Group {
+                    if engine.usesTabs(), let tabDefs = engine.tabDefinitions {
+                        TabView {
+                            ForEach(0..<tabDefs.count, id: \.self) { index in
+                                let tabDef = tabDefs[index]
+                                if let screenId = tabDef["screenId"] as? String,
+                                   let rootScreen = engine.getScreenDefinition(byId: screenId),
+                                   let label = tabDef["label"] as? String {
+
+                                    NavigationStack(path: $interpreter.navigationPath) {
+                                        Group {
+                                            DSLViewRenderer.renderScreenContent(screen: rootScreen, context: appContext)
+                                        }
+                                        .navigationDestination(for: String.self) { screenId in
+                                            if let screenDefinition = engine.getScreenDefinition(byId: screenId) {
+                                                DSLViewRenderer.renderScreenContent(screen: screenDefinition, context: appContext)
+                                            } else {
+                                                Text("🚫 Destino de navegação não encontrado para ID: \(screenId)")
+                                            }
+                                        }
+                                    }
+                                    .tabItem {
+                                        if let iconName = tabDef["icon"] as? String { Image(systemName: iconName) }
+                                        Text(label)
+                                    }
+                                    .tag(screenId)
+
+                                } else {
+                                    Text("Erro: Definição de Tab inválida [\(index)] (ID: \(tabDef["screenId"] ?? "?"))")
+                                        .tabItem { Label("Erro", systemImage: "exclamationmark.triangle") }
+                                        .tag(UUID())
+                                }
+                            }
                         }
-                    }
-                    .navigationDestination(for: String.self) { screenId in
-                        if let screenDefinition = engine.getScreenDefinition(byId: screenId) {
-                            DSLViewRenderer.renderScreenContent(screen: screenDefinition, context: appContext)
+                    } else {
+                        if let rootScreen = interpreter.getRootScreenDefinition() {
+                            NavigationStack(path: $interpreter.navigationPath) {
+                                Group {
+                                    DSLViewRenderer.renderScreenContent(screen: rootScreen, context: appContext)
+                                }
+                                .navigationDestination(for: String.self) { screenId in
+                                    if let screenDefinition = engine.getScreenDefinition(byId: screenId) {
+                                        DSLViewRenderer.renderScreenContent(screen: screenDefinition, context: appContext)
+                                    } else {
+                                        Text("🚫 Destino de navegação não encontrado para ID: \(screenId)")
+                                    }
+                                }
+                            }
                         } else {
-                            Text("🚫 Destino de navegação não encontrado para ID: \(screenId)")
+                            Text("Erro Fatal: Não foi possível obter a tela raiz do Interpreter (mainScreen: \(engine.initialScreenId ?? "N/A"))")
+                                 .foregroundColor(.red)
+                                 .padding()
                         }
                     }
                 }
@@ -34,10 +73,13 @@ struct DSLApp: App {
             } else {
                 Color.clear
                     .onAppear {
-                        RegistrySetup.registerAll()
-                        engine.start(context: appContext)
+                        if !appContext.isInitialLoadComplete {
+                            print("--- App.onAppear: Loading initial state...")
+                            RegistrySetup.registerAll()
+                            engine.start(context: appContext, interpreter: interpreter)
+                        }
                     }
-            }
+             }
         }
     }
     
@@ -82,4 +124,3 @@ struct DSLApp: App {
         }
     }
 }
-
