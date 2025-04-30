@@ -3,6 +3,14 @@
    version = "1.0">
    <ContextStates>
       <ContextState
+         contextName = "static ToggleView.render(_:context:):ToggleView.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "node[&quot;var&quot;] as? String">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
          contextName = "closure #1 in DSLApp.body.getter:App.swift">
          <PersistentStrings>
             <PersistentString

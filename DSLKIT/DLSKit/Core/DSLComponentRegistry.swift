@@ -37,5 +37,7 @@ public class DSLComponentRegistry {
         ZStackView.register()
         LabelView.register()
         MenuView.register()
+        SpacerView.register()
+        PickerView.register()
     }
 }
