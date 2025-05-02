@@ -1,7 +1,9 @@
 {
   "mainScreen": "profileScreen",
   "context": {
-    "dataset": []
+    "profileScreen": {
+      "dataset": [0,1,2,3,4,5,6,7,8]
+    }
   },
   "screens": [
     {
@@ -15,55 +17,27 @@
       },
       "body": [
         {
-          "type": "vstack",
-          "alignment": "center",
-          "children": [
-            {
-              "type": "button",
-              "children": [
-                {
-                  "type": "text",
-                  "value": "Add"
-                }
-              ],
-              "onTap": {
-                "sequence": [
-                  {
-                      "Array.append": {
-                          "var": "dataset",
-                          "value": 1
-                      }
-                  }
-                ]
-              },
+          "type": "list",
+          "data": {"var": "profileScreen.dataset"},
+          "children":
+          {
+              "type": "text",
+              "value": {"var": "profileScreen.dataset[currentItemIndex]"},
               "modifiers": [
                 {
-                  "frame": {
-                    "maxWidth": ".infinity"
-                  }
+                  "foreground": "#000000"
                 },
                 {
-                  "padding": 14
+                  "listRowSeparator": "hidden"
                 },
                 {
-                  "cornerRadius": 20
+                  "padding": 25
                 }
               ]
-            },
+          },
+          "modifiers": [
             {
-              "type": "list",
-              "data": {"var": "dataset"},
-              "visible": {"Logic.neq": [{"var": "dataset"}, []]},
-              "children":
-              {
-                  "type": "text",
-                  "value": {"var": "dataset[currentItemIndex]"},
-                  "modifiers": [
-                    {
-                      "foreground": "#000000"
-                    }
-                  ]
-              }
+              "listStyle": "plain"
             }
           ]
         }

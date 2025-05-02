@@ -10,33 +10,9 @@ public struct ListView {
         let originalValue: Any // Keep the original value if needed, though maybe not directly used here
     }
     
-    // REMOVE Hashable struct
+    // REMOVE Row Wrapper View
     /*
-    private struct ListItemData: Hashable {
-        let index: Int
-        // Use a hash representation of the value. Hashing Any is tricky.
-        // Using description's hash is a basic approach, might need refinement
-        // depending on the complexity and types of data expected.
-        let valueHash: Int
-
-        // Implement Hashable
-        func hash(into hasher: inout Hasher) {
-            hasher.combine(index)
-            hasher.combine(valueHash)
-        }
-
-        // Implement Equatable (needed for Hashable)
-        static func == (lhs: ListItemData, rhs: ListItemData) -> Bool {
-            return lhs.index == rhs.index && lhs.valueHash == rhs.valueHash
-        }
-
-        // Failable initializer to create from Any, calculating hash
-        init?(index: Int, value: Any) {
-            self.index = index
-            // Create hash from the value's string description
-            self.valueHash = String(describing: value).hashValue
-        }
-    }
+    private struct ListRowWrapper: View { ... }
     */
 
     public static func render(_ node: [String: Any], context: DSLContext) -> AnyView {
@@ -44,80 +20,66 @@ public struct ListView {
         guard let dataExpr = node["data"] else { // Get the expression itself
             return AnyView(Text("List Error: Missing 'data' source definition"))
         }
-        // Remove logging for dataVarName, as we use the expression directly
-        // print("--- DEBUG: ListView.render - Attempting to read data using expression: \(dataExpr)")
 
         // 2) Extract row template
         guard let rowContentTemplate = node["children"] as? [String: Any] else {
             return AnyView(Text("List Error: Missing 'children' template"))
         }
+        
+        // REMOVE Separator Config Extraction 
+        /*
+        var separatorVisible: Bool = true // Default
+        var separatorColor: Color? = nil
+        let allModifiers = node["modifiers"] as? [[String: Any]] ?? [] // Get all modifiers
+        // ... (extraction logic removed) ...
+        */
 
         // 3) Evaluate the data source expression to get the array
         let resolvedData = DSLExpression.shared.evaluate(dataExpr, context)
         let itemsArray = resolvedData as? [Any] ?? []
-        // Remove extra logging
-        // print("--- DEBUG: ListView.render - Read itemsArray (count: \(itemsArray.count)): \(itemsArray)")
 
         // Create Identifiable items for ForEach
         let indexedItems: [IndexedItem] = itemsArray.enumerated().map { index, element in
             IndexedItem(index: index, originalValue: element) // Use the Identifiable initializer
         }
-        // Remove extra logging
-        // print("--- DEBUG: ListView.render - Created indexedItems (count: \(indexedItems.count))")
-        //print("--- DEBUG: ListView - Rendering \(indexedItems.count) items for variable '\(dataVarName)'")
 
         // 4) Build the List using ForEach with Identifiable items
         let list = List {
-            // Use Identifiable items directly in ForEach
             ForEach(indexedItems) { itemWrapper in
                 // Create a mutable copy of the template for this specific row
                 var rowNode = rowContentTemplate
                 // Inject the current index into the node copy
                 rowNode["_currentIndex"] = itemWrapper.index
-                //print("--- DEBUG: ListView - Rendering row index \(itemWrapper.index)")
-
+                
                 // Render the component using the modified node containing the index
+                // Separator modifiers will be applied by renderComponent if defined in rowNode["modifiers"]
                 return DSLViewRenderer.renderComponent(from: rowNode, context: context)
                     .id(itemWrapper.id) // Use the stable ID from the wrapper
-                    /* // Optional: Debug onAppear
-                     .onAppear {
-                         print("--- DEBUG: ListView row \(itemWrapper.index) APPEARED")
-                     }
-                     */
             }
-            // Potential: Add onDelete/onMove modifiers here if needed,
-            // they would interact with the context via commands.
         }
-        // Remove the .id modifier from the List
-        // .id(itemsArray.map { String(describing: $0) }.joined().hashValue)
 
         // Wrap the List in AnyView for type erasure
         var contentView = AnyView(list)
 
-        // 5) Apply modifiers if they exist
-        if let modifiers = node["modifiers"] as? [[String: Any]] {
-            //print("--- DEBUG: ListView - Applying modifiers")
+        // 5) Apply modifiers (like listStyle, frame, etc.) TO THE LIST VIEW
+        // No filtering needed here, apply all modifiers defined on the list node.
+        if let modifiers = node["modifiers"] as? [[String: Any]] { 
             contentView = modifierRegistry.apply(modifiers, to: contentView, context: context)
         }
         
-        // Aplicar modificadores de ação diretamente do node
         contentView = applyActionModifiers(node: node, context: context, to: contentView)
 
         return contentView
     }
 
-    // processTemplate and areEqual functions are REMOVED
-
-    // --- register function remains unchanged ---
+    // --- register function --- 
     public static func register() {
         DSLComponentRegistry.shared.register("list", builder: render)
         
-        // Registra modificadores de base comuns (frame, padding, background, etc.)
-        // Alguns podem ter efeitos limitados dependendo do listStyle.
-        registerBaseViewModifiers(on: modifierRegistry)
+        // Base modifiers are registered elsewhere
+        // registerBaseViewModifiers(on: modifierRegistry)
         
-        // --- Modificadores Específicos de List ---
-
+        // --- Modifiers Específicos de List (Applied to the List itself) ---
         modifierRegistry.register("listStyle") { view, paramsAny, context in
             let evaluatedStyle = DSLExpression.shared.evaluate(paramsAny, context) as? String
 
@@ -156,6 +118,8 @@ public struct ListView {
             }
         }
 
+        // listRowSeparator is NOT registered here anymore
+
         modifierRegistry.register("safeAreaInset") { view, paramsAny, context in
             guard let params = paramsAny as? [String: Any],
                   let edgeStr = DSLExpression.shared.evaluate(params["edge"], context) as? String,
@@ -192,12 +156,5 @@ public struct ListView {
                 return view // Retorna a view original se a borda for inválida
             }
         } // Fim da closure safeAreaInset
-        
-        // Outros modificadores de Lista:
-        // - environment(\.defaultMinListRowHeight, ...)
-        // - listRowSeparator, listSectionSeparator
-        // - listRowInsets
-        // - refreshable (iOS 15+)
-        // - swipeActions (iOS 15+)
-    } // Fim de register()
+    }
 }

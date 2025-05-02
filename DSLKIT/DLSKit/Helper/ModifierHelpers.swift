@@ -393,6 +393,79 @@ public func registerBaseViewModifiers(on registry: DSLModifierRegistry<AnyView>)
         }
         return view
     }
+
+    // MARK: Environment
+    registry.register("environment") { view, value, context in
+        guard let dict = value as? [String: Any], dict.count == 1, let keyPathStr = dict.keys.first else {
+            print("⚠️ Environment modifier: Invalid parameters. Expected { \"keyPath\": value }")
+            return view
+        }
+        let rawValue = dict[keyPathStr]
+        let evaluatedValue = DSLExpression.shared.evaluate(rawValue, context)
+        
+        // Mapeia strings comuns para keyPaths
+        switch keyPathStr {
+        case "colorScheme":
+            if let schemeStr = evaluatedValue as? String {
+                let scheme: ColorScheme = schemeStr.lowercased() == "dark" ? .dark : .light
+                return AnyView(view.environment(\.colorScheme, scheme))
+            } else {
+                 print("⚠️ Environment modifier (colorScheme): Invalid value type. Expected String ('light' or 'dark').")
+            }
+        // Adicionar outros keyPaths comuns conforme necessário (ex: sizeCategory, layoutDirection)
+        default:
+             print("⚠️ Environment modifier: Unsupported keyPath '\(keyPathStr)'")
+        }
+        return view
+    }
+    
+    // MARK: listRowSeparator
+    registry.register("listRowSeparator") { view, paramsAny, context in
+        let evaluatedParams = DSLExpression.shared.evaluate(paramsAny, context)
+        
+        var isVisible: Bool = true // Default to visible
+        var separatorColor: Color? = nil
+        
+        // Logic to parse params (Bool, String, Dict)
+        if let visibilityBool = evaluatedParams as? Bool {
+            isVisible = visibilityBool
+        } else if let visibilityString = evaluatedParams as? String {
+            if visibilityString.lowercased() == "hidden" { isVisible = false }
+        } else if let paramsDict = evaluatedParams as? [String: Any] {
+            // Parse visibility from dictionary
+            if let visibilityValue = paramsDict["visible"] { 
+                let evaluatedVisibility = DSLExpression.shared.evaluate(visibilityValue, context)
+                if let visibilityBool = evaluatedVisibility as? Bool {
+                    isVisible = visibilityBool
+                } else if let visibilityString = evaluatedVisibility as? String, visibilityString.lowercased() == "hidden" {
+                    isVisible = false
+                }
+                // Default remains true if key exists but value is invalid or 'visible'
+            }
+            // Parse color from dictionary
+            if let colorValue = paramsDict["color"] { 
+                separatorColor = parseColor(DSLExpression.shared.evaluate(colorValue, context))
+                // If color is set, implicitly make separator visible unless explicitly hidden
+                if paramsDict["visible"] == nil { // Only default to visible if visibility wasn't set
+                     isVisible = true
+                }
+            }
+        } else if evaluatedParams != nil && !(evaluatedParams is NSNull) {
+            print("⚠️ listRowSeparator modifier: Invalid parameter type \(type(of: evaluatedParams)). Expected Bool, String, or Dictionary.")
+        }
+        
+        // Apply modifiers to the view passed in
+        var modifiedView = view
+        if #available(iOS 15.0, macOS 12.0, *) {
+            if !isVisible {
+                modifiedView = AnyView(modifiedView.listRowSeparator(.hidden))
+            } else if let color = separatorColor {
+                modifiedView = AnyView(modifiedView.listRowSeparatorTint(color))
+            } // else: default behavior
+        }
+        
+        return modifiedView
+    }
 }
 
 // --- Fim das Funções Auxiliares ---
