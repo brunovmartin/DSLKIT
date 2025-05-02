@@ -4,30 +4,52 @@ public struct TextView {
     static let modifierRegistry = DSLModifierRegistry<AnyView>()
 
     public static func render(_ node: [String: Any], context: DSLContext) -> AnyView {
-        var rawValue = node["value"] // Original expression { "var": "items[currentItemIndex]" } or literal
-        let currentIndex = node["_currentIndex"] as? Int // Check if index was injected by ListView
+        let textValue = node["value"]
+        let currentIndex = node["_currentIndex"] as? Int
 
-        // --- START MODIFICATION ---
-        // If we have an index AND the value expression is a variable path referencing the placeholder...
-        if let index = currentIndex,
-           let valueDict = rawValue as? [String: Any],
-           let path = valueDict["var"] as? String, // Get the path string
-           path.contains("[currentItemIndex]")      // Check if it uses the placeholder
-        {
-            // ...substitute the actual index into the path string BEFORE evaluation.
-            let actualPath = path.replacingOccurrences(of: "[currentItemIndex]", with: "[\(index)]")
-            // Update rawValue to be the new dictionary with the substituted path
-            rawValue = ["var": actualPath] // Now rawValue is e.g., { "var": "items[123]" }
-            //print("--- TextView: Substituted index \(index) into path. New rawValue: \(String(describing: rawValue))")
+        // Função auxiliar RECURSIVA para fazer a substituição (PRECISA SER ADICIONADA)
+        func substituteIndexPathRecursively(_ data: Any, index: Int?) -> Any {
+            guard let idx = index else { return data } // Se não há índice, não faz nada
+
+            if var dict = data as? [String: Any] {
+                if let path = dict["var"] as? String, path.contains("[currentItemIndex]") {
+                    // Encontrou o padrão! Substitui e retorna o dict modificado
+                    let actualPath = path.replacingOccurrences(of: "[currentItemIndex]", with: "[\(idx)]")
+                    dict["var"] = actualPath // Modifica o dicionário
+                    //print("--- Substitute: Found and replaced in var: \(dict)")
+                    return dict
+                } else {
+                    // Não é o padrão {"var":...} ou não contém o placeholder.
+                    // Continua a busca recursiva nos valores do dicionário.
+                    var newDict = [String: Any]()
+                    for (key, value) in dict {
+                        newDict[key] = substituteIndexPathRecursively(value, index: idx)
+                    }
+                   // print("--- Substitute: Processed dict recursively: \(newDict)")
+                    return newDict
+                }
+            } else if let array = data as? [Any] {
+                // Busca recursiva nos elementos do array
+                let newArray = array.map { substituteIndexPathRecursively($0, index: idx) }
+               // print("--- Substitute: Processed array recursively: \(newArray)")
+                return newArray
+            } else {
+                // É um valor literal (String, Int, etc.), retorna como está
+                //print("--- Substitute: Returning literal: \(data)")
+                return data
+            }
         }
-        // --- END MODIFICATION ---
 
-        // Now evaluate the (potentially modified) rawValue expression
-        let evaluatedValue = DSLExpression.shared.evaluate(rawValue, context)
+        // Chama a função recursiva ANTES da avaliação
+        let modifiedRawValue = substituteIndexPathRecursively(textValue ?? "", index: currentIndex)
+        //print("--- TextView: Value after recursive substitution: \(String(describing: modifiedRawValue))")
+
+        // Avalia a expressão potencialmente modificada
+        let evaluatedValue = DSLExpression.shared.evaluate(modifiedRawValue, context) // Passa o valor modificado
 
         let textToDisplay: String
         if let actualValue = evaluatedValue {
-            textToDisplay = "\(actualValue)"
+            textToDisplay = (String(describing: actualValue))
         } else {
             textToDisplay = ""
         }

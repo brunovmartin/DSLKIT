@@ -14,13 +14,13 @@ public class LogicOperators {
         // Logic.eq → igualdade
         DSLOperatorRegistry.shared.register("Logic.eq") { input, _ in
             guard let list = input as? [Any], list.count == 2 else { return false }
-            return "\(list[0])" == "\(list[1])"
+            return areEqual(list[0], list[1])
         }
 
         // Logic.neq → desigualdade
         DSLOperatorRegistry.shared.register("Logic.neq") { input, _ in
             guard let list = input as? [Any], list.count == 2 else { return true }
-            return "\(list[0])" != "\(list[1])"
+            return !areEqual(list[0], list[1])
         }
 
         // Logic.and → todas as condições verdadeiras
@@ -39,6 +39,44 @@ public class LogicOperators {
         DSLOperatorRegistry.shared.register("Logic.not") { input, _ in
             guard let bool = input as? Bool else { return false }
             return !bool
+        }
+    }
+    
+    private static func areEqual(_ lhs: Any?, _ rhs: Any?) -> Bool {
+        switch (lhs, rhs) {
+        case (nil, nil):
+            return true
+        case (is NSNull, is NSNull):
+             return true
+         case (nil, is NSNull), (is NSNull, nil):
+             return true 
+        case (let l as String, let r as String):
+            return l == r
+        case (let l as NSNumber, let r as NSNumber):
+             return l == r
+         case (let l as Int, let r as Int):
+             return l == r
+         case (let l as Double, let r as Double):
+             return l == r
+         case (let l as Bool, let r as Bool):
+             return l == r
+        case (let l as [String: Any], let r as [String: Any]):
+            return NSDictionary(dictionary: l).isEqual(to: r)
+        case (let l as [Any], let r as [Any]):
+            guard l.count == r.count else { return false }
+            for (index, element) in l.enumerated() {
+                if !areEqual(element, r[index]) {
+                    return false
+                }
+            }
+            return true
+        case (let swiftArray as [Any], let nsArray as NSArray):
+            return swiftArray.isEmpty && nsArray.count == 0
+        case (let nsArray as NSArray, let swiftArray as [Any]):
+            return swiftArray.isEmpty && nsArray.count == 0
+        default:
+            print("⚠️ areEqual: Comparing unhandled types \(type(of: lhs)) and \(type(of: rhs)). Returning false.")
+            return false
         }
     }
 }

@@ -2,51 +2,153 @@ import Foundation
 
 public class ArrayCommands {
     public static func registerAll() {
-        DSLCommandRegistry.shared.register("append") { payload, context in
+        DSLCommandRegistry.shared.register("Array.append") { payload, context in
             guard let params = payload as? [String: Any],
-                  let key = params["var"] as? String,
+                  let targetPath = params["var"] as? String,
                   let valueExpr = params["value"]
             else {
-                //print("⚠️ Comando 'append' inválido: payload incompleto ou mal formatado. Payload: \(String(describing: payload))")
+                print("⚠️ Comando 'append' inválido: payload incompleto ou mal formatado. Payload: \(String(describing: payload))")
                 return
             }
 
             let valueToAdd = DSLExpression.shared.evaluate(valueExpr, context)
 
-            guard let valueToAdd = valueToAdd else {
-                 //print("⚠️ Comando 'append': valor a ser adicionado resultou em nil após avaliação.")
-                 return
-            }
+            let components = VariableCommands.parsePathComponents(targetPath, context: context)
 
-            var currentArray: [Any] = []
-            if let existingArray = context.get(key) as? [Any] {
-                currentArray = existingArray
-            } else if context.get(key) != nil {
-                //print("⚠️ Comando 'append': Variável '\(key)' existe mas não é um array.")
+            guard !components.isEmpty, let baseVar = components[0] as? String else {
+                print("⚠️ Comando 'append': Path inválido ou não inicia com variável. Path: \(targetPath)")
                 return
             }
 
-            currentArray.append(valueToAdd)
-            //print("--- DEBUG: ArrayCommands 'append' - Appending to '\(key)', New array count: \(currentArray.count)")
+            var mutableValue: Any
+            if let existingValue = context.get(baseVar), !(existingValue is NSNull) {
+                 mutableValue = existingValue
+            } else {
+                if components.count > 1 {
+                    if components[1] is String {
+                        print("--- DEBUG: 'append' - Initializing base dictionary '\(baseVar)' for path.")
+                        mutableValue = [String: Any]()
+                    } else if components[1] is Int {
+                        print("--- DEBUG: 'append' - Initializing base array '\(baseVar)' for path.")
+                        mutableValue = [Any]()
+                    } else {
+                        print("⚠️ 'append' - Base var '\(baseVar)' not found, cannot determine initial type from path component: \(components[1]).")
+                        return
+                    }
+                } else if components.count == 1 {
+                    print("--- DEBUG: 'append' - Initializing base variable '\(baseVar)' as array.")
+                    mutableValue = [Any]()
+                } else {
+                     print("⚠️ 'append' - Cannot handle empty path.")
+                     return
+                }
+            }
 
-            context.set(key, to: currentArray)
+            context.objectWillChange.send()
+
+            let pathRemainder = Array(components.dropFirst())
+            if appendAtPath(&mutableValue, pathComponents: pathRemainder, valueToAppend: valueToAdd ?? NSNull()) {
+                context.set(baseVar, to: mutableValue)
+                print("--- DEBUG: 'append' - Path append successful for: \(targetPath)")
+            } else {
+                print("⚠️ 'append' - Path append failed for: \(targetPath)")
+            }
         }
         
         DSLOperatorRegistry.shared.register("Array.count") { input, context in
-            // 1. Avalia a expressão passada para o operador (ex: pode ser {"var": "items"})
-            //    Isso garante que se o input for {"var": "nomeArray"}, ele resolva para o array real.
             let evaluatedInput = DSLExpression.shared.evaluate(input, context)
-
-            // 2. Verifica se o resultado da avaliação é um Array
             guard let array = evaluatedInput as? [Any] else {
-//                print("⚠️ Array.count: Input não resultou em um array após avaliação. Input: \(String(describing: input)), Evaluated: \(String(describing: evaluatedInput))")
-                return nil // Ou talvez 0, dependendo de como quer tratar erros
+                return nil
             }
-
-            // 3. Retorna a contagem do array (como Int)
-//            print("--- DEBUG: Array.count - Array evaluated, count: \(array.count)")
             return array.count
         }
         
+    }
+
+    private static func appendAtPath(_ data: inout Any, pathComponents: [Any], valueToAppend: Any) -> Bool {
+        guard !pathComponents.isEmpty else {
+            guard var array = data as? [Any] else {
+                if data is NSNull { 
+                    print("--- DEBUG: appendAtPath - Initializing array at target path.")
+                    var newArray = [Any]()
+                    newArray.append(valueToAppend)
+                    data = newArray
+                    return true
+                }
+                print("⚠️ appendAtPath: Target is not an array and not nil/NSNull. Cannot append. Data: \(data)")
+                return false
+            }
+            array.append(valueToAppend)
+            data = array
+            return true
+        }
+
+        var nextComponents = pathComponents
+        let currentKeyOrIndex = nextComponents.removeFirst()
+
+        if let key = currentKeyOrIndex as? String {
+            guard var dict = data as? [String: Any] else {
+                if data is NSNull { 
+                     print("--- DEBUG: appendAtPath - Initializing intermediate dictionary for key '\(key)'.")
+                     var newDictAsAny: Any = [String: Any]()
+                     if appendAtPath(&newDictAsAny, pathComponents: nextComponents, valueToAppend: valueToAppend) {
+                         data = newDictAsAny
+                         return true
+                     } else {
+                         return false
+                     }
+                 } else {
+                     print("⚠️ appendAtPath: Trying to access key '\(key)' on non-dictionary. Data: \(data)")
+                     return false
+                 }
+            }
+            var subValue: Any = dict[key] ?? NSNull()
+
+            if appendAtPath(&subValue, pathComponents: nextComponents, valueToAppend: valueToAppend) {
+                dict[key] = subValue
+                data = dict
+                return true
+            } else {
+                return false
+            }
+        } else if let index = currentKeyOrIndex as? Int {
+            guard var array = data as? [Any] else {
+                 if data is NSNull { 
+                     print("--- DEBUG: appendAtPath - Initializing intermediate array for index \(index). Note: Will extend with NSNull if needed.")
+                     var newArrayAsAny: Any = [Any]()
+                     if var tempArray = newArrayAsAny as? [Any] {
+                         while index >= tempArray.count {
+                             tempArray.append(NSNull())
+                         }
+                         newArrayAsAny = tempArray
+                     }
+                     if appendAtPath(&newArrayAsAny, pathComponents: nextComponents, valueToAppend: valueToAppend) {
+                         data = newArrayAsAny
+                         return true
+                     } else {
+                         return false
+                     }
+                 } else {
+                     print("⚠️ appendAtPath: Trying to access index \(index) on non-array. Data: \(data)")
+                     return false
+                 }
+            }
+
+            while index >= array.count {
+                array.append(NSNull())
+            }
+            var subValue: Any = array[index]
+
+            if appendAtPath(&subValue, pathComponents: nextComponents, valueToAppend: valueToAppend) {
+                array[index] = subValue
+                data = array
+                return true
+            } else {
+                return false
+            }
+        } else {
+            print("⚠️ appendAtPath: Invalid path component type: \(currentKeyOrIndex)")
+            return false
+        }
     }
 }

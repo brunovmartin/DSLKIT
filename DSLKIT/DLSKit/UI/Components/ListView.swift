@@ -3,35 +3,72 @@ import SwiftUI
 public struct ListView {
     static let modifierRegistry = DSLModifierRegistry<AnyView>()
 
-    // Wrapper struct to make items Identifiable for ForEach
+    // ADD BACK IndexedItem struct
     private struct IndexedItem: Identifiable {
         let id = UUID() // Use UUID for unique ID if data has no inherent ID
         let index: Int
         let originalValue: Any // Keep the original value if needed, though maybe not directly used here
     }
+    
+    // REMOVE Hashable struct
+    /*
+    private struct ListItemData: Hashable {
+        let index: Int
+        // Use a hash representation of the value. Hashing Any is tricky.
+        // Using description's hash is a basic approach, might need refinement
+        // depending on the complexity and types of data expected.
+        let valueHash: Int
+
+        // Implement Hashable
+        func hash(into hasher: inout Hasher) {
+            hasher.combine(index)
+            hasher.combine(valueHash)
+        }
+
+        // Implement Equatable (needed for Hashable)
+        static func == (lhs: ListItemData, rhs: ListItemData) -> Bool {
+            return lhs.index == rhs.index && lhs.valueHash == rhs.valueHash
+        }
+
+        // Failable initializer to create from Any, calculating hash
+        init?(index: Int, value: Any) {
+            self.index = index
+            // Create hash from the value's string description
+            self.valueHash = String(describing: value).hashValue
+        }
+    }
+    */
 
     public static func render(_ node: [String: Any], context: DSLContext) -> AnyView {
-        // 1) Extract data source
-        guard let dataExpr = node["data"] as? [String: Any],
-              let dataVarName = dataExpr["var"] as? String else {
-            return AnyView(Text("List Error: Missing or invalid 'data' source definition: \(String(describing: node["data"]))"))
+        // 1) Extract data source expression
+        guard let dataExpr = node["data"] else { // Get the expression itself
+            return AnyView(Text("List Error: Missing 'data' source definition"))
         }
+        // Remove logging for dataVarName, as we use the expression directly
+        // print("--- DEBUG: ListView.render - Attempting to read data using expression: \(dataExpr)")
 
         // 2) Extract row template
-        guard let rowContentTemplate = node["rowContent"] as? [String: Any] else {
-            return AnyView(Text("List Error: Missing 'rowContent' template"))
+        guard let rowContentTemplate = node["children"] as? [String: Any] else {
+            return AnyView(Text("List Error: Missing 'children' template"))
         }
 
-        // 3) Get data and wrap for ForEach
-        let itemsArray = context.get(dataVarName) as? [Any] ?? []
+        // 3) Evaluate the data source expression to get the array
+        let resolvedData = DSLExpression.shared.evaluate(dataExpr, context)
+        let itemsArray = resolvedData as? [Any] ?? []
+        // Remove extra logging
+        // print("--- DEBUG: ListView.render - Read itemsArray (count: \(itemsArray.count)): \(itemsArray)")
+
         // Create Identifiable items for ForEach
         let indexedItems: [IndexedItem] = itemsArray.enumerated().map { index, element in
-            IndexedItem(index: index, originalValue: element)
+            IndexedItem(index: index, originalValue: element) // Use the Identifiable initializer
         }
+        // Remove extra logging
+        // print("--- DEBUG: ListView.render - Created indexedItems (count: \(indexedItems.count))")
         //print("--- DEBUG: ListView - Rendering \(indexedItems.count) items for variable '\(dataVarName)'")
 
         // 4) Build the List using ForEach with Identifiable items
         let list = List {
+            // Use Identifiable items directly in ForEach
             ForEach(indexedItems) { itemWrapper in
                 // Create a mutable copy of the template for this specific row
                 var rowNode = rowContentTemplate
@@ -42,7 +79,7 @@ public struct ListView {
                 // Render the component using the modified node containing the index
                 return DSLViewRenderer.renderComponent(from: rowNode, context: context)
                     .id(itemWrapper.id) // Use the stable ID from the wrapper
-                     /* // Optional: Debug onAppear
+                    /* // Optional: Debug onAppear
                      .onAppear {
                          print("--- DEBUG: ListView row \(itemWrapper.index) APPEARED")
                      }
@@ -51,6 +88,8 @@ public struct ListView {
             // Potential: Add onDelete/onMove modifiers here if needed,
             // they would interact with the context via commands.
         }
+        // Remove the .id modifier from the List
+        // .id(itemsArray.map { String(describing: $0) }.joined().hashValue)
 
         // Wrap the List in AnyView for type erasure
         var contentView = AnyView(list)

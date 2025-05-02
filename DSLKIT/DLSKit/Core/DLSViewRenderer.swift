@@ -88,6 +88,17 @@ public struct DSLViewRenderer {
 
     // --- renderComponent e renderChildren permanecem os mesmos ---
     public static func renderComponent(from node: [String: Any], context: DSLContext) -> AnyView {
+        // --- START: Visibility Check ---
+        if let visibleExpr = node["visible"] { // Verifica se a chave 'visible' existe
+            // Avalia a expressão. Assume 'true' por padrão se a avaliação falhar ou não for booleana.
+            let shouldShow = DSLExpression.shared.evaluate(visibleExpr, context) as? Bool ?? true
+
+            if !shouldShow {
+                // Se a expressão for avaliada como 'false', retorna EmptyView imediatamente.
+                return AnyView(EmptyView())
+            }
+        }
+        
          if let type = node["type"] as? String,
             let builder = DSLComponentRegistry.shared.resolve(type) {
              return builder(node, context)

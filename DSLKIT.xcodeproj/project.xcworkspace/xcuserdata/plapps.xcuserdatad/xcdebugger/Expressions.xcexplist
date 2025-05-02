@@ -3,6 +3,41 @@
    version = "1.0">
    <ContextStates>
       <ContextState
+         contextName = "DSLExpression.resolvePath(_:context:):DSLExpression.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "dict[key]">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "closure #1 in DSLApp.body.getter:App.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "appContext.get(&quot;environmentColorScheme&quot;)">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "static ListView.render(_:context:):ListView.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "node[&quot;children&quot;]">
+            </PersistentString>
+            <PersistentString
+               value = "(node[&quot;data&quot;] as? [String: Any])">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "closure #2 in static ArrayCommands.registerAll():ArrayCommands.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "array.count">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
          contextName = "closure #2 in static StringOperators.registerAll():StringOperators.swift">
          <PersistentStrings>
             <PersistentString
@@ -19,12 +54,10 @@
          </PersistentStrings>
       </ContextState>
       <ContextState
-         contextName = "closure #1 in DSLApp.body.getter:App.swift">
-         <PersistentStrings>
-            <PersistentString
-               value = "appContext.get(&quot;environmentColorScheme&quot;)">
-            </PersistentString>
-         </PersistentStrings>
+         contextName = "closure #1 in closure #2 in static ListView.render(_:context:):ListView.swift">
+      </ContextState>
+      <ContextState
+         contextName = "closure #1 in static ArrayCommands.registerAll():ArrayCommands.swift">
       </ContextState>
    </ContextStates>
 </VariablesViewState>

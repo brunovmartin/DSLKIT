@@ -52,12 +52,6 @@ public class DSLContext: ObservableObject {
         // @Published cuida da notificação APÓS a mudança
     }
 
-    /// Evaluate a raw expression in the context of this DSL.
-    /// - Parameter expr: Can be a literal, a binding, or other supported expression type.
-    /// - Returns: The result of evaluation.
-    public func evaluate(_ expr: Any) -> Any? {
-        DSLExpression.shared.evaluate(expr, self)
-    }
 
     /// Subscript to get or set context values directly.
     public subscript(key: String) -> Any? {
@@ -133,7 +127,7 @@ public class DSLContext: ObservableObject {
             
             for (key, value) in storage {
                 if let expression = value as? [String: Any] {
-                    let resolvedValue = evaluate(expression)
+                    let resolvedValue = DSLExpression.shared.evaluate(expression, self)
                     if !areEqual(value, resolvedValue) {
                         set(key: key, value: resolvedValue)
                         hasChanges = true
