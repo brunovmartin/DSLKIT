@@ -41,10 +41,12 @@ public class DSLExpression {
         // Caso 2: Dicionário Literal
         if let dict = expr as? [String: Any] {
              print("--- DEBUG: DSLExpression - Evaluating Dictionary Literal Values: \(dict)")
-             // Avalia valores do dicionário de forma síncrona
-             var evaluatedDict: [String: Any] = [:]
+             var evaluatedDict: [String: Any] = [:] // Must be [String: Any]
              for (key, value) in dict {
-                 evaluatedDict[key] = evaluate(value, context) // Avaliação recursiva SEM overrides
+                 // Evaluate recursively. If result is not nil, add to dict.
+                 if let evaluatedValue = evaluate(value, context) { 
+                     evaluatedDict[key] = evaluatedValue
+                 } // Implicitly skip if evaluate returns nil
              }
              print("--- DEBUG: DSLExpression - Evaluated Dictionary Literal: \(evaluatedDict)")
              return evaluatedDict
@@ -53,14 +55,15 @@ public class DSLExpression {
         // Caso 3: Array Literal
         if let array = expr as? [Any] {
              print("--- DEBUG: DSLExpression - Evaluating Array Literal items...")
-             // Avalia itens do array de forma síncrona
-             let evaluatedArray = array.map { evaluate($0, context) } // Avaliação recursiva SEM overrides
+             // Use compactMap to evaluate items and filter out nil results.
+             // The result is [Any], not [Any?].
+             let evaluatedArray = array.compactMap { evaluate($0, context) } 
              print("--- DEBUG: DSLExpression - Evaluated Array Literal: \(evaluatedArray)")
              return evaluatedArray
         }
 
         // Caso 4: Outros Literais Primitivos
-        ////print("--- DEBUG: DSLExpression - Returning literal primitive: \(expr)")
+        // Retorna o próprio literal, que já é Any (não Any?)
         return expr
     }
 
@@ -75,41 +78,81 @@ public class DSLExpression {
 
         for component in components.dropFirst() {
             let currentNonNullValue = (currentValue is NSNull) ? nil : currentValue
-            guard currentNonNullValue != nil else {
-                return nil
-            }
+            guard currentNonNullValue != nil else { return nil }
 
-            if let index = component as? Int { // Acesso a Array por Índice Numérico
-                guard let array = currentNonNullValue as? [Any] else { return nil }
-                guard index >= 0 && index < array.count else { return nil }
+            // --- Refactored Logic --- 
+            switch component {
+            case let index as Int:
+                // Direct integer index access
+                guard let array = currentNonNullValue as? [Any] else { 
+                    print("⚠️ Path Resolution: Trying to access index \(index) on non-array: \(currentNonNullValue!)")
+                    return nil 
+                }
+                guard index >= 0 && index < array.count else { 
+                    print("⚠️ Path Resolution: Index \(index) out of bounds for array of count \(array.count).")
+                    return nil 
+                }
                 currentValue = array[index]
-            } 
-            else if let key = component as? String {
-                // Verifica se é uma chave dinâmica
+
+            case let key as String:
+                // String key access (literal or variable)
                 if key.hasPrefix("VAR::") {
-                    let variableName = String(key.dropFirst(5)) // Remove "VAR::"
-                    // Avalia a variável para obter a chave real (ex: "light" ou "dark")
-                    guard let resolvedKey = evaluate(["var": variableName], context) as? String else {
-                         print("⚠️ Path Resolution: Dynamic key variable '\(variableName)' not found or not a String.")
-                         return nil
-                    }
-                    // Usa a chave resolvida para acessar o dicionário
-                    guard let dict = currentNonNullValue as? [String: Any] else {
-                        print("⚠️ Path Resolution: Trying to access dynamic key '\(resolvedKey)' on non-dictionary: \(currentNonNullValue!)")
+                    // --- Variable Key/Index --- 
+                    let variableName = String(key.dropFirst(5))
+                    guard let resolvedVariable = evaluate(["var": variableName], context) else {
+                        print("⚠️ Path Resolution: Variable '\(variableName)' not found in context.")
                         return nil
                     }
-                    print("--- DEBUG: Path Resolution - Using dynamic key: \(resolvedKey)")
-                    currentValue = dict[resolvedKey]
-                } else { 
-                    // Chave literal normal
-                    guard let dict = currentNonNullValue as? [String: Any] else { return nil }
+                    
+                    // Check type of current value to determine access method
+                    if let dict = currentNonNullValue as? [String: Any] {
+                        // Access Dictionary with resolved variable (must resolve to String key)
+                        guard let resolvedKey = resolvedVariable as? String else {
+                            print("⚠️ Path Resolution: Variable '\(variableName)' did not resolve to a String key for dictionary access.")
+                            return nil
+                        }
+                        print("--- DEBUG: Path Resolution - Using dynamic key: \(resolvedKey)")
+                        currentValue = dict[resolvedKey]
+                    } else if let array = currentNonNullValue as? [Any] {
+                        // Access Array with resolved variable (must resolve to Int index)
+                        guard let resolvedIndex = resolvedVariable as? Int else {
+                            print("⚠️ Path Resolution: Variable '\(variableName)' did not resolve to an Int index for array access.")
+                            return nil
+                        }
+                         print("--- DEBUG: Path Resolution - Using dynamic index: \(resolvedIndex)")
+                        guard resolvedIndex >= 0 && resolvedIndex < array.count else { 
+                            print("⚠️ Path Resolution: Resolved index \(resolvedIndex) out of bounds for array of count \(array.count).")
+                            return nil 
+                        }
+                        currentValue = array[resolvedIndex]
+                    } else {
+                        print("⚠️ Path Resolution: Cannot use variable '\(variableName)' to access non-dictionary/non-array: \(currentNonNullValue!)")
+                        return nil
+                    }
+                    // --- End Variable Key/Index ---
+                } else {
+                    // --- Literal String Key --- 
+                    guard let dict = currentNonNullValue as? [String: Any] else { 
+                        print("⚠️ Path Resolution: Trying to access literal key '\(key)' on non-dictionary: \(currentNonNullValue!)")
+                        return nil 
+                    }
                     currentValue = dict[key]
+                    // --- End Literal String Key ---
                 }
+                
+            default:
+                 // Invalid component type
+                 print("⚠️ Path Resolution: Invalid component type: \(component)")
+                 return nil
             }
-            else { 
-                return nil // Componente inválido
-            }
+             // --- End Refactored Logic ---
         }
-        return (currentValue is NSNull) ? nil : currentValue
+
+        // Return unwrapped value or nil (already corrected)
+        if let finalValue = currentValue, !(finalValue is NSNull) {
+            return finalValue 
+        } else {
+            return nil
+        }
     }
 }
