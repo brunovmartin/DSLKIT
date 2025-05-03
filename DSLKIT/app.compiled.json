@@ -9,7 +9,8 @@
           "iconName": "person.crop.circle.fill",
           "iconColor": "gray",
           "sender": "Wonka Industries",
-          "preview": "10 bizarre money habits making...",
+          "subject": "Regarding Your Golden Ticket",
+          "description": "An important update regarding your recent factory tour application and the upcoming selection process.",
           "timestamp": "12:28 AM",
           "isSelected": false
         },
@@ -18,7 +19,8 @@
           "iconName": "building.2.crop.circle.fill",
            "iconColor": "blue",
           "sender": "J-Texon",
-          "preview": "Great work facilitating the sync today. I took some notes to keep...",
+          "subject": "Meeting Notes & Follow-up",
+          "description": "Great work facilitating the sync today. I took some notes to keep track of action items and next steps.",
           "timestamp": "8:36 PM",
           "isSelected": true
         },
@@ -27,7 +29,8 @@
           "iconName": "a.circle.fill",
            "iconColor": "indigo",
           "sender": "Leif Floyd",
-          "preview": "Bummer I had to miss your presentation! I just got a chance ...",
+          "subject": "Presentation Feedback",
+          "description": "Bummer I had to miss your presentation! I just got a chance to review the slides, excellent work!",
           "timestamp": "12:36 PM",
           "isSelected": false
         },
@@ -36,7 +39,8 @@
           "iconName": "p.circle.fill",
            "iconColor": "green",
           "sender": "Projeto Alpha",
-          "preview": "Reunião de alinhamento agendada para amanhã.",
+          "subject": "Agendamento: Reunião de Alinhamento",
+          "description": "Confirmando a reunião de alinhamento para amanhã às 10h. Por favor, verifique sua agenda.",
           "timestamp": "11:15 AM",
           "isSelected": false
         },
@@ -45,7 +49,8 @@
           "iconName": "briefcase.circle.fill",
            "iconColor": "orange",
           "sender": "Recursos Humanos",
-          "preview": "Atualização sobre as políticas de férias.",
+          "subject": "Atualização: Políticas de Férias 2024",
+          "description": "Segue anexo o documento atualizado com as novas políticas de férias para o próximo ano fiscal.",
           "timestamp": "10:02 AM",
           "isSelected": false
         },
@@ -54,7 +59,8 @@
           "iconName": "t.circle.fill",
            "iconColor": "red",
           "sender": "Time de Suporte",
-          "preview": "Seu chamado #12345 foi atualizado.",
+          "subject": "Atualização Chamado #12345",
+          "description": "Seu chamado #12345 foi atualizado. Status: Aguardando informações adicionais.",
           "timestamp": "9:48 AM",
           "isSelected": false
         },
@@ -63,7 +69,8 @@
           "iconName": "cart.circle.fill",
            "iconColor": "purple",
           "sender": "Loja Exemplo",
-          "preview": "Confirmação do seu pedido XZ-987.",
+          "subject": "Confirmação Pedido XZ-987",
+          "description": "Obrigado por comprar conosco! Seu pedido XZ-987 foi confirmado e será enviado em breve.",
           "timestamp": "Ontem",
           "isSelected": false
         },
@@ -72,7 +79,8 @@
           "iconName": "calendar.circle.fill",
           "iconColor": "teal",
           "sender": "Agenda Pessoal",
-          "preview": "Lembrete: Consulta médica às 15h.",
+          "subject": "Lembrete: Consulta Médica",
+          "description": "Lembrete amigável da sua consulta médica hoje às 15h com Dr. Smith.",
           "timestamp": "Ontem",
           "isSelected": false
         },
@@ -81,7 +89,8 @@
           "iconName": "graduationcap.circle.fill",
            "iconColor": "brown",
           "sender": "Curso Online",
-          "preview": "Novo módulo disponível: SwiftUI Avançado.",
+          "subject": "Novo Módulo: SwiftUI Avançado",
+          "description": "Ótimas notícias! O novo módulo 'SwiftUI Avançado: Animações e Gestos' já está disponível na plataforma.",
           "timestamp": "Sexta",
           "isSelected": false
         },
@@ -90,7 +99,8 @@
           "iconName": "star.circle.fill",
           "iconColor": "yellow",
           "sender": "Notícias Semanais",
-          "preview": "Resumo das principais notícias da tecnologia.",
+          "subject": "Resumo Semanal de Notícias Tech",
+          "description": "Confira as principais notícias de tecnologia desta semana, incluindo IA generativa e novos lançamentos.",
           "timestamp": "Quinta",
           "isSelected": false
         }
@@ -170,7 +180,7 @@
                             "type": "text",
                             "value": { "var": "inboxScreen.items[currentItemIndex].sender" },
                             "modifiers": [
-                               { "font": { "weight": "semibold" } },
+                               { "font": { "style": "headline" } },
                                { "foreground": {
                                      "Operator.if": {
                                         "condition": { "var": "inboxScreen.items[currentItemIndex].isSelected" },
@@ -183,10 +193,27 @@
                          },
                          {
                             "type": "text",
-                            "value": { "var": "inboxScreen.items[currentItemIndex].preview" },
+                            "value": { "var": "inboxScreen.items[currentItemIndex].subject" },
+                            "modifiers": [
+                               { "font": { "style": "subheadline", "weight": "semibold" } },
+                               { "lineLimit": 1 },
+                               { "truncationMode": "tail" },
+                               { "foreground": {
+                                     "Operator.if": {
+                                        "condition": { "var": "inboxScreen.items[currentItemIndex].isSelected" },
+                                        "then": "white",
+                                        "else": "black"
+                                     }
+                                  }
+                               }
+                            ]
+                         },
+                         {
+                            "type": "text",
+                            "value": { "var": "inboxScreen.items[currentItemIndex].description" },
                             "modifiers": [
                                { "font": { "style": "subheadline" } },
-                               { "lineLimit": 1 },
+                               { "lineLimit": 2 },
                                { "truncationMode": "tail" },
                                { "foreground": {
                                      "Operator.if": {
