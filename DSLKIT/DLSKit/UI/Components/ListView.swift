@@ -46,14 +46,12 @@ public struct ListView {
         // 4) Build the List using ForEach with Identifiable items
         let list = List {
             ForEach(indexedItems) { itemWrapper in
-                // Create a mutable copy of the template for this specific row
-                var rowNode = rowContentTemplate
-                // Inject the current index into the node copy
-                rowNode["_currentIndex"] = itemWrapper.index
-                
-                // Render the component using the modified node containing the index
-                // Separator modifiers will be applied by renderComponent if defined in rowNode["modifiers"]
-                return DSLViewRenderer.renderComponent(from: rowNode, context: context)
+                // Create a context specific to this item's index
+                let itemContext = context.contextForIndex(itemWrapper.index) // Cria contexto filho
+
+                // Render the component using the item-specific context
+                // A avaliação da expressão dentro de renderComponent agora usará itemContext
+                return DSLViewRenderer.renderComponent(from: rowContentTemplate, context: itemContext) // Passa itemContext
                     .id(itemWrapper.id) // Use the stable ID from the wrapper
             }
         }

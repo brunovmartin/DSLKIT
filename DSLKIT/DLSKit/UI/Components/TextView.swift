@@ -5,47 +5,10 @@ public struct TextView {
 
     public static func render(_ node: [String: Any], context: DSLContext) -> AnyView {
         let textValue = node["value"]
-        let currentIndex = node["_currentIndex"] as? Int
+        // let currentIndex = node["_currentIndex"] as? Int // Não é mais lido diretamente aqui
 
-        // Função auxiliar RECURSIVA para fazer a substituição (PRECISA SER ADICIONADA)
-        func substituteIndexPathRecursively(_ data: Any, index: Int?) -> Any {
-            guard let idx = index else { return data } // Se não há índice, não faz nada
-
-            if var dict = data as? [String: Any] {
-                if let path = dict["var"] as? String, path.contains("[currentItemIndex]") {
-                    // Encontrou o padrão! Substitui e retorna o dict modificado
-                    let actualPath = path.replacingOccurrences(of: "[currentItemIndex]", with: "[\(idx)]")
-                    dict["var"] = actualPath // Modifica o dicionário
-                    //print("--- Substitute: Found and replaced in var: \(dict)")
-                    return dict
-                } else {
-                    // Não é o padrão {"var":...} ou não contém o placeholder.
-                    // Continua a busca recursiva nos valores do dicionário.
-                    var newDict = [String: Any]()
-                    for (key, value) in dict {
-                        newDict[key] = substituteIndexPathRecursively(value, index: idx)
-                    }
-                   // print("--- Substitute: Processed dict recursively: \(newDict)")
-                    return newDict
-                }
-            } else if let array = data as? [Any] {
-                // Busca recursiva nos elementos do array
-                let newArray = array.map { substituteIndexPathRecursively($0, index: idx) }
-               // print("--- Substitute: Processed array recursively: \(newArray)")
-                return newArray
-            } else {
-                // É um valor literal (String, Int, etc.), retorna como está
-                //print("--- Substitute: Returning literal: \(data)")
-                return data
-            }
-        }
-
-        // Chama a função recursiva ANTES da avaliação
-        let modifiedRawValue = substituteIndexPathRecursively(textValue ?? "", index: currentIndex)
-        //print("--- TextView: Value after recursive substitution: \(String(describing: modifiedRawValue))")
-
-        // Avalia a expressão potencialmente modificada
-        let evaluatedValue = DSLExpression.shared.evaluate(modifiedRawValue, context) // Passa o valor modificado
+        // Avalia a expressão. DSLExpression usará context.currentIndex internamente se necessário.
+        let evaluatedValue = DSLExpression.shared.evaluate(textValue, context) // Passa o contexto recebido
 
         let textToDisplay: String
         if let actualValue = evaluatedValue {

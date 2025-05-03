@@ -202,7 +202,7 @@ public func registerBaseViewModifiers(on registry: DSLModifierRegistry<AnyView>)
         // Garante que o raio é um número não negativo
         guard let radius = castToCGFloat(evaluatedValue), radius >= 0 else { return view } // Necessita de castToCGFloat
         // Aplica usando clipShape com RoundedRectangle
-        return AnyView(view.clipShape(RoundedRectangle(cornerRadius: radius)))
+        return AnyView(view.cornerRadius(radius))
     }
 
     // MARK: Clip Shape

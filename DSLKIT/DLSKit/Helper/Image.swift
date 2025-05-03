@@ -28,15 +28,22 @@ extension Image {
                 .resizable()
                 .scaledToFit()
                 .frame(width: idealWidth,height: idealHeight)
-        }
-        if(shouldApplyResizable && shouldApplyScaledToFit && !shouldApplyFrame){
+        } else if(shouldApplyResizable && shouldApplyFrame){
+            self
+                .resizable()
+                .frame(width: idealWidth,height: idealHeight)
+        } else if(shouldApplyFrame){
+            self
+                .frame(width: idealWidth,height: idealHeight)
+        } else if(shouldApplyResizable && shouldApplyScaledToFit && !shouldApplyFrame){
             self
                 .resizable()
                 .scaledToFit()
-        }
-        if(shouldApplyResizable && !shouldApplyScaledToFit && !shouldApplyFrame){
+        } else if(shouldApplyResizable && !shouldApplyScaledToFit && !shouldApplyFrame){
             self
                 .resizable()
+        }else{
+            self
         }
     }
     

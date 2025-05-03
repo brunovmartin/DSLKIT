@@ -4,67 +4,121 @@ import Foundation
 public class DSLExpression {
     public static let shared = DSLExpression()
 
-    // Função principal de avaliação (sem localOverrides)
-    // Reverte a função para síncrona
+    // Função principal de avaliação
     public func evaluate(_ expr: Any?, _ context: DSLContext) -> Any? {
-        guard let expr = expr else { return nil }
+        // 1. Resolver placeholders ANTES de avaliar o resto
+        let resolvedExpr = resolvePlaceholdersRecursively(expr, context: context)
+
+        guard let currentExpr = resolvedExpr else { return nil }
 
         // Caso 0: Variáveis com Path (ex: {"var": "items[0].title"})
-        if let dict = expr as? [String: Any],
+        if let dict = currentExpr as? [String: Any],
            dict.keys.count == 1,
            let pathString = dict["var"] as? String {
             print("--- DEBUG: DSLExpression - Evaluating path: \(pathString)")
-            // resolvePath é síncrono
-            return resolvePath(pathString, context: context) // Chama helper de leitura
+            return resolvePath(pathString, context: context) // Passa o contexto original
         }
 
         // Caso 1: Operadores
-        if let dict = expr as? [String: Any],
+        if let dict = currentExpr as? [String: Any],
            let opName = dict.keys.first,
            let input = dict[opName],
            DSLOperatorRegistry.shared.isRegistered(opName) {
              print("--- DEBUG: DSLExpression - Evaluating REGISTERED operator: \(opName)")
              var evaluatedInput: Any?
             if let inputArray = input as? [Any] {
-                // Avalia itens do array de forma síncrona
                 evaluatedInput = inputArray.map { item in
-                    evaluate(item, context) // Avaliação recursiva SEM overrides
+                    // Avaliação recursiva usa o MESMO contexto (que já tem o índice, se aplicável)
+                    evaluate(item, context)
                 }
             } else {
-                evaluatedInput = evaluate(input, context) // Avaliação recursiva SEM overrides
+                evaluatedInput = evaluate(input, context)
             }
              print("--- DEBUG: DSLExpression - Operator evaluated input: \(String(describing: evaluatedInput))")
-             // Chamada síncrona para o operador
              return DSLOperatorRegistry.shared.evaluate(opName, input: evaluatedInput, context: context)
         }
 
         // Caso 2: Dicionário Literal
-        if let dict = expr as? [String: Any] {
+        if let dict = currentExpr as? [String: Any] {
              print("--- DEBUG: DSLExpression - Evaluating Dictionary Literal Values: \(dict)")
-             var evaluatedDict: [String: Any] = [:] // Must be [String: Any]
+             var evaluatedDict: [String: Any] = [:]
              for (key, value) in dict {
-                 // Evaluate recursively. If result is not nil, add to dict.
+                 // Avalia valores recursivamente usando o mesmo contexto
                  if let evaluatedValue = evaluate(value, context) { 
                      evaluatedDict[key] = evaluatedValue
-                 } // Implicitly skip if evaluate returns nil
+                 }
              }
              print("--- DEBUG: DSLExpression - Evaluated Dictionary Literal: \(evaluatedDict)")
              return evaluatedDict
         }
 
         // Caso 3: Array Literal
-        if let array = expr as? [Any] {
+        if let array = currentExpr as? [Any] {
              print("--- DEBUG: DSLExpression - Evaluating Array Literal items...")
-             // Use compactMap to evaluate items and filter out nil results.
-             // The result is [Any], not [Any?].
+             // Avalia itens recursivamente usando o mesmo contexto
              let evaluatedArray = array.compactMap { evaluate($0, context) } 
              print("--- DEBUG: DSLExpression - Evaluated Array Literal: \(evaluatedArray)")
              return evaluatedArray
         }
 
         // Caso 4: Outros Literais Primitivos
-        // Retorna o próprio literal, que já é Any (não Any?)
-        return expr
+        return currentExpr // Retorna a expressão (possivelmente modificada pelos placeholders)
+    }
+
+    // --- Nova função de resolução de placeholders ---
+    private func resolvePlaceholdersRecursively(_ data: Any?, context: DSLContext) -> Any? {
+        guard let data = data else { return nil }
+        guard let index = context.currentIndex else {
+            // Se não há currentIndex no contexto, não há nada para substituir.
+            // Retorna os dados originais.
+            return data
+        }
+
+        // Placeholder atual que estamos procurando
+        let indexPlaceholder = "[currentItemIndex]" // Poderia vir de uma config futuramente
+
+        if var dict = data as? [String: Any] {
+            var newDict = [String: Any]()
+            var dictionaryModified = false // Flag para checar se houve modificação direta no 'var'
+
+            // Verifica se a chave 'var' existe e contém o placeholder
+            if let path = dict["var"] as? String, path.contains(indexPlaceholder) {
+                let actualPath = path.replacingOccurrences(of: indexPlaceholder, with: "[\(index)]")
+                newDict["var"] = actualPath // Atualiza no novo dicionário
+                dictionaryModified = true
+                // Copia as outras chaves, se houver (embora o padrão comum seja só ter 'var')
+                for (key, value) in dict where key != "var" {
+                    // Resolve placeholders recursivamente nos outros valores também
+                    newDict[key] = resolvePlaceholdersRecursively(value, context: context)
+                }
+            } else {
+                // Se não achou 'var' com placeholder, processa todos os valores recursivamente
+                for (key, value) in dict {
+                    newDict[key] = resolvePlaceholdersRecursively(value, context: context)
+                }
+            }
+           //print("--- Substitute (\(index)): Processed dict: \(newDict)")
+            return newDict
+
+        } else if let array = data as? [Any] {
+            // Processa cada elemento do array recursivamente
+            let newArray = array.map { resolvePlaceholdersRecursively($0, context: context) }
+           //print("--- Substitute (\(index)): Processed array: \(newArray)")
+            return newArray
+
+        } else if let stringValue = data as? String, stringValue.contains(indexPlaceholder) {
+             // CASO EXTRA: Se a própria string contiver o placeholder (fora de um {"var": ...})
+             // Isso pode ou não ser desejado, dependendo da sua DSL.
+             // Exemplo: "text": "Item [currentItemIndex]"
+             let resolvedString = stringValue.replacingOccurrences(of: indexPlaceholder, with: "\(index)")
+             //print("--- Substitute (\(index)): Resolved placeholder in String: \(resolvedString)")
+             return resolvedString
+        }
+        else {
+            // É um valor literal (Int, Double, Bool, ou String sem placeholder), retorna como está
+            //print("--- Substitute (\(index)): Returning literal: \(data)")
+            return data
+        }
     }
 
     // --- Função resolvePath para LEITURA ---

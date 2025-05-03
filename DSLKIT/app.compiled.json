@@ -1,1 +1,227 @@
-{"mainScreen":"profileScreen","context":{"profileScreen":{"dataset":[0,1,2,3,4,5,6,7,8]}},"screens":[{"type":"screen","id":"profileScreen","navigationBar":{"title":"Teste","displayMode":"large"},"body":[{"type":"list","data":{"var":"profileScreen.dataset"},"children":{"type":"text","value":{"var":"profileScreen.dataset[currentItemIndex]"},"modifiers":[{"foreground":"#000000"},{"listRowSeparator":"hidden"},{"padding":25}]},"modifiers":[{"listStyle":"plain"}]}]}]}
+{
+  "mainScreen": "inboxScreen",
+  "context": {
+    "inboxScreen": {
+      "unreadCount": 3,
+      "items": [
+        {
+          "id": "item1",
+          "iconName": "person.crop.circle.fill",
+          "iconColor": "gray",
+          "sender": "Wonka Industries",
+          "preview": "10 bizarre money habits making...",
+          "timestamp": "12:28 AM",
+          "isSelected": false
+        },
+        {
+          "id": "item2",
+          "iconName": "building.2.crop.circle.fill",
+           "iconColor": "blue",
+          "sender": "J-Texon",
+          "preview": "Great work facilitating the sync today. I took some notes to keep...",
+          "timestamp": "8:36 PM",
+          "isSelected": true
+        },
+        {
+          "id": "item3",
+          "iconName": "a.circle.fill",
+           "iconColor": "indigo",
+          "sender": "Leif Floyd",
+          "preview": "Bummer I had to miss your presentation! I just got a chance ...",
+          "timestamp": "12:36 PM",
+          "isSelected": false
+        },
+        {
+          "id": "item4",
+          "iconName": "p.circle.fill",
+           "iconColor": "green",
+          "sender": "Projeto Alpha",
+          "preview": "Reunião de alinhamento agendada para amanhã.",
+          "timestamp": "11:15 AM",
+          "isSelected": false
+        },
+        {
+          "id": "item5",
+          "iconName": "briefcase.circle.fill",
+           "iconColor": "orange",
+          "sender": "Recursos Humanos",
+          "preview": "Atualização sobre as políticas de férias.",
+          "timestamp": "10:02 AM",
+          "isSelected": false
+        },
+        {
+          "id": "item6",
+          "iconName": "t.circle.fill",
+           "iconColor": "red",
+          "sender": "Time de Suporte",
+          "preview": "Seu chamado #12345 foi atualizado.",
+          "timestamp": "9:48 AM",
+          "isSelected": false
+        },
+        {
+          "id": "item7",
+          "iconName": "cart.circle.fill",
+           "iconColor": "purple",
+          "sender": "Loja Exemplo",
+          "preview": "Confirmação do seu pedido XZ-987.",
+          "timestamp": "Ontem",
+          "isSelected": false
+        },
+        {
+          "id": "item8",
+          "iconName": "calendar.circle.fill",
+          "iconColor": "teal",
+          "sender": "Agenda Pessoal",
+          "preview": "Lembrete: Consulta médica às 15h.",
+          "timestamp": "Ontem",
+          "isSelected": false
+        },
+        {
+          "id": "item9",
+          "iconName": "graduationcap.circle.fill",
+           "iconColor": "brown",
+          "sender": "Curso Online",
+          "preview": "Novo módulo disponível: SwiftUI Avançado.",
+          "timestamp": "Sexta",
+          "isSelected": false
+        },
+        {
+          "id": "item10",
+          "iconName": "star.circle.fill",
+          "iconColor": "yellow",
+          "sender": "Notícias Semanais",
+          "preview": "Resumo das principais notícias da tecnologia.",
+          "timestamp": "Quinta",
+          "isSelected": false
+        }
+      ]
+    }
+  },
+  "screens": [
+    {
+      "type": "screen",
+      "id": "inboxScreen",
+      "navigationBar": {
+        "title": "Inbox",
+        "displayMode": "large",
+        "trailingItems": [
+          {
+            "type": "text",
+            "value": { "var": "inboxScreen.unreadCount" },
+             "modifiers": [
+                 { "foreground": "gray" },
+                 { "font": {"style": "callout"} }
+             ]
+          }
+        ]
+      },
+      "body": [
+        {
+          "type": "list",
+          "data": { "var": "inboxScreen.items" },
+          "modifiers": [
+            { "listStyle": "plain" }
+          ],
+          "children": {
+            "type": "hstack",
+            "spacing": 12,
+            "modifiers": [
+              { "padding": { "vertical": 8, "horizontal": 16 } },
+              { "listRowSeparator": "hidden" },
+              {
+                "background": {
+                   "Operator.if": {
+                      "condition": { "var": "inboxScreen.items[currentItemIndex].isSelected" },
+                      "then": "blue",
+                      "else": "clear"
+                   }
+                }
+              },
+              { "cornerRadius": 20 }
+            ],
+            "children": [
+              {
+                "type": "image",
+                "systemName": { "var": "inboxScreen.items[currentItemIndex].iconName" },
+                "modifiers": [
+                  { "frame": {"width": 40, "height": 40} },
+                  { "resizable": "true"},
+                  { "foreground": {
+                        "Operator.if": {
+                           "condition": { "var": "inboxScreen.items[currentItemIndex].isSelected" },
+                           "then": "white",
+                           "else": { "var": "inboxScreen.items[currentItemIndex].iconColor" }
+                        }
+                    }
+                  }
+                ]
+              },
+              {
+                "type": "hstack",
+                "alignment": "top",
+                 "spacing": 4,
+                "children": [
+                   {
+                      "type": "vstack",
+                      "alignment": "leading",
+                      "spacing": 2,
+                      "children": [
+                         {
+                            "type": "text",
+                            "value": { "var": "inboxScreen.items[currentItemIndex].sender" },
+                            "modifiers": [
+                               { "font": { "weight": "semibold" } },
+                               { "foreground": {
+                                     "Operator.if": {
+                                        "condition": { "var": "inboxScreen.items[currentItemIndex].isSelected" },
+                                        "then": "white",
+                                        "else": "black"
+                                     }
+                                 }
+                               }
+                            ]
+                         },
+                         {
+                            "type": "text",
+                            "value": { "var": "inboxScreen.items[currentItemIndex].preview" },
+                            "modifiers": [
+                               { "font": { "style": "subheadline" } },
+                               { "lineLimit": 1 },
+                               { "truncationMode": "tail" },
+                               { "foreground": {
+                                     "Operator.if": {
+                                        "condition": { "var": "inboxScreen.items[currentItemIndex].isSelected" },
+                                        "then": "white",
+                                        "else": "gray"
+                                     }
+                                  }
+                               }
+                            ]
+                         }
+                      ]
+                   },
+                  { "type": "spacer", "minLength": 5 },
+                  {
+                     "type": "text",
+                     "value": { "var": "inboxScreen.items[currentItemIndex].timestamp" },
+                     "modifiers": [
+                        { "font": { "style": "caption" } },
+                        { "foreground": {
+                              "Operator.if": {
+                                 "condition": { "var": "inboxScreen.items[currentItemIndex].isSelected" },
+                                 "then": "white",
+                                 "else": "gray"
+                              }
+                           }
+                        }
+                     ]
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -15,6 +15,9 @@ public class DSLContext: ObservableObject {
     @Published public private(set) var storage: [String: Any]
     @Published var isInitialLoadComplete = false
     
+    // Propriedade para o índice atual (usado em listas/loops)
+    public internal(set) var currentIndex: Int? = nil // nil por padrão
+    
     // Adiciona um mecanismo para rastrear atualizações pendentes
     private var pendingUpdates: Set<String> = []
     /// Create a context with optional initial variables.
@@ -160,5 +163,18 @@ public class DSLContext: ObservableObject {
         default:
             return false
         }
+    }
+
+    // Adicione um método auxiliar para criar um contexto filho com um índice
+    // Isso evita modificar diretamente o estado do contexto pai durante a iteração
+    func contextForIndex(_ index: Int) -> DSLContext {
+        // Cria um novo contexto que compartilha o storage principal, mas tem seu próprio currentIndex
+        // NOTA: Isso assume que o storage é o estado compartilhado principal. Se houver outras
+        // propriedades que precisam ser específicas do índice, ajuste esta lógica.
+        let childContext = DSLContext(initial: self.storage) // Reutiliza o storage
+        childContext.currentIndex = index
+        childContext.isInitialLoadComplete = self.isInitialLoadComplete // Herda o estado de carregamento
+        // Você pode precisar copiar/referenciar outros estados relevantes do contexto pai aqui
+        return childContext
     }
 }
