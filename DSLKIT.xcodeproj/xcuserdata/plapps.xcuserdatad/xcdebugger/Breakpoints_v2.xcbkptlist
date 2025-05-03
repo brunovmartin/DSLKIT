@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Bucket
+   uuid = "D0BF45EC-1730-4AB4-A4D0-239FC4440659"
+   type = "1"
+   version = "2.0">
+   <Breakpoints>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "87F44476-19ED-4140-B14E-B20B860B3225"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "DSLKIT/DLSKit/Commands/HttpRequestCommand.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "166"
+            endingLineNumber = "166"
+            landmarkName = "executeOnError(params:errorDetails:context:)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "DDBE294C-017A-46A0-9C1C-43ED4B28991D"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "DSLKIT/DLSKit/Operators/LogicOperators.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "22"
+            endingLineNumber = "22"
+            landmarkName = "registerAll()"
+            landmarkType = "7">
+            <Locations>
+               <Location
+                  uuid = "DDBE294C-017A-46A0-9C1C-43ED4B28991D - b387f5928dc89052"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "closure #2 (Swift.Optional&lt;Any&gt;, DSLKIT.DSLContext) -&gt; Swift.Optional&lt;Any&gt; in static DSLKIT.LogicOperators.registerAll() -&gt; ()"
+                  moduleName = "DSLKIT.debug.dylib"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/plapps/Documents/projetos/DSLKIT/DSLKIT/DLSKit/Operators/LogicOperators.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "22"
+                  endingLineNumber = "22">
+               </Location>
+               <Location
+                  uuid = "DDBE294C-017A-46A0-9C1C-43ED4B28991D - b387f5928dc89052"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "closure #2 (Swift.Optional&lt;Any&gt;, DSLKIT.DSLContext) -&gt; Swift.Optional&lt;Any&gt; in static DSLKIT.LogicOperators.registerAll() -&gt; ()"
+                  moduleName = "DSLKIT.debug.dylib"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/plapps/Documents/projetos/DSLKIT/DSLKIT/DLSKit/Operators/LogicOperators.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "22"
+                  endingLineNumber = "22">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+   </Breakpoints>
+</Bucket>

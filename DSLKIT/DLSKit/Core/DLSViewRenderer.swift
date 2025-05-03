@@ -46,41 +46,16 @@ public struct DSLViewRenderer {
             .navigationTitle(calculatedTitle)
             .navigationBarTitleDisplayMode(displayMode)
              .ifLet(navForegroundColor) { view, color in
-                 // Aplica a cor de destaque global à barra, se definida
-                 // Componentes individuais podem sobrescrever via modifiers no JSON
                  view.tint(color)
              }
             .toolbar {
-                // --- Renderiza os itens dinâmicos LEADING ---
                 ToolbarItemGroup(placement: .navigationBarLeading) {
-                    ForEach(0..<leadingItemsJson.count, id: \.self) { index in
-                        renderComponent(from: leadingItemsJson[index], context: context)
-                    }
+                    renderChildren(from: leadingItemsJson, context: context)
                 }
-
-                // --- Renderiza os itens dinâmicos TRAILING ---
                 ToolbarItemGroup(placement: .navigationBarTrailing) {
-                    ForEach(0..<trailingItemsJson.count, id: \.self) { index in
-                        renderComponent(from: trailingItemsJson[index], context: context)
-                    }
+                    renderChildren(from: trailingItemsJson, context: context)
                 }
-
-                // --- Lógica do botão fixo REMOVIDA ---
-                // if !buttonLabel.isEmpty, let action = buttonAction {
-                //     ToolbarItem(placement: .navigationBarTrailing) {
-                //         Button(buttonLabel) {
-                //             DSLInterpreter.shared.handleEvent(action, context: context)
-                //         }
-                //         // O tint() acima deve afetar este botão, mas podemos deixar o explícito como fallback?
-                //         // Ou remover este tint individual se o global funcionar.
-                //          .ifLet(navForegroundColor) { btn, color in btn.tint(color) }
-                //     }
-                // }
-
-                // O botão Voltar será adicionado automaticamente pelo NavigationStack
             }
-            // Adicionar outros modificadores de tela aqui se necessário (ex: background da tela)
-            // Ex: .background(parseColor(DSLExpression.shared.evaluate(screen["backgroundColor"], context)))
 
     }
 
@@ -99,12 +74,17 @@ public struct DSLViewRenderer {
             }
         }
         
-         if let type = node["type"] as? String,
-            let builder = DSLComponentRegistry.shared.resolve(type) {
-             return builder(node, context)
-         } else {
-             return AnyView(Text("🚫 Componente desconhecido: \(node["type"] as? String ?? "?")"))
-         }
+        let type = node["type"] as? String
+        if((type != nil) && type != "button"){
+            if let builder = DSLComponentRegistry.shared.resolve(type!) {
+                return builder(node, context)
+            }
+        }else{
+            if let builder = DSLComponentRegistry.shared.resolve(type!) {
+                return builder(node, context)
+            }
+        }
+        return AnyView(Text("🚫 Componente desconhecido: \(node["type"] as? String ?? "?")"))
     }
 
     @ViewBuilder

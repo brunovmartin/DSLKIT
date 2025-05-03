@@ -18,11 +18,8 @@ struct DSLApp: App {
                                 if let screenId = tabDef["screenId"] as? String,
                                    let rootScreen = engine.getScreenDefinition(byId: screenId),
                                    let label = tabDef["label"] as? String {
-
                                     NavigationStack(path: $interpreter.navigationPath) {
-                                        Group {
-                                            DSLViewRenderer.renderScreenContent(screen: rootScreen, context: appContext)
-                                        }
+                                        DSLViewRenderer.renderScreenContent(screen: rootScreen, context: appContext)
                                         .navigationDestination(for: String.self) { screenId in
                                             if let screenDefinition = engine.getScreenDefinition(byId: screenId) {
                                                 DSLViewRenderer.renderScreenContent(screen: screenDefinition, context: appContext)
@@ -47,9 +44,7 @@ struct DSLApp: App {
                     } else {
                         if let rootScreen = interpreter.getRootScreenDefinition() {
                             NavigationStack(path: $interpreter.navigationPath) {
-                                Group {
-                                    DSLViewRenderer.renderScreenContent(screen: rootScreen, context: appContext)
-                                }
+                                DSLViewRenderer.renderScreenContent(screen: rootScreen, context: appContext)
                                 .navigationDestination(for: String.self) { screenId in
                                     if let screenDefinition = engine.getScreenDefinition(byId: screenId) {
                                         DSLViewRenderer.renderScreenContent(screen: screenDefinition, context: appContext)
