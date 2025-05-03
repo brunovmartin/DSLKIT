@@ -137,19 +137,13 @@
         "displayMode": "large",
         "trailingItems": [
           {
-            "type": "text",
-            "value": "ss",
-            "modifiers": [
-              {
-                "foreground": "gray"
-              },
-              {
-                "font": {
-                  "style": "callout"
-                }
-              }
-            ]
-          }
+            "type": "button",
+            "title": "AA",
+          },
+          {
+            "type": "button",
+            "title": "BB",
+          },
         ]
       },
       "body": [

@@ -71,11 +71,11 @@ public class DSLCommandRegistry {
          }
         
         // Comando 'logDebug' para debug
-        register("logDebug") { params, context in
+        register("print") { params, context in
             // Avalia o parâmetro (que é o valor a ser impresso)
             let valueTologDebug = DSLExpression.shared.evaluate(params, context)
             // Usa a função logDebug() do Swift
-            logDebug("DSL logDebug >>> \(String(describing: valueTologDebug ?? "nil"))")
+            print("DSL print >>> \(String(describing: valueTologDebug ?? "nil"))")
         }
 
         // Adicionar outros comandos padrão aqui...
