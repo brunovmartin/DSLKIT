@@ -1,6 +1,8 @@
 {
   "mainScreen": "inboxScreen",
   "context": {
+    "isLoadingApiData": false,
+    "randomNumber": 0,
     "inboxScreen": {
       "unreadCount": 3,
       "items": [
@@ -121,6 +123,15 @@
     {
       "type": "screen",
       "id": "inboxScreen",
+      "onAppear": [
+        { 
+          "set": { 
+            "var": "randomNumber", 
+            "value": { "Math.random": [5, 10] } 
+          }
+        },
+        { "print": { "String.add": ["onAppear inboxScreen: randomNumber set to ", { "var": "randomNumber" }] } }
+      ],
       "navigationBar": {
         "title": "Inbox",
         "displayMode": "large",
@@ -320,7 +331,7 @@
                         "children": [
                           {
                             "type": "progress",
-                            "value": 8,
+                            "value": {"Math.random": [5,10]},
                             "total": 10,
                             "modifiers": [
                               {
@@ -389,6 +400,54 @@
               }
             ]
           }
+        },
+        {
+          "type": "button",
+          "title": "Testar API (Posts)",
+          "visible": { "Logic.not": { "var": "isLoadingApiData" } },
+          "onTap": [
+            { "set": { "var": "isLoadingApiData", "value": true } },
+            {
+              "HttpRequest.request": {
+                "url": "https://jsonplaceholder.typicode.com/posts",
+                "method": "GET",
+                "var": "apiTestData",
+                "onSuccess": [
+                  { "print": { "String.add": ["Sucesso API! Título[2]: ", { "var": "apiTestData[2].title" } ] } },
+                  { 
+                    "alert.show": { 
+                      "title": "API Sucesso (Posts)", 
+                      "message": { "String.add": ["Título do terceiro post: ", { "var": "apiTestData[2].title" } ] } 
+                    }
+                  }
+                ],
+                "onError": [
+                  { "print": { "String.add": ["Erro API: ", { "var": "_httpRequestError.message" } ] } },
+                  { 
+                     "alert.show": { 
+                       "title": "Erro API", 
+                       "message": { "String.add": ["Falha na requisição: ", { "var": "_httpRequestError.message" } ] }
+                     }
+                   }
+                ],
+                "onFinally": [
+                   { "print": "Requisição HTTP finalizada." },
+                   { "set": { "var": "isLoadingApiData", "value": false } }
+                ]
+              }
+            }
+          ],
+          "modifiers": [
+            { "padding": 10 }
+          ]
+        },
+        {
+          "type": "progress",
+          "visible": { "var": "isLoadingApiData" },
+          "modifiers": [
+            { "padding": 10 },
+            { "frame": { "maxWidth": 50 } }
+          ]
         }
       ]
     }

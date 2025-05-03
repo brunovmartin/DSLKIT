@@ -124,5 +124,6 @@ public class DSLCommandRegistry {
         FlowCommands.registerAll()
         StorageCommands.registerAll()
         AlertCommands.registerAll()
+        HttpRequestCommand.registerAll()
     } // Fim de registerDefaults
 }

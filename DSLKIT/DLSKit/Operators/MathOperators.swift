@@ -48,5 +48,55 @@ public class MathOperators {
                   let b = (list[1] as? NSNumber)?.intValue, b != 0 else { return nil }
             return a % b
         }
+
+        // Math.random
+        DSLOperatorRegistry.shared.register("Math.random") { input, context in
+            // Espera um array [minExpr, maxExpr]
+            guard let inputArray = input as? [Any], inputArray.count == 2 else {
+                print("⚠️ Math.random: Input inválido. Esperado um array com dois elementos [min, max]. Input: \\(String(describing: input))")
+                return nil
+            }
+            
+            // Avalia os limites min e max
+            let minExpr = inputArray[0]
+            let maxExpr = inputArray[1]
+            
+            let minValueAny = DSLExpression.shared.evaluate(minExpr, context)
+            let maxValueAny = DSLExpression.shared.evaluate(maxExpr, context)
+            
+            // Tenta converter para Double primeiro (mais geral)
+            guard var minDouble = (minValueAny as? NSNumber)?.doubleValue,
+                  var maxDouble = (maxValueAny as? NSNumber)?.doubleValue else {
+                print("⚠️ Math.random: min ou max não avaliaram para números válidos. Min: \\(String(describing: minValueAny)), Max: \\(String(describing: maxValueAny))")
+                return nil
+            }
+            
+            // Garante min <= max
+            if minDouble > maxDouble {
+                swap(&minDouble, &maxDouble)
+                print("ℹ️ Math.random: min era maior que max, valores trocados.")
+            }
+            
+            // Verifica se ambos podem ser representados como Int sem perda
+            // (ou se foram originalmente Int)
+            let minIsIntRepresentable = floor(minDouble) == minDouble
+            let maxIsIntRepresentable = floor(maxDouble) == maxDouble
+            let minIsOriginallyInt = minValueAny is Int
+            let maxIsOriginallyInt = maxValueAny is Int
+            
+            // Gera Int se ambos os limites originais eram Int OU
+            // se ambos são representáveis como Int sem perda.
+            if (minIsOriginallyInt && maxIsOriginallyInt) || (minIsIntRepresentable && maxIsIntRepresentable) {
+                let minInt = Int(minDouble)
+                let maxInt = Int(maxDouble)
+                // Gera Int inclusivo (min...max)
+                print("--- DEBUG: Math.random generating Int between \\(minInt) and \\(maxInt)")
+                return Int.random(in: minInt...maxInt)
+            } else {
+                // Gera Double inclusivo (min...max)
+                 print("--- DEBUG: Math.random generating Double between \\(minDouble) and \\(maxDouble)")
+                return Double.random(in: minDouble...maxDouble)
+            }
+        }
     }
 }

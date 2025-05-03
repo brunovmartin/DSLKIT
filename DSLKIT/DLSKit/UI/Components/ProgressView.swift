@@ -5,15 +5,29 @@ public struct ProgressViewComponent {
 
     public static func render(_ node: [String: Any], context: DSLContext) -> AnyView {
         let valueExpr = node["value"]
-        let value = DSLExpression.shared.evaluate(valueExpr, context) as? Double ?? 0.0
+        let valueAny = DSLExpression.shared.evaluate(valueExpr, context)
         let totalExpr = node["total"]
-        let total = DSLExpression.shared.evaluate(totalExpr, context) as? Double ?? 1.0
+        let totalAny = DSLExpression.shared.evaluate(totalExpr, context)
+
+        // Tenta converter para Double via NSNumber (aceita Int, Double, etc.)
+        let valueDouble = (valueAny as? NSNumber)?.doubleValue
+        let totalDouble = (totalAny as? NSNumber)?.doubleValue ?? 1.0 // Default total 1.0 se não especificado ou inválido
 
         var view: AnyView
 
-        view = AnyView(
-            SwiftUI.ProgressView(value: value, total: total)
-        )
+        // Usa ProgressView com valor/total se value foi convertido com sucesso
+        if let finalValue = valueDouble {
+             print("--- DEBUG: ProgressView render - value: \\(finalValue), total: \\(totalDouble)")
+            view = AnyView(
+                SwiftUI.ProgressView(value: finalValue, total: totalDouble)
+            )
+        } else {
+            // Se value falhou a conversão, usa ProgressView indeterminado
+            print("--- DEBUG: ProgressView render - indeterminate (value eval: \\(String(describing: valueAny)))")
+            view = AnyView(
+                SwiftUI.ProgressView()
+            )
+        }
 
         if let modifiers = node["modifiers"] as? [[String: Any]] {
             view = modifierRegistry.apply(modifiers, to: view, context: context)
