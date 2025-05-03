@@ -11,7 +11,7 @@ public class StorageCommands {
                   // A chave pode ser uma string literal ou uma expressão que avalia para string
                   let key = DSLExpression.shared.evaluate(setParams["key"], context) as? String,
                   let valueExpr = setParams["value"] else { // O valor a ser salvo
-                print("⚠️ Command 'Storage.set': Invalid parameters. Expected { \"key\": \"string_expr\", \"value\": any_expr }.")
+                logDebug("⚠️ Command 'Storage.set': Invalid parameters. Expected { \"key\": \"string_expr\", \"value\": any_expr }.")
                 return
             }
             // Avalia o valor ANTES de salvar

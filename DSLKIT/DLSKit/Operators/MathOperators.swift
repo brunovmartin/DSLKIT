@@ -53,7 +53,7 @@ public class MathOperators {
         DSLOperatorRegistry.shared.register("Math.random") { input, context in
             // Espera um array [minExpr, maxExpr]
             guard let inputArray = input as? [Any], inputArray.count == 2 else {
-                print("⚠️ Math.random: Input inválido. Esperado um array com dois elementos [min, max]. Input: \\(String(describing: input))")
+                logDebug("⚠️ Math.random: Input inválido. Esperado um array com dois elementos [min, max]. Input: \\(String(describing: input))")
                 return nil
             }
             
@@ -67,14 +67,14 @@ public class MathOperators {
             // Tenta converter para Double primeiro (mais geral)
             guard var minDouble = (minValueAny as? NSNumber)?.doubleValue,
                   var maxDouble = (maxValueAny as? NSNumber)?.doubleValue else {
-                print("⚠️ Math.random: min ou max não avaliaram para números válidos. Min: \\(String(describing: minValueAny)), Max: \\(String(describing: maxValueAny))")
+                logDebug("⚠️ Math.random: min ou max não avaliaram para números válidos. Min: \\(String(describing: minValueAny)), Max: \\(String(describing: maxValueAny))")
                 return nil
             }
             
             // Garante min <= max
             if minDouble > maxDouble {
                 swap(&minDouble, &maxDouble)
-                print("ℹ️ Math.random: min era maior que max, valores trocados.")
+                logDebug("ℹ️ Math.random: min era maior que max, valores trocados.")
             }
             
             // Verifica se ambos podem ser representados como Int sem perda
@@ -90,11 +90,11 @@ public class MathOperators {
                 let minInt = Int(minDouble)
                 let maxInt = Int(maxDouble)
                 // Gera Int inclusivo (min...max)
-                print("--- DEBUG: Math.random generating Int between \\(minInt) and \\(maxInt)")
+                logDebug("--- DEBUG: Math.random generating Int between \\(minInt) and \\(maxInt)")
                 return Int.random(in: minInt...maxInt)
             } else {
                 // Gera Double inclusivo (min...max)
-                 print("--- DEBUG: Math.random generating Double between \\(minDouble) and \\(maxDouble)")
+                 logDebug("--- DEBUG: Math.random generating Double between \\(minDouble) and \\(maxDouble)")
                 return Double.random(in: minDouble...maxDouble)
             }
         }

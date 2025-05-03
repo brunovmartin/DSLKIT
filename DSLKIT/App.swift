@@ -74,7 +74,7 @@ struct DSLApp: App {
                 Color.clear
                     .onAppear {
                         if !appContext.isInitialLoadComplete {
-                            print("--- App.onAppear: Loading initial state...")
+                            logDebug("--- App.onAppear: Loading initial state...")
                             RegistrySetup.registerAll()
                             engine.start(context: appContext, interpreter: interpreter)
                         }
@@ -96,7 +96,7 @@ struct DSLApp: App {
             )
         } else {
             if btns.count > 2 {
-                print("⚠️ Aviso: Alert com mais de 2 botões solicitado. Exibindo apenas os dois primeiros.")
+                logDebug("⚠️ Aviso: Alert com mais de 2 botões solicitado. Exibindo apenas os dois primeiros.")
             }
             return Alert(
                 title: Text(item.title),

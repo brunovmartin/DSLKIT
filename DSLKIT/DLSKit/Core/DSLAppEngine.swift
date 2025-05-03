@@ -102,11 +102,11 @@ public class DSLAppEngine {
             // ** Executa a pré-verificação básica **
             if let precheckErrorMsg = precheckJSON(data: data) {
                 // Se a pré-verificação falhar, imprime o erro e termina
-                print("\n🚨🚨🚨 ERRO BÁSICO DE SINTAXE DETECTADO EM app.compiled.json 🚨🚨🚨")
-                print("--------------------------------------------------------------")
-                print(precheckErrorMsg)
-                print("--------------------------------------------------------------")
-                print("Corrija o problema indicado acima e tente novamente.")
+                logDebug("\n🚨🚨🚨 ERRO BÁSICO DE SINTAXE DETECTADO EM app.compiled.json 🚨🚨🚨")
+                logDebug("--------------------------------------------------------------")
+                logDebug(precheckErrorMsg)
+                logDebug("--------------------------------------------------------------")
+                logDebug("Corrija o problema indicado acima e tente novamente.")
                 fatalError("Falha ao inicializar DSLAppEngine devido a erro básico no JSON.")
             }
             
@@ -136,14 +136,14 @@ public class DSLAppEngine {
         } catch {
              // Captura outros erros (Data(contentsOf:), JSONSerialization)
              // Imprime a descrição do erro pego
-             print("\n🚨🚨🚨 ERRO FATAL AO CARREGAR/PROCESSAR app.compiled.json 🚨🚨🚨")
-             print("---------------------------------------------------------")
-             print("Erro: \(error.localizedDescription)")
-             print("Detalhes: \(error)") // Imprime a descrição completa do erro
-             print("---------------------------------------------------------")
-             print("Verifique se o arquivo 'app.compiled.json' está no Bundle e se o formato JSON é válido.")
-             print("Você pode usar um validador JSON online para ajudar a encontrar o erro.")
-             print("---------------------------------------------------------")
+             logDebug("\n🚨🚨🚨 ERRO FATAL AO CARREGAR/PROCESSAR app.compiled.json 🚨🚨🚨")
+             logDebug("---------------------------------------------------------")
+             logDebug("Erro: \(error.localizedDescription)")
+             logDebug("Detalhes: \(error)") // Imprime a descrição completa do erro
+             logDebug("---------------------------------------------------------")
+             logDebug("Verifique se o arquivo 'app.compiled.json' está no Bundle e se o formato JSON é válido.")
+             logDebug("Você pode usar um validador JSON online para ajudar a encontrar o erro.")
+             logDebug("---------------------------------------------------------")
              fatalError("Falha ao inicializar DSLAppEngine devido a erro no JSON.") // Ainda termina, mas com mais info no log
         }
     }
@@ -159,24 +159,24 @@ public class DSLAppEngine {
            let initialData = raw["context"] as? [String: Any] {
             
             // --- Primeira Passagem: Definir valores brutos ---
-            print("--- DEBUG AppEngine.start: First Pass - Setting raw initial values ---")
+            logDebug("--- DEBUG AppEngine.start: First Pass - Setting raw initial values ---")
             for (key, value) in initialData {
-                print("    Setting raw: \(key) = \(value)")
+                logDebug("    Setting raw: \(key) = \(value)")
                 context.set(key, to: value)
             }
             
             // --- Segunda Passagem: Avaliar e atualizar expressões ---
             // Mantém a avaliação síncrona por enquanto
-            print("--- DEBUG AppEngine.start: Second Pass - Evaluating expressions ---")
+            logDebug("--- DEBUG AppEngine.start: Second Pass - Evaluating expressions ---")
             for (key, rawValue) in initialData { // Iterar sobre os dados originais
                 if rawValue is [String: Any] {
-                    print("    Evaluating expression for key: \(key), rawValue: \(rawValue)")
+                    logDebug("    Evaluating expression for key: \(key), rawValue: \(rawValue)")
                     // Chamada síncrona
                     let evaluatedValue = DSLExpression.shared.evaluate(rawValue, context) ?? NSNull()
-                    print("    Updating context: \(key) = \(evaluatedValue)")
+                    logDebug("    Updating context: \(key) = \(evaluatedValue)")
                     context.set(key, to: evaluatedValue)
                 } else {
-                    print("    Skipping literal for key: \(key), value: \(rawValue)")
+                    logDebug("    Skipping literal for key: \(key), value: \(rawValue)")
                 }
             }
             
@@ -189,22 +189,22 @@ public class DSLAppEngine {
                     
                     // Apresenta a tela inicial somente APÓS o contexto estar pronto
                     guard let id = self.initialScreenId, let screen = self.screens[id] else {
-                        print("🚫 Tela inicial não encontrada após carregamento.")
+                        logDebug("🚫 Tela inicial não encontrada após carregamento.")
                         return
                     }
 
                     // Marca o carregamento como completo APÓS apresentar ao interpreter
                     // Isso garante que o interpreter.currentContext está definido antes da UI principal tentar renderizar
                     context.waitForUpdates {
-                         print("--- DEBUG AppEngine.start: Evaluation Complete & Interpreter Presented - Setting isInitialLoadComplete = true ---")
+                         logDebug("--- DEBUG AppEngine.start: Evaluation Complete & Interpreter Presented - Setting isInitialLoadComplete = true ---")
                          context.isInitialLoadComplete = true
-                         print("--- Final Context Storage after updates ---")
-                         print(context.storage)
+                         logDebug("--- Final Context Storage after updates ---")
+                         logDebug(context.storage)
                         
                         // --- VERIFICA SE HÁ TABS (APENAS PARA usesTabs()) ---
                         if let tabs = raw["tabs"] as? [[String: Any]] {
                             self.tabDefinitions = tabs
-                            print("ℹ️ Engine Init: Definição 'tabs' encontrada.")
+                            logDebug("ℹ️ Engine Init: Definição 'tabs' encontrada.")
                             // Se usa tabs, o App.swift vai cuidar de apresentar a view inicial de cada tab.
                             // O interpreter ainda precisa saber o contexto, mas não necessariamente apresentar uma tela específica aqui.
                             // Talvez uma chamada diferente para o interpreter ou apenas definir o contexto?
@@ -214,7 +214,7 @@ public class DSLAppEngine {
 
                         } else {
                             self.tabDefinitions = nil
-                            print("ℹ️ Engine Init: Definição 'tabs' NÃO encontrada.")
+                            logDebug("ℹ️ Engine Init: Definição 'tabs' NÃO encontrada.")
                             // Se não usa tabs, o interpreter apresenta a tela inicial única.
                             interpreter.present(screen: screen, context: context) // Informa o interpreter sobre o contexto e tela inicial
                         }
@@ -233,7 +233,7 @@ public class DSLAppEngine {
     // Adapte navigate se necessário para usar self.currentContext
     public func navigate(to id: String) {
         guard let screen = screens[id], let context = self.currentContext else {
-            //print("🚫 Tela '\(id)' não encontrada ou contexto não definido.")
+            //logDebug("🚫 Tela '\(id)' não encontrada ou contexto não definido.")
             return
         }
         DSLInterpreter.shared.present(screen: screen, context: context) // Usa o contexto atual

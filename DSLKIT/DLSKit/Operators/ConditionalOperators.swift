@@ -18,28 +18,28 @@ public class ConditionalOperators {
                   let conditionExpr = dict["condition"],
                   let thenExpr = dict["then"] // 'else' is optional
             else {
-                //print("⚠️ Operator.if: Invalid input structure. Need 'condition' and 'then'. Input: \(String(describing: input))")
+                //logDebug("⚠️ Operator.if: Invalid input structure. Need 'condition' and 'then'. Input: \(String(describing: input))")
                 return nil // Cannot evaluate without condition and then branch
             }
 
             // Evaluate the condition
             let conditionResult = DSLExpression.shared.evaluate(conditionExpr, context) as? Bool ?? false
-            //print("--- DEBUG: Operator.if - Condition result: \(conditionResult)")
+            //logDebug("--- DEBUG: Operator.if - Condition result: \(conditionResult)")
 
             if conditionResult {
                 // If true, evaluate and return the 'then' branch
                 let thenValue = DSLExpression.shared.evaluate(thenExpr, context)
-                //print("--- DEBUG: Operator.if - Returning evaluated 'then' branch: \(String(describing: thenValue))")
+                //logDebug("--- DEBUG: Operator.if - Returning evaluated 'then' branch: \(String(describing: thenValue))")
                 return thenValue
             } else {
                 // If false, check for an 'else' branch
                 if let elseExpr = dict["else"] {
                     let elseValue = DSLExpression.shared.evaluate(elseExpr, context)
-                    //print("--- DEBUG: Operator.if - Returning evaluated 'else' branch: \(String(describing: elseValue))")
+                    //logDebug("--- DEBUG: Operator.if - Returning evaluated 'else' branch: \(String(describing: elseValue))")
                     return elseValue
                 } else {
                     // If no 'else' branch, return nil
-                    //print("--- DEBUG: Operator.if - Condition false, no 'else' branch. Returning nil.")
+                    //logDebug("--- DEBUG: Operator.if - Condition false, no 'else' branch. Returning nil.")
                     return nil
                 }
             }

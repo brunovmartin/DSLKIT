@@ -9,7 +9,7 @@ struct StorageHelper {
     ///   - value: O valor a ser salvo. Deve ser um tipo compatível com PropertyList (String, Int, Double, Bool, Data, Date, Array/Dict destes).
     static func set(key: String, value: Any?) {
         UserDefaults.standard.set(value, forKey: key)
-        // print("--- DEBUG: StorageHelper.set - Key: \(key), Value: \(String(describing: value))")
+        // logDebug("--- DEBUG: StorageHelper.set - Key: \(key), Value: \(String(describing: value))")
     }
 
     /// Recupera um valor do UserDefaults usando uma chave.
@@ -17,7 +17,7 @@ struct StorageHelper {
     /// - Returns: O valor associado à chave, ou nil se não existir.
     static func get(key: String) -> Any? {
         let value = UserDefaults.standard.object(forKey: key)
-        // print("--- DEBUG: StorageHelper.get - Key: \(key), Fetched Value: \(String(describing: value))")
+        // logDebug("--- DEBUG: StorageHelper.get - Key: \(key), Fetched Value: \(String(describing: value))")
         return value
     }
 } 

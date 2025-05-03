@@ -20,17 +20,17 @@ public class NumberOperators { // Ou MathOperators
 
             guard let number = evaluatedValue as? NSNumber else {
                  // Se não for número, retorna como string normal ou vazio
-                 //print("⚠️ Number.toIntString - Input não é um número: \(String(describing: evaluatedValue))")
+                 //logDebug("⚠️ Number.toIntString - Input não é um número: \(String(describing: evaluatedValue))")
                  return (evaluatedValue != nil) ? "\(evaluatedValue!)" : ""
             }
 
             let doubleValue = number.doubleValue
             // Verifica se é um número inteiro
             if doubleValue.truncatingRemainder(dividingBy: 1) == 0 {
-                //print("--- DEBUG: Number.toIntString - Formatting as Int: \(Int(doubleValue))")
+                //logDebug("--- DEBUG: Number.toIntString - Formatting as Int: \(Int(doubleValue))")
                 return String(Int(doubleValue)) // Formata como Int
             } else {
-                //print("--- DEBUG: Number.toIntString - Formatting as Double: \(doubleValue)")
+                //logDebug("--- DEBUG: Number.toIntString - Formatting as Double: \(doubleValue)")
                 return String(doubleValue) // Formata como Double (com decimal)
             }
         }

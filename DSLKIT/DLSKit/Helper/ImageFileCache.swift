@@ -18,12 +18,12 @@ class ImageFileCache {
         if !fileManager.fileExists(atPath: cacheDirectory.path) {
             do {
                 try fileManager.createDirectory(at: cacheDirectory, withIntermediateDirectories: true, attributes: nil)
-                print("Created image cache directory at: \(cacheDirectory.path)")
+                logDebug("Created image cache directory at: \(cacheDirectory.path)")
             } catch {
                 fatalError("Could not create image cache directory: \(error)")
             }
         }
-//        print("--- DEBUG: ImageFileCache Initialized. Directory: \(cacheDirectory.path)")
+//        logDebug("--- DEBUG: ImageFileCache Initialized. Directory: \(cacheDirectory.path)")
     }
 
     // Generates a safe filename based on the URL hash
@@ -41,27 +41,27 @@ class ImageFileCache {
     // Checks if an image exists in the cache for the URL
     func exists(for url: URL) -> Bool {
         let path = filePath(for: url).path
-//        print("--- DEBUG: Checking existence for URL: \(url.absoluteString) at Path: \(path)")
+//        logDebug("--- DEBUG: Checking existence for URL: \(url.absoluteString) at Path: \(path)")
         let exists = fileManager.fileExists(atPath: path)
-//        print("--- DEBUG: Exists: \(exists)")
+//        logDebug("--- DEBUG: Exists: \(exists)")
         return exists
     }
 
     // Loads an image from the cache for the URL
     func load(for url: URL) -> UIImage? {
         let path = filePath(for: url)
-//        print("--- DEBUG: Attempting to load image for URL: \(url.absoluteString) from Path: \(path.path)")
+//        logDebug("--- DEBUG: Attempting to load image for URL: \(url.absoluteString) from Path: \(path.path)")
         guard fileManager.fileExists(atPath: path.path) else {
-//            print("--- DEBUG: File does not exist at path.")
+//            logDebug("--- DEBUG: File does not exist at path.")
             return nil
         }
         do {
             let data = try Data(contentsOf: path)
             let image = UIImage(data: data)
-//            print("--- DEBUG: Successfully loaded image.")
+//            logDebug("--- DEBUG: Successfully loaded image.")
             return image
         } catch {
-            print("Error loading image data from \(path.path): \(error)")
+            logDebug("Error loading image data from \(path.path): \(error)")
             return nil
         }
     }
@@ -71,15 +71,15 @@ class ImageFileCache {
         let path = filePath(for: url)
         // Convert UIImage to Data (e.g., PNG or JPEG)
         guard let data = image.pngData() else { // Use pngData or jpegData as needed
-            print("Error converting UIImage to Data for URL: \(url.absoluteString)")
+            logDebug("Error converting UIImage to Data for URL: \(url.absoluteString)")
             return
         }
-//        print("--- DEBUG: Attempting to save image for URL: \(url.absoluteString) to Path: \(path.path)")
+//        logDebug("--- DEBUG: Attempting to save image for URL: \(url.absoluteString) to Path: \(path.path)")
         do {
             try data.write(to: path, options: .atomic)
-//            print("--- DEBUG: Successfully saved image data.")
+//            logDebug("--- DEBUG: Successfully saved image data.")
         } catch {
-            print("Error saving image data to \(path.path): \(error)")
+            logDebug("Error saving image data to \(path.path): \(error)")
         }
     }
 
@@ -90,9 +90,9 @@ class ImageFileCache {
             for fileURL in contents {
                 try fileManager.removeItem(at: fileURL)
             }
-            print("Image cache cleared.")
+            logDebug("Image cache cleared.")
         } catch {
-            print("Error clearing image cache: \(error)")
+            logDebug("Error clearing image cache: \(error)")
         }
     }
 } 

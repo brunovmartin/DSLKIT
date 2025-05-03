@@ -216,7 +216,7 @@ public func registerBaseViewModifiers(on registry: DSLModifierRegistry<AnyView>)
             case "rectangle": return AnyView(view.clipShape(Rectangle()))
             // case "ellipse": return AnyView(view.clipShape(Ellipse())) // Adicionar se necessário
             default:
-                print("⚠️ ClipShape: Forma desconhecida '\(shapeName)'")
+                logDebug("⚠️ ClipShape: Forma desconhecida '\(shapeName)'")
                 break // Forma não reconhecida
             }
         } else if let shapeDict = evaluatedValue as? [String: Any],
@@ -236,7 +236,7 @@ public func registerBaseViewModifiers(on registry: DSLModifierRegistry<AnyView>)
              return AnyView(view.overlay(color))
          }
         // TODO: Suportar overlay com Shape e stroke? Ex: {"shape": "circle", "stroke": "red", "lineWidth": 2}
-        print("⚠️ Overlay: Suportado apenas com valor de cor por enquanto.")
+        logDebug("⚠️ Overlay: Suportado apenas com valor de cor por enquanto.")
         return view
     }
 
@@ -267,7 +267,7 @@ public func registerBaseViewModifiers(on registry: DSLModifierRegistry<AnyView>)
         let evaluatedValue = DSLExpression.shared.evaluate(value, context)
         // Espera um dicionário para os parâmetros da sombra
         guard let dict = evaluatedValue as? [String: Any] else {
-            print("⚠️ Shadow: Parâmetro inválido. Esperado um dicionário com color, radius, x, y.")
+            logDebug("⚠️ Shadow: Parâmetro inválido. Esperado um dicionário com color, radius, x, y.")
             return view
         }
         // Cor padrão se não especificada
@@ -299,7 +299,7 @@ public func registerBaseViewModifiers(on registry: DSLModifierRegistry<AnyView>)
         } else if let sizeArray = evaluatedValue as? [Double], sizeArray.count == 2 {
              return AnyView(view.offset(x: CGFloat(sizeArray[0]), y: CGFloat(sizeArray[1])))
         }
-        print("⚠️ Offset: Parâmetro inválido. Esperado dicionário {x, y} ou array [x, y].")
+        logDebug("⚠️ Offset: Parâmetro inválido. Esperado dicionário {x, y} ou array [x, y].")
         return view
     }
 
@@ -316,7 +316,7 @@ public func registerBaseViewModifiers(on registry: DSLModifierRegistry<AnyView>)
             // TODO: Considerar "anchor" point?
             return AnyView(view.scaleEffect(CGSize(width: x, height: y)))
         }
-        print("⚠️ ScaleEffect: Parâmetro inválido. Esperado número ou dicionário {x, y}.")
+        logDebug("⚠️ ScaleEffect: Parâmetro inválido. Esperado número ou dicionário {x, y}.")
         return view
     }
 
@@ -333,7 +333,7 @@ public func registerBaseViewModifiers(on registry: DSLModifierRegistry<AnyView>)
              // TODO: Considerar "anchor" point dict["anchor"]?
              return AnyView(view.rotationEffect(.degrees(angleDegrees)))
         }
-        print("⚠️ RotationEffect: Parâmetro inválido. Esperado número (graus) ou dicionário {degrees}.")
+        logDebug("⚠️ RotationEffect: Parâmetro inválido. Esperado número (graus) ou dicionário {degrees}.")
         return view
     }
 
@@ -397,7 +397,7 @@ public func registerBaseViewModifiers(on registry: DSLModifierRegistry<AnyView>)
     // MARK: Environment
     registry.register("environment") { view, value, context in
         guard let dict = value as? [String: Any], dict.count == 1, let keyPathStr = dict.keys.first else {
-            print("⚠️ Environment modifier: Invalid parameters. Expected { \"keyPath\": value }")
+            logDebug("⚠️ Environment modifier: Invalid parameters. Expected { \"keyPath\": value }")
             return view
         }
         let rawValue = dict[keyPathStr]
@@ -410,11 +410,11 @@ public func registerBaseViewModifiers(on registry: DSLModifierRegistry<AnyView>)
                 let scheme: ColorScheme = schemeStr.lowercased() == "dark" ? .dark : .light
                 return AnyView(view.environment(\.colorScheme, scheme))
             } else {
-                 print("⚠️ Environment modifier (colorScheme): Invalid value type. Expected String ('light' or 'dark').")
+                 logDebug("⚠️ Environment modifier (colorScheme): Invalid value type. Expected String ('light' or 'dark').")
             }
         // Adicionar outros keyPaths comuns conforme necessário (ex: sizeCategory, layoutDirection)
         default:
-             print("⚠️ Environment modifier: Unsupported keyPath '\(keyPathStr)'")
+             logDebug("⚠️ Environment modifier: Unsupported keyPath '\(keyPathStr)'")
         }
         return view
     }
@@ -451,7 +451,7 @@ public func registerBaseViewModifiers(on registry: DSLModifierRegistry<AnyView>)
                 }
             }
         } else if evaluatedParams != nil && !(evaluatedParams is NSNull) {
-            print("⚠️ listRowSeparator modifier: Invalid parameter type \(type(of: evaluatedParams)). Expected Bool, String, or Dictionary.")
+            logDebug("⚠️ listRowSeparator modifier: Invalid parameter type \(type(of: evaluatedParams)). Expected Bool, String, or Dictionary.")
         }
         
         // Apply modifiers to the view passed in
@@ -478,27 +478,27 @@ public func applyActionModifiers(node: [String: Any], context: DSLContext, to vi
 
     // onTapGesture
     if let tapAction = node["onTapGesture"] {
-        // print("--- DEBUG: Applying onTapGesture from node")
+        // logDebug("--- DEBUG: Applying onTapGesture from node")
         modifiedView = AnyView(modifiedView.onTapGesture {
-            // print("--- DEBUG: Executing onTapGesture action")
+            // logDebug("--- DEBUG: Executing onTapGesture action")
             DSLInterpreter.shared.handleEvent(tapAction, context: context)
         })
     }
     
     // onAppear
     if let appearAction = node["onAppear"] {
-         // print("--- DEBUG: Applying onAppear from node")
+         // logDebug("--- DEBUG: Applying onAppear from node")
         modifiedView = AnyView(modifiedView.onAppear {
-             // print("--- DEBUG: Executing onAppear action")
+             // logDebug("--- DEBUG: Executing onAppear action")
             DSLInterpreter.shared.handleEvent(appearAction, context: context)
         })
     }
     
     // onDisappear
     if let disappearAction = node["onDisappear"] {
-         // print("--- DEBUG: Applying onDisappear from node")
+         // logDebug("--- DEBUG: Applying onDisappear from node")
         modifiedView = AnyView(modifiedView.onDisappear {
-             // print("--- DEBUG: Executing onDisappear action")
+             // logDebug("--- DEBUG: Executing onDisappear action")
             DSLInterpreter.shared.handleEvent(disappearAction, context: context)
         })
     }

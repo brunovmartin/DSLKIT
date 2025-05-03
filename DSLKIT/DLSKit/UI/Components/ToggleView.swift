@@ -10,7 +10,7 @@ public struct ToggleView {
         
         // Busca a variável de estado na raiz do nó
         guard let varName = node["var"] as? String else {
-            print("⚠️ ToggleView: Parâmetro 'var' (String) faltando na raiz do nó.")
+            logDebug("⚠️ ToggleView: Parâmetro 'var' (String) faltando na raiz do nó.")
             return AnyView(Text("Toggle Error: var missing"))
         }
         
@@ -22,7 +22,7 @@ public struct ToggleView {
             onChangeAction: onChangeAction 
         )
         
-        print("--- DEBUG: ToggleView render - Root var: \(varName), current value: \(isOnBinding.wrappedValue)")
+        logDebug("--- DEBUG: ToggleView render - Root var: \(varName), current value: \(isOnBinding.wrappedValue)")
 
         // Cria a view base (sem modificador .onChange)
         let toggle = Toggle(labelText, isOn: isOnBinding)

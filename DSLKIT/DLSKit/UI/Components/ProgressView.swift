@@ -17,13 +17,13 @@ public struct ProgressViewComponent {
 
         // Usa ProgressView com valor/total se value foi convertido com sucesso
         if let finalValue = valueDouble {
-             print("--- DEBUG: ProgressView render - value: \\(finalValue), total: \\(totalDouble)")
+             logDebug("--- DEBUG: ProgressView render - value: \\(finalValue), total: \\(totalDouble)")
             view = AnyView(
                 SwiftUI.ProgressView(value: finalValue, total: totalDouble)
             )
         } else {
             // Se value falhou a conversão, usa ProgressView indeterminado
-            print("--- DEBUG: ProgressView render - indeterminate (value eval: \\(String(describing: valueAny)))")
+            logDebug("--- DEBUG: ProgressView render - indeterminate (value eval: \\(String(describing: valueAny)))")
             view = AnyView(
                 SwiftUI.ProgressView()
             )

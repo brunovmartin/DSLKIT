@@ -102,11 +102,11 @@ public struct ListView {
                   if #available(iOS 14.0, macOS 11.0, *) {
                       return AnyView(view.listStyle(.sidebar))
                   } else {
-                      print("⚠️ ListStyle 'sidebar' not available on this OS version.")
+                      logDebug("⚠️ ListStyle 'sidebar' not available on this OS version.")
                       return view // Ou um fallback como .plain
                   }
             default:
-                print("⚠️ ListStyle modifier: Unknown or invalid style '\(evaluatedStyle ?? "nil")'. Applying default.")
+                logDebug("⚠️ ListStyle modifier: Unknown or invalid style '\(evaluatedStyle ?? "nil")'. Applying default.")
                 // Default pode ser .automatic ou um estilo seguro como .insetGrouped
                 if #available(iOS 14.0, macOS 11.0, *) {
                     return AnyView(view.listStyle(.insetGrouped))
@@ -122,7 +122,7 @@ public struct ListView {
             guard let params = paramsAny as? [String: Any],
                   let edgeStr = DSLExpression.shared.evaluate(params["edge"], context) as? String,
                   let contentNode = params["content"] as? [String: Any] else {
-                print("⚠️ safeAreaInset modifier: Invalid parameters. Need 'edge' (string) and 'content' (dictionary).")
+                logDebug("⚠️ safeAreaInset modifier: Invalid parameters. Need 'edge' (string) and 'content' (dictionary).")
                 return view // Retorna a view original se os params estiverem errados
             }
 
@@ -133,7 +133,7 @@ public struct ListView {
             // Renderiza o conteúdo do inset ANTES de aplicar o modificador
             let insetContent = DSLViewRenderer.renderComponent(from: contentNode, context: context)
 
-            //print("--- DEBUG: Applying safeAreaInset to edge: \(edgeStr)")
+            //logDebug("--- DEBUG: Applying safeAreaInset to edge: \(edgeStr)")
 
             // Chama a assinatura correta baseada na string da borda
             switch edgeStr.lowercased() {
@@ -150,7 +150,7 @@ public struct ListView {
                  let align: VerticalAlignment = mapVerticalAlignment(from: alignmentStr) ?? .center
                 return AnyView(view.safeAreaInset(edge: .trailing, alignment: align, spacing: spacing) { insetContent })
             default:
-                print("⚠️ safeAreaInset modifier: Invalid edge '\(edgeStr)'. Modifier not applied.")
+                logDebug("⚠️ safeAreaInset modifier: Invalid edge '\(edgeStr)'. Modifier not applied.")
                 return view // Retorna a view original se a borda for inválida
             }
         } // Fim da closure safeAreaInset

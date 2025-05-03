@@ -17,7 +17,7 @@ public struct TextView {
             textToDisplay = ""
         }
 
-        //print("--- DEBUG: TextView evaluated value: \(textToDisplay)")
+        //logDebug("--- DEBUG: TextView evaluated value: \(textToDisplay)")
         var view = AnyView(Text(textToDisplay))
 
         if let modifiers = node["modifiers"] as? [[String: Any]] {
@@ -121,7 +121,7 @@ public struct TextView {
             //} else if let dict = raw as? [String: Any], let limit = DSLExpression.shared.evaluate(dict["limit"], context) as? Int {
             //     return AnyView(view.lineLimit(max(0, limit)))
             } else {
-                 print("⚠️ LineLimit: Valor inválido \(String(describing: raw)). Esperado Int ou null.")
+                 logDebug("⚠️ LineLimit: Valor inválido \(String(describing: raw)). Esperado Int ou null.")
             }
             return view
         }

@@ -9,7 +9,7 @@ public struct PickerView {
         
         // --- Binding --- 
         guard let varName = node["var"] as? String else {
-            print("⚠️ PickerView: Parâmetro \'var\' (String) faltando na raiz do nó.")
+            logDebug("⚠️ PickerView: Parâmetro \'var\' (String) faltando na raiz do nó.")
             return AnyView(Text("Picker Error: \'var\' missing"))
         }
         
@@ -23,7 +23,7 @@ public struct PickerView {
             onChangeAction: node["onChange"] // Passa a ação onChange, se houver
         )
         
-        print("--- DEBUG: PickerView render - var: \(varName), current value: \(selectionBinding.wrappedValue)")
+        logDebug("--- DEBUG: PickerView render - var: \(varName), current value: \(selectionBinding.wrappedValue)")
 
         // --- Criação do Picker --- 
         let picker = Picker(labelText, selection: selectionBinding) {
@@ -89,19 +89,19 @@ public struct PickerView {
                 if #available(iOS 13.0, macOS 10.15, *) {
                    styledView = AnyView(view.pickerStyle(.segmented))
                 } else {
-                   print("⚠️ SegmentedPickerStyle não disponível nesta versão de OS.")
+                   logDebug("⚠️ SegmentedPickerStyle não disponível nesta versão de OS.")
                 }
             case "wheel":
                  if #available(iOS 13.0, macOS 11.0, *) { // macOS 11+ for wheel
                     styledView = AnyView(view.pickerStyle(.wheel))
                  } else {
-                     print("⚠️ WheelPickerStyle não disponível nesta versão de OS.")
+                     logDebug("⚠️ WheelPickerStyle não disponível nesta versão de OS.")
                  }
             case "inline":
                  if #available(iOS 14.0, macOS 11.0, *) {
                     styledView = AnyView(view.pickerStyle(.inline))
                  } else {
-                     print("⚠️ InlinePickerStyle não disponível nesta versão de OS.")
+                     logDebug("⚠️ InlinePickerStyle não disponível nesta versão de OS.")
                  }
             // Adicione outros estilos como .navigationLink se necessário
             default:

@@ -4,7 +4,7 @@
     "isLoadingApiData": false,
     "randomNumber": 0,
     "inboxScreen": {
-      "unreadCount": 3,
+      "unreadCount": 22,
       "items": [
         {
           "id": "item1",
@@ -138,9 +138,7 @@
         "trailingItems": [
           {
             "type": "text",
-            "value": {
-              "var": "inboxScreen.unreadCount"
-            },
+            "value": "ss",
             "modifiers": [
               {
                 "foreground": "gray"

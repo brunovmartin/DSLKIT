@@ -7,7 +7,7 @@ public class ArrayCommands {
                   let targetPath = params["var"] as? String,
                   let valueExpr = params["value"]
             else {
-                print("⚠️ Comando 'append' inválido: payload incompleto ou mal formatado. Payload: \(String(describing: payload))")
+                logDebug("⚠️ Comando 'append' inválido: payload incompleto ou mal formatado. Payload: \(String(describing: payload))")
                 return
             }
 
@@ -16,7 +16,7 @@ public class ArrayCommands {
             let components = VariableCommands.parsePathComponents(targetPath, context: context)
 
             guard !components.isEmpty, let baseVar = components[0] as? String else {
-                print("⚠️ Comando 'append': Path inválido ou não inicia com variável. Path: \(targetPath)")
+                logDebug("⚠️ Comando 'append': Path inválido ou não inicia com variável. Path: \(targetPath)")
                 return
             }
 
@@ -26,20 +26,20 @@ public class ArrayCommands {
             } else {
                 if components.count > 1 {
                     if components[1] is String {
-                        print("--- DEBUG: 'append' - Initializing base dictionary '\(baseVar)' for path.")
+                        logDebug("--- DEBUG: 'append' - Initializing base dictionary '\(baseVar)' for path.")
                         mutableValue = [String: Any]()
                     } else if components[1] is Int {
-                        print("--- DEBUG: 'append' - Initializing base array '\(baseVar)' for path.")
+                        logDebug("--- DEBUG: 'append' - Initializing base array '\(baseVar)' for path.")
                         mutableValue = [Any]()
                     } else {
-                        print("⚠️ 'append' - Base var '\(baseVar)' not found, cannot determine initial type from path component: \(components[1]).")
+                        logDebug("⚠️ 'append' - Base var '\(baseVar)' not found, cannot determine initial type from path component: \(components[1]).")
                         return
                     }
                 } else if components.count == 1 {
-                    print("--- DEBUG: 'append' - Initializing base variable '\(baseVar)' as array.")
+                    logDebug("--- DEBUG: 'append' - Initializing base variable '\(baseVar)' as array.")
                     mutableValue = [Any]()
                 } else {
-                     print("⚠️ 'append' - Cannot handle empty path.")
+                     logDebug("⚠️ 'append' - Cannot handle empty path.")
                      return
                 }
             }
@@ -49,9 +49,9 @@ public class ArrayCommands {
             let pathRemainder = Array(components.dropFirst())
             if appendAtPath(&mutableValue, pathComponents: pathRemainder, valueToAppend: valueToAdd ?? NSNull()) {
                 context.set(baseVar, to: mutableValue)
-                print("--- DEBUG: 'append' - Path append successful for: \(targetPath)")
+                logDebug("--- DEBUG: 'append' - Path append successful for: \(targetPath)")
             } else {
-                print("⚠️ 'append' - Path append failed for: \(targetPath)")
+                logDebug("⚠️ 'append' - Path append failed for: \(targetPath)")
             }
         }
         
@@ -69,13 +69,13 @@ public class ArrayCommands {
         guard !pathComponents.isEmpty else {
             guard var array = data as? [Any] else {
                 if data is NSNull { 
-                    print("--- DEBUG: appendAtPath - Initializing array at target path.")
+                    logDebug("--- DEBUG: appendAtPath - Initializing array at target path.")
                     var newArray = [Any]()
                     newArray.append(valueToAppend)
                     data = newArray
                     return true
                 }
-                print("⚠️ appendAtPath: Target is not an array and not nil/NSNull. Cannot append. Data: \(data)")
+                logDebug("⚠️ appendAtPath: Target is not an array and not nil/NSNull. Cannot append. Data: \(data)")
                 return false
             }
             array.append(valueToAppend)
@@ -89,7 +89,7 @@ public class ArrayCommands {
         if let key = currentKeyOrIndex as? String {
             guard var dict = data as? [String: Any] else {
                 if data is NSNull { 
-                     print("--- DEBUG: appendAtPath - Initializing intermediate dictionary for key '\(key)'.")
+                     logDebug("--- DEBUG: appendAtPath - Initializing intermediate dictionary for key '\(key)'.")
                      var newDictAsAny: Any = [String: Any]()
                      if appendAtPath(&newDictAsAny, pathComponents: nextComponents, valueToAppend: valueToAppend) {
                          data = newDictAsAny
@@ -98,7 +98,7 @@ public class ArrayCommands {
                          return false
                      }
                  } else {
-                     print("⚠️ appendAtPath: Trying to access key '\(key)' on non-dictionary. Data: \(data)")
+                     logDebug("⚠️ appendAtPath: Trying to access key '\(key)' on non-dictionary. Data: \(data)")
                      return false
                  }
             }
@@ -114,7 +114,7 @@ public class ArrayCommands {
         } else if let index = currentKeyOrIndex as? Int {
             guard var array = data as? [Any] else {
                  if data is NSNull { 
-                     print("--- DEBUG: appendAtPath - Initializing intermediate array for index \(index). Note: Will extend with NSNull if needed.")
+                     logDebug("--- DEBUG: appendAtPath - Initializing intermediate array for index \(index). Note: Will extend with NSNull if needed.")
                      var newArrayAsAny: Any = [Any]()
                      if var tempArray = newArrayAsAny as? [Any] {
                          while index >= tempArray.count {
@@ -129,7 +129,7 @@ public class ArrayCommands {
                          return false
                      }
                  } else {
-                     print("⚠️ appendAtPath: Trying to access index \(index) on non-array. Data: \(data)")
+                     logDebug("⚠️ appendAtPath: Trying to access index \(index) on non-array. Data: \(data)")
                      return false
                  }
             }
@@ -147,7 +147,7 @@ public class ArrayCommands {
                 return false
             }
         } else {
-            print("⚠️ appendAtPath: Invalid path component type: \(currentKeyOrIndex)")
+            logDebug("⚠️ appendAtPath: Invalid path component type: \(currentKeyOrIndex)")
             return false
         }
     }

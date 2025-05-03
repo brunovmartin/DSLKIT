@@ -12,17 +12,17 @@ public class VariableCommands {
                 let targetPath = setData["var"] as? String, // Renomear 'key' para 'targetPath'
                 let valueExpr = setData["value"]
             else {
-                print("⚠️ Comando 'set' inválido: payload incompleto ou mal formatado. Payload: \(String(describing: payload))")
+                logDebug("⚠️ Comando 'set' inválido: payload incompleto ou mal formatado. Payload: \(String(describing: payload))")
                 return
             }
             let resolvedValue = DSLExpression.shared.evaluate(valueExpr, context) ?? NSNull()
-            print("--- DEBUG: VariableCommands 'set' - Path: \(targetPath), Resolved Value: \(String(describing: resolvedValue))")
+            logDebug("--- DEBUG: VariableCommands 'set' - Path: \(targetPath), Resolved Value: \(String(describing: resolvedValue))")
             
             // --- Lógica Adaptada de setAtPath --- 
             let components = Self.parsePathComponents(targetPath, context: context)
             
             guard !components.isEmpty, let baseVar = components[0] as? String else {
-                print("⚠️ 'set' - Path inválido ou não inicia com variável. Path: \(targetPath)")
+                logDebug("⚠️ 'set' - Path inválido ou não inicia com variável. Path: \(targetPath)")
                 return
             }
             
@@ -35,16 +35,16 @@ public class VariableCommands {
                  if components.count > 1 {
                      if components[1] is String {
                          currentMutableValue = [String: Any]()
-                         print("--- DEBUG: 'set' - Initialized base dictionary '\(baseVar)'.")
+                         logDebug("--- DEBUG: 'set' - Initialized base dictionary '\(baseVar)'.")
                      } else if components[1] is Int {
                          currentMutableValue = [Any]() // Embora set em array por string não faça sentido aqui
-                         print("--- DEBUG: 'set' - Initialized base array '\(baseVar)'.")
+                         logDebug("--- DEBUG: 'set' - Initialized base array '\(baseVar)'.")
                      } else {
-                         print("⚠️ 'set' - Base '\(baseVar)' not found, cannot initialize for path component: \(components[1]).")
+                         logDebug("⚠️ 'set' - Base '\(baseVar)' not found, cannot initialize for path component: \(components[1]).")
                          return
                      }
                  } else if components.count == 1 { // Apenas a variável base
-                      print("--- DEBUG: 'set' - Setting base variable '\(baseVar)' directly.")
+                      logDebug("--- DEBUG: 'set' - Setting base variable '\(baseVar)' directly.")
                       // Notificar ANTES da mudança para @Published funcionar
                       context.objectWillChange.send()
                       context.set(baseVar, to: resolvedValue) 
@@ -55,15 +55,15 @@ public class VariableCommands {
              }
              
              // Chamar a função auxiliar para modificar o valor no caminho restante
-             print("--- DEBUG: 'set' - Attempting to modify path for base '\(baseVar)'. Components: \(Array(components.dropFirst()))")
+             logDebug("--- DEBUG: 'set' - Attempting to modify path for base '\(baseVar)'. Components: \(Array(components.dropFirst()))")
              // Notificar ANTES da mudança para @Published funcionar
              context.objectWillChange.send()
              if Self.modifyValueAtPath(&currentMutableValue, pathComponents: Array(components.dropFirst()), newValue: resolvedValue) {
                  // Atualizar o valor base no contexto com a estrutura modificada
                  context.set(baseVar, to: currentMutableValue)
-                 print("--- DEBUG: 'set' - Path write successful for: \(targetPath)")
+                 logDebug("--- DEBUG: 'set' - Path write successful for: \(targetPath)")
              } else {
-                 print("⚠️ 'set' - Path write failed for: \(targetPath)")
+                 logDebug("⚠️ 'set' - Path write failed for: \(targetPath)")
                  // Opcional: Desfazer a notificação se a escrita falhar? Depende da granularidade desejada.
              }
             // Remover chamada antiga
@@ -77,7 +77,7 @@ public class VariableCommands {
                 let targetPath = params["path"] as? String,
                 let valueExpr = params["value"]
             else {
-                //print("⚠️ Comando 'setAtPath' inválido. Payload: \(String(describing: payload))")
+                //logDebug("⚠️ Comando 'setAtPath' inválido. Payload: \(String(describing: payload))")
                 return
             }
 
@@ -85,7 +85,7 @@ public class VariableCommands {
             let components = Self.parsePathComponents(targetPath, context: context)
 
             guard !components.isEmpty, let baseVar = components[0] as? String else {
-                //print("⚠️ 'setAtPath' - Path inválido ou não inicia com variável. Path: \(targetPath)")
+                //logDebug("⚠️ 'setAtPath' - Path inválido ou não inicia com variável. Path: \(targetPath)")
                 return
             }
 
@@ -100,13 +100,13 @@ public class VariableCommands {
                     } else if components[1] is Int {
                         currentMutableValue = [Any]()
                     } else {
-                        //print("⚠️ 'setAtPath' - Base '\(baseVar)' not found, cannot initialize.")
+                        //logDebug("⚠️ 'setAtPath' - Base '\(baseVar)' not found, cannot initialize.")
                         return
                     }
-                    //print("--- DEBUG: 'setAtPath' - Initialized base var '\(baseVar)'.")
+                    //logDebug("--- DEBUG: 'setAtPath' - Initialized base var '\(baseVar)'.")
                 } else if components.count == 1 {
                     // Apenas a variável base
-                    //print("--- DEBUG: 'setAtPath' - Base '\(baseVar)' not found, setting directly.")
+                    //logDebug("--- DEBUG: 'setAtPath' - Base '\(baseVar)' not found, setting directly.")
                     context.set(baseVar, to: resolvedValue)
                     return
                 } else {
@@ -117,9 +117,9 @@ public class VariableCommands {
             // Corrige o typo '¤tMutableValue' -> '&currentMutableValue'
             if Self.modifyValueAtPath(&currentMutableValue, pathComponents: Array(components.dropFirst()), newValue: resolvedValue) {
                 context.set(baseVar, to: currentMutableValue)
-                //print("--- DEBUG: 'setAtPath' - Path write successful for: \(targetPath)")
+                //logDebug("--- DEBUG: 'setAtPath' - Path write successful for: \(targetPath)")
             } else {
-                //print("⚠️ 'setAtPath' - Path write failed for: \(targetPath)")
+                //logDebug("⚠️ 'setAtPath' - Path write failed for: \(targetPath)")
             }
         }
     } // Fim registerAll

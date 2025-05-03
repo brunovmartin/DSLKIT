@@ -16,17 +16,17 @@ public struct TextFieldView {
         guard let valueExpr = node["value"],
               let valueDict = valueExpr as? [String: Any],
               let varName = valueDict["var"] as? String else {
-            print("⚠️ TextFieldView: Definição de 'value' inválida ou faltando. Precisa ser {\"var\": \"nomeVar\"}")
+            logDebug("⚠️ TextFieldView: Definição de 'value' inválida ou faltando. Precisa ser {\"var\": \"nomeVar\"}")
             return AnyView(Text("TextField Error"))
         }
 
         let textBinding: Binding<String> = BindingResolver.bind(varName, context: context, defaultValue: "")
 
-        print("--- DEBUG: TextFieldView render - varName: \(varName), current value: \(textBinding.wrappedValue)")
+        logDebug("--- DEBUG: TextFieldView render - varName: \(varName), current value: \(textBinding.wrappedValue)")
 
         let textField = TextField(placeholder, text: textBinding)
             .onSubmit {
-                print("TextField onSubmit for \(varName)")
+                logDebug("TextField onSubmit for \(varName)")
             }
 
         var finalView = AnyView(textField)

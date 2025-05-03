@@ -5,7 +5,7 @@ class AlertCommands {
         DSLCommandRegistry.shared.register("alert.show") { (params: Any?, context: DSLContext) in
             // 1. Validar e Parsear Parâmetros
             guard let alertParams = params as? [String: Any] else {
-                print("⚠️ Command 'alert.show': Invalid parameters format. Expected a Dictionary.")
+                logDebug("⚠️ Command 'alert.show': Invalid parameters format. Expected a Dictionary.")
                 return
             }
 
@@ -39,13 +39,13 @@ class AlertCommands {
                 // Ou apenas mostrar o alerta sem botões (o sistema adiciona um OK por padrão às vezes)
                 // Vamos seguir o que foi definido e permitir alerta sem botões customizados, 
                 // confiando no comportamento padrão do sistema ou na função createAlert.
-                 print("ℹ️ Command 'alert.show': No 'buttons' array provided or invalid format. Alert might show with default dismiss button.")
+                 logDebug("ℹ️ Command 'alert.show': No 'buttons' array provided or invalid format. Alert might show with default dismiss button.")
             }
             
             // 2. Chamar o AlertManager na Thread Principal
             // Não precisa mais de DispatchQueue.main.async aqui, pois AlertManager já faz isso.
             AlertManager.shared.show(title: title, message: message, buttons: alertButtons)
-             print("--- DEBUG: Command 'alert.show' - Requesting alert: Title='\(title)', Message='\(message)', Buttons=\(alertButtons.count)")
+             logDebug("--- DEBUG: Command 'alert.show' - Requesting alert: Title='\(title)', Message='\(message)', Buttons=\(alertButtons.count)")
         }
         
         // Registrar outros comandos relacionados a alertas aqui, se necessário

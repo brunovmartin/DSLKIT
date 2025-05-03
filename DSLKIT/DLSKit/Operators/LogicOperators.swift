@@ -75,7 +75,7 @@ public class LogicOperators {
         case (let nsArray as NSArray, let swiftArray as [Any]):
             return swiftArray.isEmpty && nsArray.count == 0
         default:
-            print("⚠️ areEqual: Comparing unhandled types \(type(of: normalizedLhs)) and \(type(of: normalizedRhs)). Returning false.")
+            logDebug("⚠️ areEqual: Comparing unhandled types \(type(of: normalizedLhs)) and \(type(of: normalizedRhs)). Returning false.")
             return false
         }
     } 

@@ -1,7 +1,7 @@
 import Foundation
 
 public func logDebug(_ item: Any) {
-    #if DEBUG
+    #if false
     Swift.print(item)
     #endif
 }

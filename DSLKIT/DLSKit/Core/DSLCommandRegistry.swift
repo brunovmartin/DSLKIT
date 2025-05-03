@@ -20,10 +20,10 @@ public class DSLCommandRegistry {
         guard let name = command.keys.first,
               let params = command[name],
               let fn = registry[name] else {
-            print("⚠️ CommandRegistry: Unknown command or invalid format: \(command)")
+            logDebug("⚠️ CommandRegistry: Unknown command or invalid format: \(command)")
             return
         }
-        // print("--- DEBUG: CommandRegistry executing command: \(name) with params: \(String(describing: params))")
+        // logDebug("--- DEBUG: CommandRegistry executing command: \(name) with params: \(String(describing: params))")
         fn(params, context)
     }
 
@@ -33,12 +33,12 @@ public class DSLCommandRegistry {
             guard let setParams = params as? [String: Any],
                   let varPath = setParams["var"] as? String,
                   let valueExpr = setParams["value"] else { // 'value' pode ser qualquer coisa
-                print("⚠️ Command 'set': Invalid parameters. Need 'var' (String) and 'value'.")
+                logDebug("⚠️ Command 'set': Invalid parameters. Need 'var' (String) and 'value'.")
                 return
             }
             // Avalia o valor ANTES de definir no contexto
             let valueToSet = DSLExpression.shared.evaluate(valueExpr, context)
-            // print("--- DEBUG: Command 'set' - Setting var '\(varPath)' to value: \(String(describing: valueToSet))")
+            // logDebug("--- DEBUG: Command 'set' - Setting var '\(varPath)' to value: \(String(describing: valueToSet))")
             context.set(varPath, to: valueToSet ?? "?")
         }
 
@@ -53,10 +53,10 @@ public class DSLCommandRegistry {
             }
             
             guard let id = screenId else {
-                print("⚠️ Command 'navigate': Invalid parameter. Expected screen ID (String).")
+                logDebug("⚠️ Command 'navigate': Invalid parameter. Expected screen ID (String).")
                 return
             }
-            // print("--- DEBUG: Command 'navigate' - Navigating to screen: \(id)")
+            // logDebug("--- DEBUG: Command 'navigate' - Navigating to screen: \(id)")
             DispatchQueue.main.async { // Garante que a mudança de UI ocorra na thread principal
                  DSLInterpreter.shared.pushScreen(withId: id)
             }
@@ -64,18 +64,18 @@ public class DSLCommandRegistry {
         
         // Comando 'goBack'
         register("goBack") { params, context in
-             // print("--- DEBUG: Command 'goBack' - Popping screen")
+             // logDebug("--- DEBUG: Command 'goBack' - Popping screen")
              DispatchQueue.main.async { // Garante que a mudança de UI ocorra na thread principal
                  DSLInterpreter.shared.popScreen()
              }
          }
         
-        // Comando 'print' para debug
-        register("print") { params, context in
+        // Comando 'logDebug' para debug
+        register("logDebug") { params, context in
             // Avalia o parâmetro (que é o valor a ser impresso)
-            let valueToPrint = DSLExpression.shared.evaluate(params, context)
-            // Usa a função print() do Swift
-            print("DSL PRINT >>> \(String(describing: valueToPrint ?? "nil"))")
+            let valueTologDebug = DSLExpression.shared.evaluate(params, context)
+            // Usa a função logDebug() do Swift
+            logDebug("DSL logDebug >>> \(String(describing: valueTologDebug ?? "nil"))")
         }
 
         // Adicionar outros comandos padrão aqui...
@@ -83,22 +83,22 @@ public class DSLCommandRegistry {
         register("if") { params, context in
              guard let ifParams = params as? [String: Any],
                    let conditionExpr = ifParams["condition"] else {
-                 print("⚠️ Command 'if': Invalid parameters. Missing 'condition'.")
+                 logDebug("⚠️ Command 'if': Invalid parameters. Missing 'condition'.")
                  return
              }
              
              let conditionResult = DSLExpression.shared.evaluate(conditionExpr, context) as? Bool ?? false
-             // print("--- DEBUG: Command 'if' - Condition evaluated to: \(conditionResult)")
+             // logDebug("--- DEBUG: Command 'if' - Condition evaluated to: \(conditionResult)")
 
              if conditionResult {
                  if let thenAction = ifParams["then"] {
-                     // print("--- DEBUG: Command 'if' - Executing 'then' branch")
+                     // logDebug("--- DEBUG: Command 'if' - Executing 'then' branch")
                      // handleEvent pode lidar com comando único ou sequência
                      DSLInterpreter.shared.handleEvent(thenAction, context: context)
                  }
              } else {
                  if let elseAction = ifParams["else"] {
-                     // print("--- DEBUG: Command 'if' - Executing 'else' branch")
+                     // logDebug("--- DEBUG: Command 'if' - Executing 'else' branch")
                      DSLInterpreter.shared.handleEvent(elseAction, context: context)
                  }
              }
@@ -110,7 +110,7 @@ public class DSLCommandRegistry {
         // Por ora, vamos confiar no handleEvent.
         // register("sequence") { params, context in
         //     guard let sequenceArray = params as? [[String: Any]] else {
-        //         print("⚠️ Command 'sequence': Invalid parameters. Expected an array of commands.")
+        //         logDebug("⚠️ Command 'sequence': Invalid parameters. Expected an array of commands.")
         //         return
         //     }
         //     DSLInterpreter.shared.handleEvent(sequenceArray, context: context) // Reencaminha para handleEvent

@@ -15,11 +15,11 @@ struct BindingResolver {
                 context.storage[varName] as? T ?? defaultValue
             },
             set: {
-                print("--- DEBUG: BindingResolver SET for \(varName) called with value: \($0)")
+                logDebug("--- DEBUG: BindingResolver SET for \(varName) called with value: \($0)")
                 context.set(varName, to: $0)
                 
                 if let action = onChangeAction {
-                    print("--- DEBUG: BindingResolver executing onChange action for \(varName)")
+                    logDebug("--- DEBUG: BindingResolver executing onChange action for \(varName)")
                     DSLInterpreter.shared.handleEvent(action, context: context)
                 }
             }

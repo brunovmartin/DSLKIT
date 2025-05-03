@@ -22,7 +22,7 @@ public struct ScrollViewComponent {
 
         // Get the content node which defines what's inside the ScrollView
         guard let contentNode = node["content"] as? [String: Any] else {
-            print("⚠️ ScrollViewComponent: Missing 'content' node definition.")
+            logDebug("⚠️ ScrollViewComponent: Missing 'content' node definition.")
             return AnyView(Text("ScrollView Error: Content missing"))
         }
 

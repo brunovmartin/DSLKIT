@@ -173,14 +173,14 @@ public struct ImageView {
               // Este modificador agora é tratado por conditionalResizableScaled
               // Pode ser removido ou deixado como redundante (seguro)
               // return AnyView(view.scaledToFill())
-             print("INFO: scaledToFill modifier applied via conditionalResizableScaled based on presence.")
+             logDebug("INFO: scaledToFill modifier applied via conditionalResizableScaled based on presence.")
              return view // Retorna a view inalterada pois já foi tratado
           }
 
           modifierRegistry.register("scaledToFit") { view, _, _ in
                // Este modificador agora é tratado por conditionalResizableScaled
                // return AnyView(view.scaledToFit())
-               print("INFO: scaledToFit modifier applied via conditionalResizableScaled based on presence.")
+               logDebug("INFO: scaledToFit modifier applied via conditionalResizableScaled based on presence.")
               return view // Retorna a view inalterada pois já foi tratado
            }
 
@@ -191,7 +191,7 @@ public struct ImageView {
                  if let originalImage = view.asMirrorChild(type: Image.self) {
                      return AnyView(originalImage.renderingMode(mode))
                  } else {
-                      print("⚠️ renderingMode: Could not apply to non-Image view type.")
+                      logDebug("⚠️ renderingMode: Could not apply to non-Image view type.")
                  }
              }
              return view
@@ -203,7 +203,7 @@ public struct ImageView {
              if let originalImage = view.asMirrorChild(type: Image.self) {
                  return AnyView(originalImage.interpolation(quality))
               } else {
-                   print("⚠️ interpolation: Could not apply to non-Image view type.")
+                   logDebug("⚠️ interpolation: Could not apply to non-Image view type.")
               }
              return view
          }
@@ -213,7 +213,7 @@ public struct ImageView {
              if let originalImage = view.asMirrorChild(type: Image.self) {
                  return AnyView(originalImage.antialiased(enabled))
               } else {
-                   print("⚠️ antialiased: Could not apply to non-Image view type.")
+                   logDebug("⚠️ antialiased: Could not apply to non-Image view type.")
               }
              return view
          }

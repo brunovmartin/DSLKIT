@@ -23,7 +23,7 @@ public class DSLContext: ObservableObject {
     /// Create a context with optional initial variables.
     public init(initial: [String: Any] = [:]) {
         self.storage = initial
-//        print("--- DEBUG: DSLContext INIT - ID: \(id)") // <-- ADICIONE AQUI
+//        logDebug("--- DEBUG: DSLContext INIT - ID: \(id)") // <-- ADICIONE AQUI
     }
 
     /// Retrieve the value for a given key.
@@ -42,15 +42,15 @@ public class DSLContext: ObservableObject {
         if let current = storage[key] as? AnyHashable,
            let newValue = value as? AnyHashable,
            current == newValue {
-            print("--- DEBUG: DSLContext SET - Value for \(key) unchanged. Skipping update.") 
+            logDebug("--- DEBUG: DSLContext SET - Value for \(key) unchanged. Skipping update.")
             return // Não notifica se não mudou
         }
         
-        print("--- DEBUG: DSLContext SET - Triggering objectWillChange for \(key)")
+        logDebug("--- DEBUG: DSLContext SET - Triggering objectWillChange for \(key)")
         // Chama objectWillChange manualmente ANTES da mudança
         objectWillChange.send()
         
-        print("--- DEBUG: DSLContext SET - Updating \(key) to: \(value)")
+        logDebug("--- DEBUG: DSLContext SET - Updating \(key) to: \(value)")
         storage[key] = value 
         // @Published cuida da notificação APÓS a mudança
     }
@@ -140,7 +140,7 @@ public class DSLContext: ObservableObject {
         }
         
         if iterationCount >= maxIterations {
-            print("⚠️ WARNING: Maximum iterations reached while resolving expressions")
+            logDebug("⚠️ WARNING: Maximum iterations reached while resolving expressions")
         }
     }
     

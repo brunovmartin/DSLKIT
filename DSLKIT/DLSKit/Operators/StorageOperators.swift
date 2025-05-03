@@ -17,12 +17,12 @@ public class StorageOperators { // Ou MathOperators
                 // Input como dicionário { "key": ... }
                 key = DSLExpression.shared.evaluate(params["key"], context) as? String
             } else {
-                print("⚠️ Operator 'Storage.get': Invalid input type. Expected String or { \"key\": \"string\" }.")
+                logDebug("⚠️ Operator 'Storage.get': Invalid input type. Expected String or { \"key\": \"string\" }.")
                 return nil
             }
             
             guard let finalKey = key else {
-                print("⚠️ Operator 'Storage.get': Could not resolve key from input: \(String(describing: input))")
+                logDebug("⚠️ Operator 'Storage.get': Could not resolve key from input: \(String(describing: input))")
                 return nil
             }
             

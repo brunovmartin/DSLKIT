@@ -25,7 +25,7 @@ public class DSLOperatorRegistry {
     /// Marca a função como async e usa await
     public func evaluate(_ name: String, input: Any?, context: DSLContext) -> Any? {
         guard let op = registry[name] else {
-            print("⚠️ Operador não registrado: \(name)")
+            logDebug("⚠️ Operador não registrado: \(name)")
             return nil
         }
         // Aguarda a execução da função do operador (que agora é async)

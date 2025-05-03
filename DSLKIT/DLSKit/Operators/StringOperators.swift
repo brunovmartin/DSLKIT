@@ -22,7 +22,7 @@ public class StringOperators {
         DSLOperatorRegistry.shared.register("String.add") { input, context in // Manter context para consistência
             // Input é o array [Any?] JÁ AVALIADO pelo DSLExpression
             guard let items = input as? [Any?] else {
-                //print("⚠️ Operador String.add recebeu input inválido (não é um array [Any?]). Input: \(String(describing: input))")
+                //logDebug("⚠️ Operador String.add recebeu input inválido (não é um array [Any?]). Input: \(String(describing: input))")
                 return nil
             }
 
@@ -36,7 +36,7 @@ public class StringOperators {
                     return ""
                 }
             }
-            //print("--- DEBUG: String.add - Items converted to strings: \(strings)") // Log atualizado
+            //logDebug("--- DEBUG: String.add - Items converted to strings: \(strings)") // Log atualizado
 
             // Junta as strings resultantes
             return strings.joined()
@@ -50,7 +50,7 @@ public class StringOperators {
                   // Se dict["source"] ou dict["search"] fossem {"var":...}, eles já teriam sido resolvidos.
                   let text = dict["source"] as? String, // Pega o valor direto
                   let search = dict["search"] as? String else { // Pega o valor direto
-                //print("⚠️ Operador String.indexOf recebeu input inválido ou não avaliado. Input: \(String(describing: input))")
+                //logDebug("⚠️ Operador String.indexOf recebeu input inválido ou não avaliado. Input: \(String(describing: input))")
                 return nil
             }
             if let range = text.range(of: search) {
@@ -64,14 +64,14 @@ public class StringOperators {
 
         DSLOperatorRegistry.shared.register("String.substring") { input, context in
             guard let args = input as? [Any], args.count == 3 else {
-                //print("⚠️ String.substring: Requires array input with 3 arguments [stringExpr, startIndex, length]. Input: \(String(describing: input))")
+                //logDebug("⚠️ String.substring: Requires array input with 3 arguments [stringExpr, startIndex, length]. Input: \(String(describing: input))")
                 return nil
             }
 
             // Evaluate the first argument, which should be the source string or expression
             let sourceStringValue = DSLExpression.shared.evaluate(args[0], context)
             guard let sourceString = sourceStringValue as? String else {
-                //print("⚠️ String.substring: First argument did not evaluate to a String. Evaluated: \(String(describing: sourceStringValue))")
+                //logDebug("⚠️ String.substring: First argument did not evaluate to a String. Evaluated: \(String(describing: sourceStringValue))")
                 return nil
             }
 
@@ -80,18 +80,18 @@ public class StringOperators {
             let lengthValue = DSLExpression.shared.evaluate(args[2], context)
 
             guard let startIndex = startIndexValue as? Int, let length = lengthValue as? Int else {
-                //print("⚠️ String.substring: Second (startIndex) or third (length) argument did not evaluate to Int. Start: \(String(describing: startIndexValue)), Length: \(String(describing: lengthValue))")
+                //logDebug("⚠️ String.substring: Second (startIndex) or third (length) argument did not evaluate to Int. Start: \(String(describing: startIndexValue)), Length: \(String(describing: lengthValue))")
                 return nil
             }
 
             guard startIndex >= 0, length >= 0, startIndex <= sourceString.count else {
-                //print("⚠️ String.substring: Invalid startIndex (\(startIndex)) or length (\(length)) for string '\(sourceString)'")
+                //logDebug("⚠️ String.substring: Invalid startIndex (\(startIndex)) or length (\(length)) for string '\(sourceString)'")
                 return "" // Return empty string for invalid indices/length
             }
 
             let calculatedEndIndex = startIndex + length
             guard calculatedEndIndex <= sourceString.count else {
-                //print("⚠️ String.substring: Calculated endIndex (\(calculatedEndIndex)) is out of bounds for string '\(sourceString)'")
+                //logDebug("⚠️ String.substring: Calculated endIndex (\(calculatedEndIndex)) is out of bounds for string '\(sourceString)'")
                  // Return substring up to the end if length goes beyond
                 let start = sourceString.index(sourceString.startIndex, offsetBy: startIndex)
                 return String(sourceString[start...])
@@ -101,7 +101,7 @@ public class StringOperators {
             let start = sourceString.index(sourceString.startIndex, offsetBy: startIndex)
             let end = sourceString.index(start, offsetBy: length)
 
-            //print("--- DEBUG: String.substring - Source: '\(sourceString)', StartIdx: \(startIndex), Len: \(length), Result: '\(String(sourceString[start..<end]))'")
+            //logDebug("--- DEBUG: String.substring - Source: '\(sourceString)', StartIdx: \(startIndex), Len: \(length), Result: '\(String(sourceString[start..<end]))'")
             return String(sourceString[start..<end])
         }
         
