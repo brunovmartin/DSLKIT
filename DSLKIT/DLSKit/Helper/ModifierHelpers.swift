@@ -196,7 +196,7 @@ public func registerBaseViewModifiers(on registry: DSLModifierRegistry<AnyView>)
         return AnyView(view.opacity(max(0.0, min(1.0, opacityValue))))
     }
 
-    // MARK: Corner Radius (via clipShape)
+    // MARK: Corner Radius
     registry.register("cornerRadius") { view, value, context in
         let evaluatedValue = DSLExpression.shared.evaluate(value, context)
         // Garante que o raio é um número não negativo

@@ -6,6 +6,16 @@ extension Color {
         var hexSanitized = hex.trimmingCharacters(in: .whitespacesAndNewlines)
         hexSanitized = hexSanitized.replacingOccurrences(of: "#", with: "")
 
+        // Adicionar suporte para formato de 3 dígitos (#RGB -> #RRGGBB)
+        if hexSanitized.count == 3 {
+            var expandedHex = ""
+            for char in hexSanitized {
+                expandedHex.append(String(repeating: char, count: 2))
+            }
+            hexSanitized = expandedHex
+            // Agora hexSanitized tem 6 caracteres
+        }
+
         var rgb: UInt64 = 0
 
         var r: CGFloat = 0.0

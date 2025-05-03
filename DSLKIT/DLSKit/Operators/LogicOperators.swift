@@ -43,23 +43,23 @@ public class LogicOperators {
     }
     
     private static func areEqual(_ lhs: Any?, _ rhs: Any?) -> Bool {
-        switch (lhs, rhs) {
+        // Primeiro, normalizamos os valores para lidar com NSNull e nil
+        let normalizedLhs = lhs is NSNull ? nil : lhs
+        let normalizedRhs = rhs is NSNull ? nil : rhs
+        
+        switch (normalizedLhs, normalizedRhs) {
         case (nil, nil):
             return true
-        case (is NSNull, is NSNull):
-             return true
-         case (nil, is NSNull), (is NSNull, nil):
-             return true 
         case (let l as String, let r as String):
             return l == r
         case (let l as NSNumber, let r as NSNumber):
-             return l == r
-         case (let l as Int, let r as Int):
-             return l == r
-         case (let l as Double, let r as Double):
-             return l == r
-         case (let l as Bool, let r as Bool):
-             return l == r
+            return l == r
+        case (let l as Int, let r as Int):
+            return l == r
+        case (let l as Double, let r as Double):
+            return l == r
+        case (let l as Bool, let r as Bool):
+            return l == r
         case (let l as [String: Any], let r as [String: Any]):
             return NSDictionary(dictionary: l).isEqual(to: r)
         case (let l as [Any], let r as [Any]):
@@ -75,8 +75,8 @@ public class LogicOperators {
         case (let nsArray as NSArray, let swiftArray as [Any]):
             return swiftArray.isEmpty && nsArray.count == 0
         default:
-            print("⚠️ areEqual: Comparing unhandled types \(type(of: lhs)) and \(type(of: rhs)). Returning false.")
+            print("⚠️ areEqual: Comparing unhandled types \(type(of: normalizedLhs)) and \(type(of: normalizedRhs)). Returning false.")
             return false
         }
-    }
+    } 
 }

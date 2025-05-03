@@ -3,12 +3,7 @@
    version = "1.0">
    <ContextStates>
       <ContextState
-         contextName = "DSLExpression.resolvePath(_:context:):DSLExpression.swift">
-         <PersistentStrings>
-            <PersistentString
-               value = "dict[key]">
-            </PersistentString>
-         </PersistentStrings>
+         contextName = "closure #1 in static ArrayCommands.registerAll():ArrayCommands.swift">
       </ContextState>
       <ContextState
          contextName = "closure #1 in DSLApp.body.getter:App.swift">
@@ -46,6 +41,22 @@
          </PersistentStrings>
       </ContextState>
       <ContextState
+         contextName = "closure #2 in static LogicOperators.registerAll():LogicOperators.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "areEqual(null, null)">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "static LogicOperators.areEqual(_:_:):LogicOperators.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "rhs is NSNull">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
          contextName = "static ToggleView.render(_:context:):ToggleView.swift">
          <PersistentStrings>
             <PersistentString
@@ -57,7 +68,12 @@
          contextName = "closure #1 in closure #2 in static ListView.render(_:context:):ListView.swift">
       </ContextState>
       <ContextState
-         contextName = "closure #1 in static ArrayCommands.registerAll():ArrayCommands.swift">
+         contextName = "DSLExpression.resolvePath(_:context:):DSLExpression.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "dict[key]">
+            </PersistentString>
+         </PersistentStrings>
       </ContextState>
    </ContextStates>
 </VariablesViewState>

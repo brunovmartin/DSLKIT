@@ -12,22 +12,22 @@
           "subject": "Regarding Your Golden Ticket",
           "description": "An important update regarding your recent factory tour application and the upcoming selection process.",
           "timestamp": "12:28 AM",
-          "isSelected": false
+          "isSelected": true
         },
         {
           "id": "item2",
           "iconName": "building.2.crop.circle.fill",
-           "iconColor": "blue",
+          "iconColor": "blue",
           "sender": "J-Texon",
           "subject": "Meeting Notes & Follow-up",
           "description": "Great work facilitating the sync today. I took some notes to keep track of action items and next steps.",
           "timestamp": "8:36 PM",
-          "isSelected": true
+          "isSelected": false
         },
         {
           "id": "item3",
           "iconName": "a.circle.fill",
-           "iconColor": "indigo",
+          "iconColor": "indigo",
           "sender": "Leif Floyd",
           "subject": "Presentation Feedback",
           "description": "Bummer I had to miss your presentation! I just got a chance to review the slides, excellent work!",
@@ -37,7 +37,7 @@
         {
           "id": "item4",
           "iconName": "p.circle.fill",
-           "iconColor": "green",
+          "iconColor": "green",
           "sender": "Projeto Alpha",
           "subject": "Agendamento: Reunião de Alinhamento",
           "description": "Confirmando a reunião de alinhamento para amanhã às 10h. Por favor, verifique sua agenda.",
@@ -47,7 +47,7 @@
         {
           "id": "item5",
           "iconName": "briefcase.circle.fill",
-           "iconColor": "orange",
+          "iconColor": "orange",
           "sender": "Recursos Humanos",
           "subject": "Atualização: Políticas de Férias 2024",
           "description": "Segue anexo o documento atualizado com as novas políticas de férias para o próximo ano fiscal.",
@@ -57,7 +57,7 @@
         {
           "id": "item6",
           "iconName": "t.circle.fill",
-           "iconColor": "red",
+          "iconColor": "red",
           "sender": "Time de Suporte",
           "subject": "Atualização Chamado #12345",
           "description": "Seu chamado #12345 foi atualizado. Status: Aguardando informações adicionais.",
@@ -67,7 +67,7 @@
         {
           "id": "item7",
           "iconName": "cart.circle.fill",
-           "iconColor": "purple",
+          "iconColor": "purple",
           "sender": "Loja Exemplo",
           "subject": "Confirmação Pedido XZ-987",
           "description": "Obrigado por comprar conosco! Seu pedido XZ-987 foi confirmado e será enviado em breve.",
@@ -87,7 +87,7 @@
         {
           "id": "item9",
           "iconName": "graduationcap.circle.fill",
-           "iconColor": "brown",
+          "iconColor": "brown",
           "sender": "Curso Online",
           "subject": "Novo Módulo: SwiftUI Avançado",
           "description": "Ótimas notícias! O novo módulo 'SwiftUI Avançado: Animações e Gestos' já está disponível na plataforma.",
@@ -103,6 +103,16 @@
           "description": "Confira as principais notícias de tecnologia desta semana, incluindo IA generativa e novos lançamentos.",
           "timestamp": "Quinta",
           "isSelected": false
+        },
+        {
+          "id": "item11",
+          "iconName": "arrow.down.circle.fill",
+          "iconColor": "blue",
+          "sender": "Carregando mais mensagens...",
+          "subject": "Sincronizando com o servidor",
+          "description": "Atualizando sua caixa de entrada",
+          "timestamp": "Agora",
+          "isSelected": false
         }
       ]
     }
@@ -117,51 +127,88 @@
         "trailingItems": [
           {
             "type": "text",
-            "value": { "var": "inboxScreen.unreadCount" },
-             "modifiers": [
-                 { "foreground": "gray" },
-                 { "font": {"style": "callout"} }
-             ]
+            "value": {
+              "var": "inboxScreen.unreadCount"
+            },
+            "modifiers": [
+              {
+                "foreground": "gray"
+              },
+              {
+                "font": {
+                  "style": "callout"
+                }
+              }
+            ]
           }
         ]
       },
       "body": [
         {
           "type": "list",
-          "data": { "var": "inboxScreen.items" },
+          "data": {
+            "var": "inboxScreen.items"
+          },
           "modifiers": [
-            { "listStyle": "plain" }
+            {
+              "listStyle": "plain"
+            }
           ],
           "children": {
             "type": "hstack",
             "spacing": 12,
             "modifiers": [
-              { "padding": { "vertical": 8, "horizontal": 16 } },
-              { "listRowSeparator": "hidden" },
               {
-                "background": {
-                   "Operator.if": {
-                      "condition": { "var": "inboxScreen.items[currentItemIndex].isSelected" },
-                      "then": "blue",
-                      "else": "clear"
-                   }
+                "padding": {
+                  "vertical": 8,
+                  "horizontal": 16
                 }
               },
-              { "cornerRadius": 20 }
+              {
+                "listRowSeparator": "hidden"
+              },
+              {
+                "background": {
+                  "Operator.if": {
+                    "condition": {
+                      "var": "inboxScreen.items[currentItemIndex].isSelected"
+                    },
+                    "then": "blue",
+                    "else": "clear"
+                  }
+                }
+              },
+              {
+                "cornerRadius": 20
+              }
             ],
             "children": [
               {
                 "type": "image",
-                "systemName": { "var": "inboxScreen.items[currentItemIndex].iconName" },
+                "systemName": {
+                  "var": "inboxScreen.items[currentItemIndex].iconName"
+                },
                 "modifiers": [
-                  { "frame": {"width": 40, "height": 40} },
-                  { "resizable": "true"},
-                  { "foreground": {
-                        "Operator.if": {
-                           "condition": { "var": "inboxScreen.items[currentItemIndex].isSelected" },
-                           "then": "white",
-                           "else": { "var": "inboxScreen.items[currentItemIndex].iconColor" }
+                  {
+                    "frame": {
+                      "width": 40,
+                      "height": 40
+                    }
+                  },
+                  {
+                    "resizable": "true"
+                  },
+                  {
+                    "foreground": {
+                      "Operator.if": {
+                        "condition": {
+                          "var": "inboxScreen.items[currentItemIndex].isSelected"
+                        },
+                        "then": "white",
+                        "else": {
+                          "var": "inboxScreen.items[currentItemIndex].iconColor"
                         }
+                      }
                     }
                   }
                 ]
@@ -169,79 +216,174 @@
               {
                 "type": "hstack",
                 "alignment": "top",
-                 "spacing": 4,
+                "spacing": 4,
                 "children": [
-                   {
-                      "type": "vstack",
-                      "alignment": "leading",
-                      "spacing": 2,
-                      "children": [
-                         {
-                            "type": "text",
-                            "value": { "var": "inboxScreen.items[currentItemIndex].sender" },
-                            "modifiers": [
-                               { "font": { "style": "headline" } },
-                               { "foreground": {
-                                     "Operator.if": {
-                                        "condition": { "var": "inboxScreen.items[currentItemIndex].isSelected" },
-                                        "then": "white",
-                                        "else": "black"
-                                     }
-                                 }
-                               }
-                            ]
-                         },
-                         {
-                            "type": "text",
-                            "value": { "var": "inboxScreen.items[currentItemIndex].subject" },
-                            "modifiers": [
-                               { "font": { "style": "subheadline", "weight": "semibold" } },
-                               { "lineLimit": 1 },
-                               { "truncationMode": "tail" },
-                               { "foreground": {
-                                     "Operator.if": {
-                                        "condition": { "var": "inboxScreen.items[currentItemIndex].isSelected" },
-                                        "then": "white",
-                                        "else": "black"
-                                     }
-                                  }
-                               }
-                            ]
-                         },
-                         {
-                            "type": "text",
-                            "value": { "var": "inboxScreen.items[currentItemIndex].description" },
-                            "modifiers": [
-                               { "font": { "style": "subheadline" } },
-                               { "lineLimit": 2 },
-                               { "truncationMode": "tail" },
-                               { "foreground": {
-                                     "Operator.if": {
-                                        "condition": { "var": "inboxScreen.items[currentItemIndex].isSelected" },
-                                        "then": "white",
-                                        "else": "gray"
-                                     }
-                                  }
-                               }
-                            ]
-                         }
-                      ]
-                   },
-                  { "type": "spacer", "minLength": 5 },
                   {
-                     "type": "text",
-                     "value": { "var": "inboxScreen.items[currentItemIndex].timestamp" },
-                     "modifiers": [
-                        { "font": { "style": "caption" } },
-                        { "foreground": {
+                    "type": "vstack",
+                    "alignment": "leading",
+                    "spacing": 2,
+                    "children": [
+                      {
+                        "type": "text",
+                        "value": {
+                          "var": "inboxScreen.items[currentItemIndex].sender"
+                        },
+                        "modifiers": [
+                          {
+                            "font": {
+                              "style": "headline"
+                            }
+                          },
+                          {
+                            "foreground": {
                               "Operator.if": {
-                                 "condition": { "var": "inboxScreen.items[currentItemIndex].isSelected" },
-                                 "then": "white",
-                                 "else": "gray"
+                                "condition": {
+                                  "var": "inboxScreen.items[currentItemIndex].isSelected"
+                                },
+                                "then": "white",
+                                "else": "black"
                               }
-                           }
+                            }
+                          }
+                        ]
+                      },
+                      {
+                        "type": "text",
+                        "value": {
+                          "var": "inboxScreen.items[currentItemIndex].subject"
+                        },
+                        "modifiers": [
+                          {
+                            "font": {
+                              "style": "subheadline",
+                              "weight": "semibold"
+                            }
+                          },
+                          {
+                            "lineLimit": 1
+                          },
+                          {
+                            "truncationMode": "tail"
+                          },
+                          {
+                            "foreground": {
+                              "Operator.if": {
+                                "condition": {
+                                  "var": "inboxScreen.items[currentItemIndex].isSelected"
+                                },
+                                "then": "white",
+                                "else": "black"
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      {
+                        "type": "text",
+                        "value": {
+                          "var": "inboxScreen.items[currentItemIndex].description"
+                        },
+                        "modifiers": [
+                          {
+                            "font": {
+                              "style": "subheadline"
+                            }
+                          },
+                          {
+                            "lineLimit": 2
+                          },
+                          {
+                            "truncationMode": "tail"
+                          },
+                          {
+                            "foreground": {
+                              "Operator.if": {
+                                "condition": {
+                                  "var": "inboxScreen.items[currentItemIndex].isSelected"
+                                },
+                                "then": "white",
+                                "else": "gray"
+                              }
+                            }
+                          }
+                        ]
+                      },
+                      {
+                        "type": "vstack",
+                        "modifiers": [
+                          {
+                            "padding": {
+                              "top": 4
+                            }
+                          }
+                        ],
+                        "children": [
+                          {
+                            "type": "progress",
+                            "value": 8,
+                            "total": 10,
+                            "modifiers": [
+                              {
+                                "tint": {
+                                  "Operator.if": {
+                                    "condition": {
+                                      "var": "inboxScreen.items[currentItemIndex].isSelected"
+                                    },
+                                    "then": "white",
+                                    "else": "blue"
+                                  }
+                                }
+                              },
+                              {
+                                "background": {
+                                  "Operator.if": {
+                                    "condition": {
+                                      "var": "inboxScreen.items[currentItemIndex].isSelected"
+                                    },
+                                    "then": "#e2e2e2",
+                                    "else": ""
+                                  }
+                                }
+                              },
+                              {
+                                "style": "linear"
+                              },
+                              {
+                                "clipShape": "capsule"
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "type": "spacer",
+                    "minLength": 5
+                  },
+                  {
+                    "type": "text",
+                    "value": {
+                      "var": "inboxScreen.items[currentItemIndex].timestamp"
+                    },
+                    "modifiers": [
+                      {
+                        "font": {
+                          "style": "caption"
                         }
-                     ]
+                      },
+                      {
+                        "foreground": {
+                          "Operator.if": {
+                            "condition": {
+                              "var": "inboxScreen.items[currentItemIndex].isSelected"
+                            },
+                            "then": "white",
+                            "else": "gray"
+                          }
+                        }
+                      }
+                    ]
                   }
                 ]
               }
