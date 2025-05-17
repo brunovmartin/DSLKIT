@@ -1,17 +1,23 @@
 package com.example.composedsl.core
 
 import com.example.composedsl.operators.DSLOperatorRegistry
+import android.util.Log
 import org.json.JSONArray
 import org.json.JSONObject
 
 object DSLExpression {
+    private const val TAG = "DSLExpression"
     fun evaluate(expr: Any?, context: DSLContext): Any? {
         when (expr) {
             null -> return null
             is Map<*, *> -> {
                 if (expr.size == 1 && expr.containsKey("var")) {
                     val path = expr["var"] as? String
-                    return path?.let { resolvePath(it, context) }
+                    return path?.let {
+                        val result = resolvePath(it, context)
+                        Log.d(TAG, "resolvePath($it) -> $result")
+                        result
+                    }
                 }
                 val opName = expr.keys.firstOrNull() as? String
                 val input = expr[opName]
@@ -41,6 +47,7 @@ object DSLExpression {
     }
 
     private fun resolvePath(path: String, context: DSLContext): Any? {
+        Log.d(TAG, "Resolving path: $path")
         val parts = path.split(".")
         var value: Any? = context[parts.firstOrNull() ?: return null]
         for (part in parts.drop(1)) {
@@ -53,6 +60,7 @@ object DSLExpression {
                 else -> return null
             }
         }
+        Log.d(TAG, "Resolved '$path' -> $value")
         return value
     }
 }
