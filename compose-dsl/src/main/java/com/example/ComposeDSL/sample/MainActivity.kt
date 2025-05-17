@@ -1,0 +1,27 @@
+package com.example.ComposeDSL.sample
+
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import com.example.ComposeDSL.*
+
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        val context = DSLContext()
+        DSLOperatorRegistry.registerDefaults()
+        DSLCommandRegistry.registerDefaults()
+        DSLModifierRegistry.registerDefaults()
+        DSLComponentRegistry.registerDefaults()
+        DSLAppEngine.load(this)
+        DSLAppEngine.start(this, context, DSLInterpreter.shared)
+
+        setContent {
+            val root = DSLInterpreter.shared.getRootScreenDefinition()
+            if (root != null) {
+                DSLRenderer.renderChildren(root["body"] as List<Map<String, Any?>>, context)
+            }
+        }
+    }
+}
