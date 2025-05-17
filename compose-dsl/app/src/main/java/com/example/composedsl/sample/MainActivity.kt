@@ -22,7 +22,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             val root = DSLInterpreter.shared.getRootScreenDefinition()
             if (root != null) {
-                DSLRenderer.renderChildren(root["body"] as List<Map<String, Any?>>, context)
+                DSLScreenRenderer.Render(root, context)
             }
         }
     }
