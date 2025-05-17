@@ -1,17 +1,23 @@
 package com.example.composedsl.core
 
 import com.example.composedsl.operators.DSLOperatorRegistry
+import android.util.Log
 import org.json.JSONArray
 import org.json.JSONObject
 
 object DSLExpression {
+    private const val TAG = "DSLExpression"
     fun evaluate(expr: Any?, context: DSLContext): Any? {
         when (expr) {
             null -> return null
             is Map<*, *> -> {
                 if (expr.size == 1 && expr.containsKey("var")) {
                     val path = expr["var"] as? String
-                    return path?.let { resolvePath(it, context) }
+                    return path?.let {
+                        val result = resolvePath(it, context)
+                        Log.d(TAG, "resolvePath($it) -> $result")
+                        result
+                    }
                 }
                 val opName = expr.keys.firstOrNull() as? String
                 val input = expr[opName]
@@ -41,18 +47,30 @@ object DSLExpression {
     }
 
     private fun resolvePath(path: String, context: DSLContext): Any? {
-        val parts = path.split(".")
-        var value: Any? = context[parts.firstOrNull() ?: return null]
-        for (part in parts.drop(1)) {
+        Log.d(TAG, "Resolving path: $path")
+        val tokenRegex = Regex("([^.\\[\\]]+)(?:\\[(.+?)])?")
+        val matches = tokenRegex.findAll(path)
+        var value: Any? = context
+        for (match in matches) {
+            val key = match.groupValues[1]
+            val indexToken = match.groupValues.getOrNull(2)
+
             value = when (value) {
-                is Map<*, *> -> value[part]
-                is List<*> -> {
-                    val index = part.removeSuffix("]").substringAfter("[").toIntOrNull()
-                    if (index != null && value.size > index) value[index] else null
-                }
+                is DSLContext -> value[key]
+                is Map<*, *> -> value[key]
                 else -> return null
             }
+
+            if (indexToken?.isNotEmpty() == true) {
+                val index = if (indexToken == "currentItemIndex") {
+                    context.currentIndex
+                } else {
+                    indexToken.toIntOrNull()
+                }
+                value = (value as? List<*>)?.getOrNull(index ?: return null)
+            }
         }
+        Log.d(TAG, "Resolved '$path' -> $value")
         return value
     }
 }
