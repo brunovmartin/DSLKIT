@@ -5,6 +5,8 @@ import com.example.composedsl.core.*
 import com.example.composedsl.commands.DSLCommandRegistry
 import com.example.composedsl.operators.DSLOperatorRegistry
 import com.example.composedsl.ui.components.*
+import com.example.composedsl.ui.screen.DSLScreenRenderer
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 
@@ -21,8 +23,9 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             val root = DSLInterpreter.shared.getRootScreenDefinition()
+            Log.d("MainActivity", "Root screen: $root")
             if (root != null) {
-                DSLRenderer.renderChildren(root["body"] as List<Map<String, Any?>>, context)
+                DSLScreenRenderer.Render(root, context)
             }
         }
     }
