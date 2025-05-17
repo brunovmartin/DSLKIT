@@ -1,0 +1,590 @@
+{
+  "mainScreen": "inboxScreen",
+  "context": {
+    "isLoadingApiData": false,
+    "randomNumber": 0,
+    "inboxScreen": {
+      "unreadCount": 22,
+      "items": [
+        {
+          "id": "item1",
+          "iconName": "person.crop.circle.fill",
+          "iconColor": "gray",
+          "sender": "Wonka Industries",
+          "subject": "Regarding Your Golden Ticket",
+          "description": "An important update regarding your recent factory tour application and the upcoming selection process.",
+          "timestamp": "12:28 AM",
+          "isSelected": true
+        },
+        {
+          "id": "item2",
+          "iconName": "building.2.crop.circle.fill",
+          "iconColor": "blue",
+          "sender": "J-Texon",
+          "subject": "Meeting Notes & Follow-up",
+          "description": "Great work facilitating the sync today. I took some notes to keep track of action items and next steps.",
+          "timestamp": "8:36 PM",
+          "isSelected": false
+        },
+        {
+          "id": "item3",
+          "iconName": "a.circle.fill",
+          "iconColor": "indigo",
+          "sender": "Leif Floyd",
+          "subject": "Presentation Feedback",
+          "description": "Bummer I had to miss your presentation! I just got a chance to review the slides, excellent work!",
+          "timestamp": "12:36 PM",
+          "isSelected": false
+        },
+        {
+          "id": "item4",
+          "iconName": "p.circle.fill",
+          "iconColor": "green",
+          "sender": "Projeto Alpha",
+          "subject": "Agendamento: Reunião de Alinhamento",
+          "description": "Confirmando a reunião de alinhamento para amanhã às 10h. Por favor, verifique sua agenda.",
+          "timestamp": "11:15 AM",
+          "isSelected": false
+        },
+        {
+          "id": "item5",
+          "iconName": "briefcase.circle.fill",
+          "iconColor": "orange",
+          "sender": "Recursos Humanos",
+          "subject": "Atualização: Políticas de Férias 2024",
+          "description": "Segue anexo o documento atualizado com as novas políticas de férias para o próximo ano fiscal.",
+          "timestamp": "10:02 AM",
+          "isSelected": false
+        },
+        {
+          "id": "item6",
+          "iconName": "t.circle.fill",
+          "iconColor": "red",
+          "sender": "Time de Suporte",
+          "subject": "Atualização Chamado #12345",
+          "description": "Seu chamado #12345 foi atualizado. Status: Aguardando informações adicionais.",
+          "timestamp": "9:48 AM",
+          "isSelected": false
+        },
+        {
+          "id": "item7",
+          "iconName": "cart.circle.fill",
+          "iconColor": "purple",
+          "sender": "Loja Exemplo",
+          "subject": "Confirmação Pedido XZ-987",
+          "description": "Obrigado por comprar conosco! Seu pedido XZ-987 foi confirmado e será enviado em breve.",
+          "timestamp": "Ontem",
+          "isSelected": false
+        },
+        {
+          "id": "item8",
+          "iconName": "calendar.circle.fill",
+          "iconColor": "teal",
+          "sender": "Agenda Pessoal",
+          "subject": "Lembrete: Consulta Médica",
+          "description": "Lembrete amigável da sua consulta médica hoje às 15h com Dr. Smith.",
+          "timestamp": "Ontem",
+          "isSelected": false
+        },
+        {
+          "id": "item9",
+          "iconName": "graduationcap.circle.fill",
+          "iconColor": "brown",
+          "sender": "Curso Online",
+          "subject": "Novo Módulo: SwiftUI Avançado",
+          "description": "Ótimas notícias! O novo módulo 'SwiftUI Avançado: Animações e Gestos' já está disponível na plataforma.",
+          "timestamp": "Sexta",
+          "isSelected": false
+        },
+        {
+          "id": "item10",
+          "iconName": "star.circle.fill",
+          "iconColor": "yellow",
+          "sender": "Notícias Semanais",
+          "subject": "Resumo Semanal de Notícias Tech",
+          "description": "Confira as principais notícias de tecnologia desta semana, incluindo IA generativa e novos lançamentos.",
+          "timestamp": "Quinta",
+          "isSelected": false
+        },
+        {
+          "id": "item11",
+          "iconName": "arrow.down.circle.fill",
+          "iconColor": "blue",
+          "sender": "Carregando mais mensagens...",
+          "subject": "Sincronizando com o servidor",
+          "description": "Atualizando sua caixa de entrada",
+          "timestamp": "Agora",
+          "isSelected": false
+        },
+        {
+          "id": "item11",
+          "iconName": "arrow.down.circle.fill",
+          "iconColor": "blue",
+          "sender": "Carregando mais mensagens...",
+          "subject": "Sincronizando com o servidor",
+          "description": "Atualizando sua caixa de entrada",
+          "timestamp": "Agora",
+          "isSelected": false
+        },
+        {
+          "id": "item11",
+          "iconName": "arrow.down.circle.fill",
+          "iconColor": "blue",
+          "sender": "Carregando mais mensagens...",
+          "subject": "Sincronizando com o servidor",
+          "description": "Atualizando sua caixa de entrada",
+          "timestamp": "Agora",
+          "isSelected": false
+        },
+        {
+          "id": "item11",
+          "iconName": "arrow.down.circle.fill",
+          "iconColor": "blue",
+          "sender": "Carregando mais mensagens...",
+          "subject": "Sincronizando com o servidor",
+          "description": "Atualizando sua caixa de entrada",
+          "timestamp": "Agora",
+          "isSelected": false
+        },
+        {
+          "id": "item11",
+          "iconName": "arrow.down.circle.fill",
+          "iconColor": "blue",
+          "sender": "Carregando mais mensagens...",
+          "subject": "Sincronizando com o servidor",
+          "description": "Atualizando sua caixa de entrada",
+          "timestamp": "Agora",
+          "isSelected": false
+        },
+        {
+          "id": "item11",
+          "iconName": "arrow.down.circle.fill",
+          "iconColor": "blue",
+          "sender": "Carregando mais mensagens...",
+          "subject": "Sincronizando com o servidor",
+          "description": "Atualizando sua caixa de entrada",
+          "timestamp": "Agora",
+          "isSelected": false
+        },
+        {
+          "id": "item11",
+          "iconName": "arrow.down.circle.fill",
+          "iconColor": "blue",
+          "sender": "Carregando mais mensagens...",
+          "subject": "Sincronizando com o servidor",
+          "description": "Atualizando sua caixa de entrada",
+          "timestamp": "Agora",
+          "isSelected": false
+        },
+        {
+          "id": "item11",
+          "iconName": "arrow.down.circle.fill",
+          "iconColor": "blue",
+          "sender": "Carregando mais mensagens...",
+          "subject": "Sincronizando com o servidor",
+          "description": "Atualizando sua caixa de entrada",
+          "timestamp": "Agora",
+          "isSelected": false
+        },
+        {
+          "id": "item11",
+          "iconName": "arrow.down.circle.fill",
+          "iconColor": "blue",
+          "sender": "Carregando mais mensagens...",
+          "subject": "Sincronizando com o servidor",
+          "description": "Atualizando sua caixa de entrada",
+          "timestamp": "Agora",
+          "isSelected": false
+        },
+        {
+          "id": "item11",
+          "iconName": "arrow.down.circle.fill",
+          "iconColor": "blue",
+          "sender": "Carregando mais mensagens...",
+          "subject": "Sincronizando com o servidor",
+          "description": "Atualizando sua caixa de entrada",
+          "timestamp": "Agora",
+          "isSelected": false
+        },
+        {
+          "id": "item11",
+          "iconName": "arrow.down.circle.fill",
+          "iconColor": "blue",
+          "sender": "Carregando mais mensagens...",
+          "subject": "Sincronizando com o servidor",
+          "description": "Atualizando sua caixa de entrada",
+          "timestamp": "Agora",
+          "isSelected": false
+        },
+        {
+          "id": "item11",
+          "iconName": "arrow.down.circle.fill",
+          "iconColor": "blue",
+          "sender": "Carregando mais mensagens...",
+          "subject": "Sincronizando com o servidor",
+          "description": "Atualizando sua caixa de entrada",
+          "timestamp": "Agora",
+          "isSelected": false
+        },
+        {
+          "id": "item11",
+          "iconName": "arrow.down.circle.fill",
+          "iconColor": "blue",
+          "sender": "Carregando mais mensagens...",
+          "subject": "Sincronizando com o servidor",
+          "description": "Atualizando sua caixa de entrada",
+          "timestamp": "Agora",
+          "isSelected": false
+        },
+        {
+          "id": "item11",
+          "iconName": "arrow.down.circle.fill",
+          "iconColor": "blue",
+          "sender": "Carregando mais mensagens...",
+          "subject": "Sincronizando com o servidor",
+          "description": "Atualizando sua caixa de entrada",
+          "timestamp": "Agora",
+          "isSelected": false
+        },
+        {
+          "id": "item11",
+          "iconName": "arrow.down.circle.fill",
+          "iconColor": "blue",
+          "sender": "Carregando mais mensagens...",
+          "subject": "Sincronizando com o servidor",
+          "description": "Atualizando sua caixa de entrada",
+          "timestamp": "Agora",
+          "isSelected": false
+        }
+      ]
+    }
+  },
+  "screens": [
+    {
+      "type": "screen",
+      "id": "inboxScreen",
+      "onAppear": [
+        {
+          "set": {
+            "var": "randomNumber",
+            "value": { "Math.random": [5, 10] }
+          }
+        },
+        { "print": { "String.add": ["onAppear inboxScreen: randomNumber set to ", { "var": "randomNumber" }] } }
+      ],
+      "navigationBar": {
+        "title": "Caixa de Entrada",
+        "displayMode": "large",
+        "leadingItems": [
+          {
+            "type": "button",
+            "children": [
+              {
+                "type": "image",
+                "systemName": "star"
+              }
+            ]
+          }
+        ]
+      },
+      "body": [
+        {
+          "type": "vstack",
+          "alignment": "center",
+          "children": [
+            {
+              "type": "list",
+              "data": { "var": "inboxScreen.items" },
+              "modifiers": [
+                {"listStyle": "plain"}
+              ],
+              "children": {
+                "type": "hstack",
+                "spacing": 12,
+                "modifiers": [
+                  {
+                    "padding": {
+                      "vertical": 8,
+                      "horizontal": 16
+                    }
+                  },
+                  {
+                    "listRowSeparator": "hidden"
+                  },
+                  {
+                    "background": {
+                      "Operator.if": {
+                        "condition": {
+                          "var": "inboxScreen.items[currentItemIndex].isSelected"
+                        },
+                        "then": "blue",
+                        "else": "clear"
+                      }
+                    }
+                  },
+                  {
+                    "cornerRadius": 20
+                  }
+                ],
+                "children": [
+                  {
+                    "type": "image",
+                    "systemName": {
+                      "var": "inboxScreen.items[currentItemIndex].iconName"
+                    },
+                    "modifiers": [
+                      {
+                        "frame": {
+                          "width": 40,
+                          "height": 40
+                        }
+                      },
+                      {
+                        "resizable": "true"
+                      },
+                      {
+                        "foreground": {
+                          "Operator.if": {
+                            "condition": {
+                              "var": "inboxScreen.items[currentItemIndex].isSelected"
+                            },
+                            "then": "white",
+                            "else": {
+                              "var": "inboxScreen.items[currentItemIndex].iconColor"
+                            }
+                          }
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "type": "hstack",
+                    "alignment": "top",
+                    "spacing": 4,
+                    "children": [
+                      {
+                        "type": "vstack",
+                        "alignment": "leading",
+                        "spacing": 2,
+                        "children": [
+                          {
+                            "type": "text",
+                            "value": {
+                              "var": "inboxScreen.items[currentItemIndex].sender"
+                            },
+                            "modifiers": [
+                              {
+                                "font": {
+                                  "style": "headline"
+                                }
+                              },
+                              {
+                                "foreground": {
+                                  "Operator.if": {
+                                    "condition": {
+                                      "var": "inboxScreen.items[currentItemIndex].isSelected"
+                                    },
+                                    "then": "white",
+                                    "else": "black"
+                                  }
+                                }
+                              }
+                            ]
+                          },
+                          {
+                            "type": "text",
+                            "value": {
+                              "var": "inboxScreen.items[currentItemIndex].subject"
+                            },
+                            "modifiers": [
+                              {
+                                "font": {
+                                  "style": "subheadline",
+                                  "weight": "semibold"
+                                }
+                              },
+                              {
+                                "lineLimit": 1
+                              },
+                              {
+                                "truncationMode": "tail"
+                              },
+                              {
+                                "foreground": {
+                                  "Operator.if": {
+                                    "condition": {
+                                      "var": "inboxScreen.items[currentItemIndex].isSelected"
+                                    },
+                                    "then": "white",
+                                    "else": "black"
+                                  }
+                                }
+                              }
+                            ]
+                          },
+                          {
+                            "type": "text",
+                            "value": {
+                              "var": "inboxScreen.items[currentItemIndex].description"
+                            },
+                            "modifiers": [
+                              {
+                                "font": {
+                                  "style": "subheadline"
+                                }
+                              },
+                              {
+                                "lineLimit": 2
+                              },
+                              {
+                                "truncationMode": "tail"
+                              },
+                              {
+                                "foreground": {
+                                  "Operator.if": {
+                                    "condition": {
+                                      "var": "inboxScreen.items[currentItemIndex].isSelected"
+                                    },
+                                    "then": "white",
+                                    "else": "gray"
+                                  }
+                                }
+                              }
+                            ]
+                          },
+                          {
+                            "type": "vstack",
+                            "modifiers": [
+                              {
+                                "padding": {
+                                  "top": 4
+                                }
+                              }
+                            ],
+                            "children": [
+                              {
+                                "type": "progress",
+                                "value": {"Math.random": [5,10]},
+                                "total": 10,
+                                "modifiers": [
+                                  {
+                                    "tint": {
+                                      "Operator.if": {
+                                        "condition": {
+                                          "var": "inboxScreen.items[currentItemIndex].isSelected"
+                                        },
+                                        "then": "white",
+                                        "else": "blue"
+                                      }
+                                    }
+                                  },
+                                  {
+                                    "background": {
+                                      "Operator.if": {
+                                        "condition": {
+                                          "var": "inboxScreen.items[currentItemIndex].isSelected"
+                                        },
+                                        "then": "#e2e2e2",
+                                        "else": ""
+                                      }
+                                    }
+                                  },
+                                  {
+                                    "style": "linear"
+                                  },
+                                  {
+                                    "clipShape": "capsule"
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "type": "spacer",
+                        "minLength": 5
+                      },
+                      {
+                        "type": "text",
+                        "value": {
+                          "var": "inboxScreen.items[currentItemIndex].timestamp"
+                        },
+                        "modifiers": [
+                          {
+                            "font": {
+                              "style": "caption"
+                            }
+                          },
+                          {
+                            "foreground": {
+                              "Operator.if": {
+                                "condition": {
+                                  "var": "inboxScreen.items[currentItemIndex].isSelected"
+                                },
+                                "then": "white",
+                                "else": "gray"
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "type": "button",
+              "title": "Testar API (Posts)",
+              "visible": { "Logic.not": { "var": "isLoadingApiData" } },
+              "onTap": [
+                { "set": { "var": "isLoadingApiData", "value": true } },
+                {
+                  "HttpRequest.request": {
+                    "url": "https://jsonplaceholder.typicode.com/posts",
+                    "method": "GET",
+                    "var": "apiTestData",
+                    "onSuccess": [
+                      { "print": { "String.add": ["Sucesso API! Título[2]: ", { "var": "apiTestData[2].title" } ] } },
+                      {
+                        "alert.show": {
+                          "title": "API Sucesso (Posts)",
+                          "message": { "String.add": ["Título do terceiro post: ", { "var": "apiTestData[2].title" } ] }
+                        }
+                      }
+                    ],
+                    "onError": [
+                      { "print": { "String.add": ["Erro API: ", { "var": "_httpRequestError.message" } ] } },
+                      {
+                        "alert.show": {
+                          "title": "Erro API",
+                          "message": { "String.add": ["Falha na requisição: ", { "var": "_httpRequestError.message" } ] }
+                        }
+                      }
+                    ],
+                    "onFinally": [
+                      { "print": "Requisição HTTP finalizada." },
+                      { "set": { "var": "isLoadingApiData", "value": false } }
+                    ]
+                  }
+                }
+              ],
+              "modifiers": [
+                { "padding": 10 }
+              ]
+            },
+            {
+              "type": "progress",
+              "visible": { "var": "isLoadingApiData" },
+              "modifiers": [
+                { "padding": 10 },
+                { "frame": { "maxWidth": 50 } }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
