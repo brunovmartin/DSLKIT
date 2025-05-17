@@ -1,20 +1,52 @@
 package com.example.composedsl.core
 
 import com.example.composedsl.operators.DSLOperatorRegistry
+import android.util.Log
 import org.json.JSONArray
 import org.json.JSONObject
 
 object DSLExpression {
+    private const val TAG = "DSLExpression"
+    private const val INDEX_PLACEHOLDER = "[currentItemIndex]"
+
+    private fun resolvePlaceholders(data: Any?, context: DSLContext): Any? {
+        val idx = context.currentIndex ?: return data
+        if (data == null) return null
+        return when (data) {
+            is Map<*, *> -> {
+                val result = mutableMapOf<String, Any?>()
+                data.forEach { (k, v) ->
+                    val key = k as String
+                    if (key == "var" && v is String && v.contains(INDEX_PLACEHOLDER)) {
+                        result[key] = v.replace(INDEX_PLACEHOLDER, "[$idx]")
+                    } else {
+                        result[key] = resolvePlaceholders(v, context)
+                    }
+                }
+                result
+            }
+            is List<*> -> data.map { resolvePlaceholders(it, context) }
+            is String -> data.replace(INDEX_PLACEHOLDER, "[$idx]")
+            is JSONObject -> resolvePlaceholders(data.toMap(), context)
+            is JSONArray -> (0 until data.length()).map { resolvePlaceholders(data.get(it), context) }
+            else -> data
+        }
+    }
     fun evaluate(expr: Any?, context: DSLContext): Any? {
-        when (expr) {
+        val resolvedExpr = resolvePlaceholders(expr, context)
+        when (resolvedExpr) {
             null -> return null
             is Map<*, *> -> {
-                if (expr.size == 1 && expr.containsKey("var")) {
-                    val path = expr["var"] as? String
-                    return path?.let { resolvePath(it, context) }
+                if (resolvedExpr.size == 1 && resolvedExpr.containsKey("var")) {
+                    val path = resolvedExpr["var"] as? String
+                    return path?.let {
+                        val result = resolvePath(it, context)
+                        Log.d(TAG, "resolvePath($it) -> $result")
+                        result
+                    }
                 }
-                val opName = expr.keys.firstOrNull() as? String
-                val input = expr[opName]
+                val opName = resolvedExpr.keys.firstOrNull() as? String
+                val input = resolvedExpr[opName]
                 if (opName != null && DSLOperatorRegistry.isRegistered(opName)) {
                     val evaluatedInput = if (input is List<*>) {
                         input.map { evaluate(it, context) }
@@ -24,23 +56,24 @@ object DSLExpression {
                     return DSLOperatorRegistry.evaluate(opName, evaluatedInput, context)
                 }
                 val result = mutableMapOf<String, Any?>()
-                expr.forEach { (k, v) -> result[k as String] = evaluate(v, context) }
+                resolvedExpr.forEach { (k, v) -> result[k as String] = evaluate(v, context) }
                 return result
             }
-            is List<*> -> return expr.map { evaluate(it, context) }
+            is List<*> -> return resolvedExpr.map { evaluate(it, context) }
             is JSONArray -> {
-                return (0 until expr.length()).map { evaluate(expr.get(it), context) }
+                return (0 until resolvedExpr.length()).map { evaluate(resolvedExpr.get(it), context) }
             }
             is JSONObject -> {
                 val map = mutableMapOf<String, Any?>()
-                expr.keys().forEach { key -> map[key] = evaluate(expr.get(key), context) }
+                resolvedExpr.keys().forEach { key -> map[key] = evaluate(resolvedExpr.get(key), context) }
                 return evaluate(map, context)
             }
-            else -> return expr
+            else -> return resolvedExpr
         }
     }
 
     private fun resolvePath(path: String, context: DSLContext): Any? {
+        Log.d(TAG, "Resolving path: $path")
         val parts = path.split(".")
         var value: Any? = context[parts.firstOrNull() ?: return null]
         for (part in parts.drop(1)) {
@@ -53,6 +86,7 @@ object DSLExpression {
                 else -> return null
             }
         }
+        Log.d(TAG, "Resolved '$path' -> $value")
         return value
     }
 }

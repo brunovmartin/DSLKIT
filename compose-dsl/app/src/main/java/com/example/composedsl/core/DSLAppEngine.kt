@@ -1,6 +1,7 @@
 package com.example.composedsl.core
 
 import android.content.Context
+import android.util.Log
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -24,7 +25,9 @@ object DSLAppEngine {
     fun start(context: Context, dslContext: DSLContext, interpreter: DSLInterpreter) {
         val rawContext = JSONObject(context.assets.open("app.compiled.json").bufferedReader().use { it.readText() }).optJSONObject("context")
         if (rawContext != null) {
-            rawContext.keys().forEach { key -> dslContext[key] = rawContext.get(key) }
+            val contextMap = rawContext.toMap()
+            contextMap.forEach { (key, value) -> dslContext[key] = value }
+            Log.d("DSLAppEngine", "Loaded initial context: $contextMap")
         }
         if (initialScreenId != null) {
             screens[initialScreenId!!]?.let { interpreter.present(it, dslContext) }
